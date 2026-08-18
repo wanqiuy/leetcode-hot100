@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>15. 三数之和 · LeetCode 热题100题解</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:#f5f7fb;color:#1f2937;line-height:1.7}
+.wrap{max-width:900px;margin:0 auto;padding:24px}
+header{background:linear-gradient(135deg,#1e3a8a,#2563eb 55%,#38bdf8);color:#fff;padding:28px 24px}
+header .wrap{padding:0}
+header h1{font-size:22px}
+header p{opacity:.85;font-size:13px;margin-top:4px}
+.back{color:#fff;opacity:.9;font-size:13px;text-decoration:none}
+.crumb{font-size:12px;opacity:.85;margin-top:6px}
+.crumb a{color:#fff;text-decoration:underline}
+.toc{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px 20px;margin:20px 0}
+.toc h2{font-size:15px;margin-bottom:8px}
+.prob{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:22px 24px;margin-bottom:22px}
+.prob h2{font-size:17px;margin-bottom:10px}
+.prob h3{font-size:14px;color:#2563eb;margin:16px 0 6px}
+.badge{display:inline-block;padding:1px 9px;border-radius:999px;font-size:12px;font-weight:600;vertical-align:middle}
+.easy{color:#16a34a;background:#dcfce7}.medium{color:#d97706;background:#fef3c7}.hard{color:#dc2626;background:#fee2e2}
+.desc{background:#f9fafb;border-left:3px solid #2563eb;padding:10px 14px;border-radius:0 8px 8px 0;font-size:14px}
+.ex{background:#f3f4f6;border-radius:8px;padding:10px 14px;font-size:13px;margin-top:8px;white-space:pre-wrap;font-family:"SF Mono",Menlo,Consolas,monospace}
+pre{background:#0f172a;color:#e2e8f0;border-radius:10px;padding:14px 16px;overflow-x:auto;font-size:13px;line-height:1.6;font-family:"SF Mono",Menlo,Consolas,monospace}
+.diagram{background:#fffbeb;color:#78350f;border:1px solid #fde68a;white-space:pre}
+.cx{font-size:12px;color:#6b7280;margin-top:6px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin:8px 0 22px;flex-wrap:wrap}
+.pager a{flex:1;min-width:150px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px 16px;font-size:13px;color:#2563eb;text-decoration:none}
+.pager a:hover{background:#eff6ff}
+.pager a.mid{flex:0 1 auto;text-align:center;color:#6b7280}
+.item{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 18px;margin-bottom:10px;text-decoration:none;color:inherit;transition:box-shadow .2s}
+.item:hover{box-shadow:0 4px 14px rgba(37,99,235,.12)}
+.item .no{color:#6b7280;font-variant-numeric:tabular-nums;min-width:56px}
+.item .ti{flex:1;font-size:15px}
+.item .go{font-size:12px;color:#9ca3af}
+footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
+
+
+/* 标记控件 v2 */
+.mk{display:inline-flex;align-items:center;gap:6px;cursor:pointer;user-select:none}
+.mk input[type=checkbox]{width:17px;height:17px;cursor:pointer;accent-color:#16a34a;margin:0}
+.lv{border:1.5px solid #d1d5db;background:#fff;border-radius:999px;padding:3px 14px;font-size:12px;cursor:pointer;color:#6b7280;transition:all .15s}
+.lv:hover{transform:translateY(-1px)}
+.lv.on-high{background:#dcfce7;border-color:#16a34a;color:#16a34a;font-weight:600}
+.lv.on-mid{background:#fef3c7;border-color:#d97706;color:#d97706;font-weight:600}
+.lv.on-low{background:#fee2e2;border-color:#dc2626;color:#dc2626;font-weight:600}
+/* 分类页卡片 */
+.card{display:block;background:#fff;border:1px solid #e5e7eb;border-radius:14px;margin-bottom:12px;overflow:hidden;transition:box-shadow .2s}
+.card:hover{box-shadow:0 4px 16px rgba(37,99,235,.10)}
+.card .row1{display:flex;align-items:center;gap:12px;padding:14px 18px 8px;cursor:pointer}
+.card .no{color:#9ca3af;font-variant-numeric:tabular-nums;min-width:52px;font-size:14px}
+.card .ti{flex:1;font-size:15px;font-weight:500;color:#1f2937}
+.card .row1:hover .ti{color:#2563eb}
+.card .go{font-size:12px;color:#c0c4cc}
+.card .row2{display:flex;align-items:center;gap:10px;padding:0 18px 12px 70px;font-size:13px;color:#6b7280;flex-wrap:wrap}
+.card .sep{color:#e5e7eb}
+/* 单题页标记条 */
+.markbar{display:flex;align-items:center;gap:12px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:12px 16px;margin:14px 0;font-size:14px;flex-wrap:wrap}
+.markbar .lab{color:#6b7280;font-size:13px}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+<h1>15. 三数之和 <span class="badge medium">中等</span></h1>
+<div class="crumb"><a href="../../index.html">目录</a> / <a href="../../02-two-pointers.html">双指针</a> / 15. 三数之和</div>
+</div></header>
+<div class="wrap">
+<section class="prob" id="p15">
+<h2>15. 三数之和 <span class="badge medium">中等</span></h2><div class="markbar"><span class="lab">标记本题：</span><span class="mkbox" data-n="15"></span></div>
+<div class="desc">给定数组 nums，返回所有满足 nums[i] + nums[j] + nums[k] = 0 且下标互不相同的三元组，答案中不能包含重复的三元组。<div class="ex">示例：
+输入：nums = [-1,0,1,2,-1,-4]
+输出：[[-1,-1,2],[-1,0,1]]</div></div>
+<h3>解题思路</h3>
+<p><b>先想清楚两个问题：</b></p>
+<p><b>Q1：怎么把 O(n³) 的三重枚举降下来？</b>先排序，固定第一个数 nums[i]，问题退化为「在 i 右侧的有序区间找两数之和 = -nums[i]」，用对撞双指针 O(n) 解决，整体 O(n²)。</p>
+<p><b>Q2：答案不能含重复三元组，怎么去重？</b>排序让相同值相邻，做两层去重：固定的 i 与前一个值相同就跳过；命中答案后，l、r 各自跳过所有重复值再内移。</p>
+<p><b>照着写的五步：</b></p>
+<p>① 排序，然后遍历固定数 i（只需到 n-3）；<br>
+② nums[i] 与前一个值相同 → continue，去重；<br>
+③ l = i+1、r = n-1 对撞：sum &lt; 0 则 l++，sum &gt; 0 则 r--；<br>
+④ sum == 0 记录三元组，l、r 各跳过重复值后再各内移一步；<br>
+⑤ 遍历结束返回结果集。</p>
+<p>易错点：必须先排序，双指针的移动方向和去重都依赖有序；i 的去重判断是 i &gt; 0 且 nums[i] == nums[i-1]，不是与 nums[i+1] 比；命中后是先跳重复、再 l++/r--，少了最后的内移会死循环。</p>
+<pre class="diagram">nums = [-1,0,1,2,-1,-4] → 排序后 [-4,-1,-1,0,1,2]
+
+i=0 (-4): 目标两数和 4，l=1(-1) r=5(2) sum=-3，l++ 到相遇，无解
+i=1 (-1): 目标两数和 1，区间下标 2~5 [-1,0,1,2]
+          l=2(-1) r=5(2): -1+2=1 ✓ 记录 [-1,-1,2]
+          跳重复后 l=3(0) r=4(1): 0+1=1 ✓ 记录 [-1,0,1]
+          再内移，l==r，本轮结束
+i=2 (-1): nums[2]==nums[1] → 跳过（去重）
+i=3 (0):  l=4(1) r=5(2)，sum=3 &gt; 0，r--，l==r，无解
+
+答案 = [[-1,-1,2], [-1,0,1]]</pre>
+<h3>代码（Java）</h3>
+<pre><code>class Solution {
+    public List&lt;List&lt;Integer&gt;&gt; threeSum(int[] nums) {
+        List&lt;List&lt;Integer&gt;&gt; ans = new ArrayList&lt;&gt;();
+        Arrays.sort(nums); // ① 先排序
+        int n = nums.length;
+        for (int i = 0; i &lt; n - 2; i++) { // ① 固定第一个数
+            if (i &gt; 0 &amp;&amp; nums[i] == nums[i - 1]) continue; // ② 固定数去重
+            int l = i + 1, r = n - 1; // ③ 右侧区间对撞
+            while (l &lt; r) {
+                int sum = nums[i] + nums[l] + nums[r];
+                if (sum == 0) {
+                    // ④ 命中：记录后双指针各自跳重复再内移
+                    ans.add(Arrays.asList(nums[i], nums[l], nums[r]));
+                    while (l &lt; r &amp;&amp; nums[l] == nums[l + 1]) l++;
+                    while (l &lt; r &amp;&amp; nums[r] == nums[r - 1]) r--;
+                    l++; r--;
+                } else if (sum &lt; 0) {
+                    l++; // ③ 偏小，左指针右移
+                } else {
+                    r--; // ③ 偏大，右指针左移
+                }
+            }
+        }
+        return ans; // ⑤
+    }
+}</code></pre>
+<p class="cx">时间复杂度 O(n²) · 空间复杂度 O(log n)（排序递归栈，不计输出）</p>
+</section>
+<div class="pager"><a href="p11.html">← 上一题：11. 盛最多水的容器</a><a class="mid" href="../../02-two-pointers.html">返回「双指针」列表</a><a href="p42.html">下一题：42. 接雨水 →</a></div>
+</div>
+<footer>LeetCode 热题100 题解手册 · Java</footer>
+
+
+
+
+
+<script>
+(function(){
+  var KEY='hot100-marks';
+  function load(){ try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){return{}} }
+  function save(m){ localStorage.setItem(KEY, JSON.stringify(m)); }
+  function get(n){ var m=load(); return m[n]||{done:false,level:''}; }
+  function set(n,done,level){ var m=load(); m[n]={done:done,level:level}; save(m); }
+  window.HOT100={load:load,get:get,set:set};
+
+  window.renderMark=function(el,n){
+    var st=get(n);
+    el.innerHTML='';
+    // 勾选
+    var lab=document.createElement('label'); lab.className='mk';
+    var cb=document.createElement('input'); cb.type='checkbox'; cb.checked=!!st.done;
+    cb.addEventListener('change',function(e){ e.stopPropagation(); var s=get(n); set(n,cb.checked,s.level); });
+    lab.appendChild(cb); lab.appendChild(document.createTextNode(' 做过'));
+    el.appendChild(lab);
+    // 分隔
+    var sep=document.createElement('span'); sep.className='sep'; sep.textContent='|'; el.appendChild(sep);
+    el.appendChild(document.createTextNode('熟练度 '));
+    // 三档按钮
+    [['high','高'],['mid','中'],['low','低']].forEach(function(pair){
+      var b=document.createElement('button'); b.className='lv'+(st.level===pair[0]?' on-'+pair[0]:'');
+      b.textContent=pair[1];
+      b.addEventListener('click',function(e){
+        e.preventDefault(); e.stopPropagation();
+        var s=get(n);
+        set(n, s.done, s.level===pair[0]?'':pair[0]);
+        renderMark(el,n);
+        if(window.onMarkChange) window.onMarkChange();
+      });
+      el.appendChild(b);
+    });
+  };
+})();
+</script>
+
+<script>
+document.querySelectorAll('.mkbox').forEach(function(el){ renderMark(el, el.dataset.n); });
+</script>
+</body>
+</html>

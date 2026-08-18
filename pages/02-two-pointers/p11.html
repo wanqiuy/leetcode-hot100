@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>11. 盛最多水的容器 · LeetCode 热题100题解</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:#f5f7fb;color:#1f2937;line-height:1.7}
+.wrap{max-width:900px;margin:0 auto;padding:24px}
+header{background:linear-gradient(135deg,#1e3a8a,#2563eb 55%,#38bdf8);color:#fff;padding:28px 24px}
+header .wrap{padding:0}
+header h1{font-size:22px}
+header p{opacity:.85;font-size:13px;margin-top:4px}
+.back{color:#fff;opacity:.9;font-size:13px;text-decoration:none}
+.crumb{font-size:12px;opacity:.85;margin-top:6px}
+.crumb a{color:#fff;text-decoration:underline}
+.toc{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px 20px;margin:20px 0}
+.toc h2{font-size:15px;margin-bottom:8px}
+.prob{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:22px 24px;margin-bottom:22px}
+.prob h2{font-size:17px;margin-bottom:10px}
+.prob h3{font-size:14px;color:#2563eb;margin:16px 0 6px}
+.badge{display:inline-block;padding:1px 9px;border-radius:999px;font-size:12px;font-weight:600;vertical-align:middle}
+.easy{color:#16a34a;background:#dcfce7}.medium{color:#d97706;background:#fef3c7}.hard{color:#dc2626;background:#fee2e2}
+.desc{background:#f9fafb;border-left:3px solid #2563eb;padding:10px 14px;border-radius:0 8px 8px 0;font-size:14px}
+.ex{background:#f3f4f6;border-radius:8px;padding:10px 14px;font-size:13px;margin-top:8px;white-space:pre-wrap;font-family:"SF Mono",Menlo,Consolas,monospace}
+pre{background:#0f172a;color:#e2e8f0;border-radius:10px;padding:14px 16px;overflow-x:auto;font-size:13px;line-height:1.6;font-family:"SF Mono",Menlo,Consolas,monospace}
+.diagram{background:#fffbeb;color:#78350f;border:1px solid #fde68a;white-space:pre}
+.cx{font-size:12px;color:#6b7280;margin-top:6px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin:8px 0 22px;flex-wrap:wrap}
+.pager a{flex:1;min-width:150px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px 16px;font-size:13px;color:#2563eb;text-decoration:none}
+.pager a:hover{background:#eff6ff}
+.pager a.mid{flex:0 1 auto;text-align:center;color:#6b7280}
+.item{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 18px;margin-bottom:10px;text-decoration:none;color:inherit;transition:box-shadow .2s}
+.item:hover{box-shadow:0 4px 14px rgba(37,99,235,.12)}
+.item .no{color:#6b7280;font-variant-numeric:tabular-nums;min-width:56px}
+.item .ti{flex:1;font-size:15px}
+.item .go{font-size:12px;color:#9ca3af}
+footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
+
+
+/* 标记控件 v2 */
+.mk{display:inline-flex;align-items:center;gap:6px;cursor:pointer;user-select:none}
+.mk input[type=checkbox]{width:17px;height:17px;cursor:pointer;accent-color:#16a34a;margin:0}
+.lv{border:1.5px solid #d1d5db;background:#fff;border-radius:999px;padding:3px 14px;font-size:12px;cursor:pointer;color:#6b7280;transition:all .15s}
+.lv:hover{transform:translateY(-1px)}
+.lv.on-high{background:#dcfce7;border-color:#16a34a;color:#16a34a;font-weight:600}
+.lv.on-mid{background:#fef3c7;border-color:#d97706;color:#d97706;font-weight:600}
+.lv.on-low{background:#fee2e2;border-color:#dc2626;color:#dc2626;font-weight:600}
+/* 分类页卡片 */
+.card{display:block;background:#fff;border:1px solid #e5e7eb;border-radius:14px;margin-bottom:12px;overflow:hidden;transition:box-shadow .2s}
+.card:hover{box-shadow:0 4px 16px rgba(37,99,235,.10)}
+.card .row1{display:flex;align-items:center;gap:12px;padding:14px 18px 8px;cursor:pointer}
+.card .no{color:#9ca3af;font-variant-numeric:tabular-nums;min-width:52px;font-size:14px}
+.card .ti{flex:1;font-size:15px;font-weight:500;color:#1f2937}
+.card .row1:hover .ti{color:#2563eb}
+.card .go{font-size:12px;color:#c0c4cc}
+.card .row2{display:flex;align-items:center;gap:10px;padding:0 18px 12px 70px;font-size:13px;color:#6b7280;flex-wrap:wrap}
+.card .sep{color:#e5e7eb}
+/* 单题页标记条 */
+.markbar{display:flex;align-items:center;gap:12px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:12px 16px;margin:14px 0;font-size:14px;flex-wrap:wrap}
+.markbar .lab{color:#6b7280;font-size:13px}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+<h1>11. 盛最多水的容器 <span class="badge medium">中等</span></h1>
+<div class="crumb"><a href="../../index.html">目录</a> / <a href="../../02-two-pointers.html">双指针</a> / 11. 盛最多水的容器</div>
+</div></header>
+<div class="wrap">
+<section class="prob" id="p11">
+<h2>11. 盛最多水的容器 <span class="badge medium">中等</span></h2><div class="markbar"><span class="lab">标记本题：</span><span class="mkbox" data-n="11"></span></div>
+<div class="desc">给定数组 height，每个元素代表一条竖线的高度。选两条线与 x 轴构成容器，使容器能盛的水最多，返回最大水量。<div class="ex">示例：
+输入：height = [1,8,6,2,5,4,8,3,7]
+输出：49
+解释：选中下标 1（高 8）和下标 8（高 7），面积 = 7 × 7 = 49</div></div>
+<h3>解题思路</h3>
+<p><b>先想清楚两个问题：</b></p>
+<p><b>Q1：怎么避免 O(n²) 枚举所有线对？</b>对撞双指针从两端开始，每步排除一个「不可能更优」的选择，只扫一遍就结束。</p>
+<p><b>Q2：每步移动哪一侧的指针？</b>移动较矮一侧。面积由短板决定：若移动较高一侧，宽度变小且短板不变，面积必然更小，等于白走；只有动短板才可能遇到更高的板。</p>
+<p><b>照着写的三步：</b></p>
+<p>① l = 0、r = n - 1、ans = 0；<br>
+② 每轮算面积 min(height[l], height[r]) × (r - l)，刷新 ans；<br>
+③ 矮的一侧内移一格（左矮 l++，右矮 r--，相等走哪边都行），直到 l == r。</p>
+<p>易错点：是移动「较矮一侧」不是「较高一侧」；宽度是下标差 r - l，不是 r - l + 1；循环条件是 l &lt; r，不是 l &lt;= r。</p>
+<pre class="diagram">height = [1,8,6,2,5,4,8,3,7]
+下标      0 1 2 3 4 5 6 7 8
+
+ l   r   短板 min  宽 r-l  面积   操作
+ 0   8   1         8       8     左矮，l++
+ 1   8   7         7       49 ←  最大；右矮，r--
+ 1   7   3         6       18    右矮，r--
+ 1   6   8         5       40    相等，r--
+ 1   5   4         4       16    右矮，r--
+ 1   4   5         3       15    右矮，r--
+ 1   3   2         2       4     右矮，r--
+ 1   2   6         1       6     右矮，r--
+ l==r 结束
+
+ans = 49</pre>
+<h3>代码（Java）</h3>
+<pre><code>class Solution {
+    public int maxArea(int[] height) {
+        int l = 0, r = height.length - 1, ans = 0; // ① 对撞指针从两端出发
+        while (l &lt; r) {
+            // ② 面积 = 短板 × 宽度，刷新最大值
+            int area = Math.min(height[l], height[r]) * (r - l);
+            ans = Math.max(ans, area);
+            // ③ 移动较矮一侧（动较高一侧面积只会更小）
+            if (height[l] &lt; height[r]) l++;
+            else r--;
+        }
+        return ans;
+    }
+}</code></pre>
+<p class="cx">时间复杂度 O(n) · 空间复杂度 O(1)</p>
+</section>
+<div class="pager"><a href="p283.html">← 上一题：283. 移动零</a><a class="mid" href="../../02-two-pointers.html">返回「双指针」列表</a><a href="p15.html">下一题：15. 三数之和 →</a></div>
+</div>
+<footer>LeetCode 热题100 题解手册 · Java</footer>
+
+
+
+
+
+<script>
+(function(){
+  var KEY='hot100-marks';
+  function load(){ try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){return{}} }
+  function save(m){ localStorage.setItem(KEY, JSON.stringify(m)); }
+  function get(n){ var m=load(); return m[n]||{done:false,level:''}; }
+  function set(n,done,level){ var m=load(); m[n]={done:done,level:level}; save(m); }
+  window.HOT100={load:load,get:get,set:set};
+
+  window.renderMark=function(el,n){
+    var st=get(n);
+    el.innerHTML='';
+    // 勾选
+    var lab=document.createElement('label'); lab.className='mk';
+    var cb=document.createElement('input'); cb.type='checkbox'; cb.checked=!!st.done;
+    cb.addEventListener('change',function(e){ e.stopPropagation(); var s=get(n); set(n,cb.checked,s.level); });
+    lab.appendChild(cb); lab.appendChild(document.createTextNode(' 做过'));
+    el.appendChild(lab);
+    // 分隔
+    var sep=document.createElement('span'); sep.className='sep'; sep.textContent='|'; el.appendChild(sep);
+    el.appendChild(document.createTextNode('熟练度 '));
+    // 三档按钮
+    [['high','高'],['mid','中'],['low','低']].forEach(function(pair){
+      var b=document.createElement('button'); b.className='lv'+(st.level===pair[0]?' on-'+pair[0]:'');
+      b.textContent=pair[1];
+      b.addEventListener('click',function(e){
+        e.preventDefault(); e.stopPropagation();
+        var s=get(n);
+        set(n, s.done, s.level===pair[0]?'':pair[0]);
+        renderMark(el,n);
+        if(window.onMarkChange) window.onMarkChange();
+      });
+      el.appendChild(b);
+    });
+  };
+})();
+</script>
+
+<script>
+document.querySelectorAll('.mkbox').forEach(function(el){ renderMark(el, el.dataset.n); });
+</script>
+</body>
+</html>

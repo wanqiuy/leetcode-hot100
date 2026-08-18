@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>Trie 前缀树 · 图论知识补充</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:#f5f7fb;color:#1f2937;line-height:1.7}
+.wrap{max-width:900px;margin:0 auto;padding:24px}
+header{background:linear-gradient(135deg,#1e3a8a,#2563eb 55%,#38bdf8);color:#fff;padding:28px 24px}
+header .wrap{padding:0}
+header h1{font-size:22px}
+header p{opacity:.85;font-size:13px;margin-top:4px}
+.back{color:#fff;opacity:.9;font-size:13px;text-decoration:none}
+.crumb{font-size:12px;opacity:.85;margin-top:6px}
+.crumb a{color:#fff;text-decoration:underline}
+.prob{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:22px 24px;margin-bottom:22px}
+.prob h2{font-size:17px;margin-bottom:10px}
+.prob h3{font-size:14px;color:#2563eb;margin:16px 0 6px}
+.badge{display:inline-block;padding:1px 9px;border-radius:999px;font-size:12px;font-weight:600;vertical-align:middle}
+.easy{color:#16a34a;background:#dcfce7}.medium{color:#d97706;background:#fef3c7}.hard{color:#dc2626;background:#fee2e2}
+.know{color:#7c3aed;background:#ede9fe}
+.desc{background:#f9fafb;border-left:3px solid #2563eb;padding:10px 14px;border-radius:0 8px 8px 0;font-size:14px}
+pre{background:#0f172a;color:#e2e8f0;border-radius:10px;padding:14px 16px;overflow-x:auto;font-size:13px;line-height:1.6;font-family:"SF Mono",Menlo,Consolas,monospace}
+.diagram{background:#fffbeb;color:#78350f;border:1px solid #fde68a;white-space:pre}
+.cx{font-size:12px;color:#6b7280;margin-top:6px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin:8px 0 22px;flex-wrap:wrap}
+.pager a{flex:1;min-width:150px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px 16px;font-size:13px;color:#2563eb;text-decoration:none}
+.pager a:hover{background:#eff6ff}
+.pager a.mid{flex:0 1 auto;text-align:center;color:#6b7280}
+.rel{background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:12px 16px;font-size:13px;margin-top:14px}
+.rel a{color:#2563eb;text-decoration:none;font-weight:500}
+.rel a:hover{text-decoration:underline}
+footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+<h1>Trie 前缀树 <span class="badge know">知识点</span></h1>
+<div class="crumb"><a href="../../index.html">目录</a> / <a href="../../18-graph-extra.html">图论知识补充</a> / Trie 前缀树</div>
+</div></header>
+<div class="wrap">
+<section class="prob">
+<h2>Trie 前缀树 <span class="badge know">知识点</span></h2>
+<div class="desc">Trie（前缀树 / 字典树）把一堆字符串按「共享前缀」组织成一棵树：每条从根出发的路径拼出一个前缀，节点上挂 isEnd 标记表示此处是否构成完整单词。插入和查询都只需 O(单词长度)，是字符串前缀匹配问题的专用结构。</div>
+<h3>核心思想</h3>
+<p>每个节点含 26 个子指针（小写字母场景）和一个 isEnd 布尔标记。插入单词时从根出发逐字符走，缺节点就新建，走完把末尾节点 isEnd 置 true。search 查完整单词：逐字符走到底且末尾 isEnd 为 true 才算存在；startsWith 查前缀：只需逐字符走到底，不关心 isEnd。共享前缀的单词共用同一段路径，省空间也让前缀查询一步到位。</p>
+<h3>什么时候用</h3>
+<p>1. 大量字符串中反复做「前缀匹配 / 自动补全 / 是否存在某单词」。<br>2. 需要按字典序枚举、或配合回溯在网格中匹配词典（单词搜索 II）。<br>3. 判断信号：题目给出「词典 / 单词列表」且查询次数多——先建 Trie 再查，远优于逐个字符串比较。</p>
+<h3>模板代码（Java）</h3>
+<pre><code>class Trie {
+    class Node {
+        Node[] next = new Node[26]; // 26 个子指针
+        boolean isEnd;              // 是否某单词的结尾
+    }
+    Node root = new Node();
+
+    public void insert(String word) {        // 插入：逐字符走，缺则新建
+        Node cur = root;
+        for (char c : word.toCharArray()) {
+            int i = c - 'a';
+            if (cur.next[i] == null) cur.next[i] = new Node();
+            cur = cur.next[i];
+        }
+        cur.isEnd = true;                    // 末尾打标记
+    }
+    public boolean search(String word) {     // 查完整单词：走到底且 isEnd
+        Node cur = root;
+        for (char c : word.toCharArray()) {
+            cur = cur.next[c - 'a'];
+            if (cur == null) return false;
+        }
+        return cur.isEnd;
+    }
+    public boolean startsWith(String prefix) { // 查前缀：能走到底即可
+        Node cur = root;
+        for (char c : prefix.toCharArray()) {
+            cur = cur.next[c - 'a'];
+            if (cur == null) return false;
+        }
+        return true;
+    }
+}</code></pre>
+<h3>图解</h3>
+<pre class="diagram">依次插入 "app"、"apple"、"bat"（* 表示 isEnd = true）
+
+插入 "app"：root → a → p → p*，沿途新建 3 个节点
+  root
+   └─ a
+       └─ p
+           └─ p*          ← "app" 结束标记
+
+插入 "apple"：前 3 个字符 a-p-p 已存在，直接复用！
+  从第二个 p 继续新建 l → e*
+  root
+   └─ a
+       └─ p
+           └─ p*          ← "app"
+               └─ l
+                   └─ e*  ← "apple"（共享前缀 a-p-p，只多建 2 个节点）
+
+插入 "bat"：root 下没有 b，从根另开一支 b → a → t*
+  root
+   ├─ a
+   │   └─ p
+   │       └─ p*
+   │           └─ l
+   │               └─ e*
+   └─ b
+       └─ a
+           └─ t*          ← "bat"
+
+查询演示：
+  search("app")   → a→p→p 走到底且 isEnd=true  ✓
+  search("appl")  → a→p→p→l 走到底但 isEnd=false ✗（它只是前缀）
+  startsWith("appl") → 能走到底 ✓
+  search("ba")    → b→a 走到底但 isEnd=false ✗</pre>
+<h3>复杂度</h3>
+<p class="cx" style="font-size:14px;color:#374151">insert / search / startsWith 时间均为 O(L)，L 为单词长度，与词典规模无关；空间 O(所有单词字符总数 × 26)，共享前缀可显著省空间。</p>
+<div class="rel"><b>关联题目：</b><a href="../09-graph/p208.html">208. 实现 Trie（前缀树）</a>（本手册题解，即上方模板）；推荐练习：212 单词搜索 II（把词典建成 Trie，网格回溯时沿 Trie 节点走，不匹配立即剪枝）</div>
+</section>
+<div class="pager"><a href="k4-dijkstra.html">← 上一篇：Dijkstra 最短路径</a><a class="mid" href="../../18-graph-extra.html">返回「图论知识补充」列表</a><a style="visibility:hidden"></a></div>
+</div>
+<footer>LeetCode 热题100 题解手册 · Java</footer>
+</body>
+</html>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>LeetCode 热题100 题解手册 · 目录</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:#f5f7fb;color:#1f2937;line-height:1.7}
+a{text-decoration:none;color:inherit}
+header{background:linear-gradient(135deg,#1e3a8a,#2563eb 55%,#38bdf8);color:#fff;padding:36px 24px 30px}
+header .inner{max-width:1000px;margin:0 auto}
+header h1{font-size:26px}
+header p{opacity:.85;font-size:13px;margin-top:6px}
+.stats{display:flex;gap:14px;flex-wrap:wrap;margin-top:18px}
+.stat{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);border-radius:10px;padding:10px 18px;font-size:13px}
+.stat b{display:block;font-size:20px;margin-bottom:2px}
+.wrap{max-width:1000px;margin:0 auto;padding:24px}
+.cat{display:block;background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:18px 22px;margin-bottom:14px;transition:box-shadow .2s,transform .2s}
+.cat:hover{box-shadow:0 6px 20px rgba(37,99,235,.12);transform:translateY(-2px)}
+.cat .top{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px}
+.cat h2{font-size:17px;color:#1e3a8a}
+.cat .meta{font-size:12px;color:#6b7280}
+.cat .probs{margin-top:8px;font-size:13px;color:#6b7280}
+.cat .probs b{color:#374151;font-weight:500}
+.dot{color:#d1d5db;margin:0 4px}
+.badge{display:inline-block;padding:1px 8px;border-radius:999px;font-size:11px;font-weight:600;margin-left:6px}
+.easy{color:#16a34a;background:#dcfce7}.medium{color:#d97706;background:#fef3c7}.hard{color:#dc2626;background:#fee2e2}
+footer{text-align:center;color:#9ca3af;font-size:12px;padding:24px}
+</style>
+</head>
+<body>
+<header>
+  <div class="inner">
+    <h1>LeetCode 热题 100 · 题解手册</h1>
+    <p>每题包含：题目内容 · 关键解题思路 · ASCII 图解 · Java 解题代码 · 复杂度分析</p>
+    <div class="stats">
+      <div class="stat"><b>100</b>题目总数</div>
+      <div class="stat"><b>17</b>题型分类</div>
+      <div class="stat"><b style="color:#86efac">20</b>简单</div>
+      <div class="stat"><b style="color:#fcd34d">68</b>中等</div>
+      <div class="stat"><b style="color:#fca5a5">12</b>困难</div>
+    </div>
+  </div>
+</header>
+<div class="wrap" id="list">
+<div id="markStats" style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:16px 22px;margin-bottom:18px;font-size:14px">
+  <b>我的刷题进度</b>：<span id="msText">加载中…</span>
+  <div style="height:8px;background:#e5e7eb;border-radius:999px;overflow:hidden;margin-top:8px"><div id="msBar" style="height:100%;background:linear-gradient(90deg,#4ade80,#22d3ee);width:0;transition:width .3s"></div></div>
+</div>
+</div>
+<footer>LeetCode 热题100 题解手册 · Java · 生成日期：2026-08-17</footer>
+<script>
+const CATS=[
+["01-hash.html","哈希",3,0,"1 两数之和;49 字母异位词分组;128 最长连续序列"],
+["02-two-pointers.html","双指针",4,0,"283 移动零;11 盛最多水的容器;15 三数之和;42 接雨水"],
+["03-sliding-window.html","滑动窗口",2,0,"3 无重复字符的最长子串;438 找到字符串中所有字母异位词"],
+["04-substring.html","子串",3,0,"560 和为 K 的子数组;239 滑动窗口最大值;76 最小覆盖子串"],
+["05-array.html","普通数组",5,0,"53 最大子数组和;56 合并区间;189 轮转数组;238 除自身以外数组的乘积;41 缺失的第一个正数"],
+["06-matrix.html","矩阵",4,0,"73 矩阵置零;54 螺旋矩阵;48 旋转图像;240 搜索二维矩阵 II"],
+["07-linked-list.html","链表",14,0,"160 相交链表;206 反转链表;234 回文链表;141 环形链表;142 环形链表 II;21 合并两个有序链表;2 两数相加;19 删除链表的倒数第 N 个结点;24 两两交换链表中的节点;25 K 个一组翻转链表;138 随机链表的复制;148 排序链表;23 合并 K 个升序链表;146 LRU 缓存"],
+["08-binary-tree.html","二叉树",15,0,"94 二叉树的中序遍历;104 二叉树的最大深度;226 翻转二叉树;101 对称二叉树;543 二叉树的直径;102 二叉树的层序遍历;108 将有序数组转换为二叉搜索树;98 验证二叉搜索树;230 二叉搜索树中第 K 小的元素;199 二叉树的右视图;114 二叉树展开为链表;105 从前序与中序遍历序列构造二叉树;437 路径总和 III;236 二叉树的最近公共祖先;124 二叉树中的最大路径和"],
+["09-graph.html","图论",4,0,"200 岛屿数量;994 腐烂的橘子;207 课程表;208 实现 Trie (前缀树)"],
+["10-backtracking.html","回溯",8,0,"46 全排列;78 子集;17 电话号码的字母组合;39 组合总和;22 括号生成;79 单词搜索;131 分割回文串;51 N 皇后"],
+["11-binary-search.html","二分查找",6,0,"35 搜索插入位置;74 搜索二维矩阵;34 查找元素首尾位置;33 搜索旋转排序数组;153 旋转数组最小值;4 两个正序数组的中位数"],
+["12-stack.html","栈",5,0,"20 有效的括号;155 最小栈;394 字符串解码;739 每日温度;84 柱状图中最大的矩形"],
+["13-heap.html","堆",3,0,"215 数组中的第 K 个最大元素;347 前 K 个高频元素;295 数据流的中位数"],
+["14-greedy.html","贪心算法",4,0,"121 买卖股票的最佳时机;55 跳跃游戏;45 跳跃游戏 II;763 划分字母区间"],
+["15-dp.html","动态规划",10,0,"70 爬楼梯;118 杨辉三角;198 打家劫舍;279 完全平方数;322 零钱兑换;139 单词拆分;300 最长递增子序列;152 乘积最大子数组;416 分割等和子集;32 最长有效括号"],
+["16-dp-multidim.html","多维动态规划",5,0,"62 不同路径;64 最小路径和;5 最长回文子串;1143 最长公共子序列;72 编辑距离"],
+["17-tricks.html","技巧",5,0,"136 只出现一次的数字;169 多数元素;75 颜色分类;31 下一个排列;287 寻找重复数"],
+["18-graph-extra.html","图论知识补充",5,1,"K1 DFS 与 BFS 遍历;K2 拓扑排序;K3 并查集;K4 Dijkstra 最短路径;K5 Trie 前缀树"]
+];
+document.getElementById("list").innerHTML=CATS.map(c=>{
+  const probs=c[4].split(";").map(p=>`<b>${p}</b>`).join('<span class="dot">·</span>');
+  const unit = c[3] ? "个知识点" : "题";
+  return `<a class="cat" href="${c[0]}">
+    <div class="top"><h2>${c[1]}</h2><span class="meta">${c[2]} ${unit} · 查看 →</span></div>
+    <div class="probs">${probs}</div>
+  </a>`;
+}).join("");
+
+// 刷题进度统计
+(function(){
+  var marks={}; try{marks=JSON.parse(localStorage.getItem('hot100-marks')||'{}')}catch(e){}
+  var done=0,high=0,mid=0,low=0;
+  Object.keys(marks).forEach(function(k){
+    if(marks[k].done) done++;
+    if(marks[k].level==='high') high++;
+    else if(marks[k].level==='mid') mid++;
+    else if(marks[k].level==='low') low++;
+  });
+  var el=document.getElementById('msText');
+  if(el){
+    el.innerHTML='已完成 <b style="color:#16a34a">'+done+'</b>/100 题 · 熟练度 '
+      +'<b style="color:#16a34a">高 '+high+'</b> / '
+      +'<b style="color:#d97706">中 '+mid+'</b> / '
+      +'<b style="color:#dc2626">低 '+low+'</b>';
+    document.getElementById('msBar').style.width=Math.round(done/100*100)+'%';
+  }
+})();
+</script>
+</body>
+</html>

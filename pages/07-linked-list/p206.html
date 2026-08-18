@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>206. 反转链表 · LeetCode 热题100题解</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:#f5f7fb;color:#1f2937;line-height:1.7}
+.wrap{max-width:900px;margin:0 auto;padding:24px}
+header{background:linear-gradient(135deg,#1e3a8a,#2563eb 55%,#38bdf8);color:#fff;padding:28px 24px}
+header .wrap{padding:0}
+header h1{font-size:22px}
+header p{opacity:.85;font-size:13px;margin-top:4px}
+.back{color:#fff;opacity:.9;font-size:13px;text-decoration:none}
+.crumb{font-size:12px;opacity:.85;margin-top:6px}
+.crumb a{color:#fff;text-decoration:underline}
+.toc{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px 20px;margin:20px 0}
+.toc h2{font-size:15px;margin-bottom:8px}
+.prob{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:22px 24px;margin-bottom:22px}
+.prob h2{font-size:17px;margin-bottom:10px}
+.prob h3{font-size:14px;color:#2563eb;margin:16px 0 6px}
+.badge{display:inline-block;padding:1px 9px;border-radius:999px;font-size:12px;font-weight:600;vertical-align:middle}
+.easy{color:#16a34a;background:#dcfce7}.medium{color:#d97706;background:#fef3c7}.hard{color:#dc2626;background:#fee2e2}
+.desc{background:#f9fafb;border-left:3px solid #2563eb;padding:10px 14px;border-radius:0 8px 8px 0;font-size:14px}
+.ex{background:#f3f4f6;border-radius:8px;padding:10px 14px;font-size:13px;margin-top:8px;white-space:pre-wrap;font-family:"SF Mono",Menlo,Consolas,monospace}
+pre{background:#0f172a;color:#e2e8f0;border-radius:10px;padding:14px 16px;overflow-x:auto;font-size:13px;line-height:1.6;font-family:"SF Mono",Menlo,Consolas,monospace}
+.diagram{background:#fffbeb;color:#78350f;border:1px solid #fde68a;white-space:pre}
+.cx{font-size:12px;color:#6b7280;margin-top:6px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin:8px 0 22px;flex-wrap:wrap}
+.pager a{flex:1;min-width:150px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px 16px;font-size:13px;color:#2563eb;text-decoration:none}
+.pager a:hover{background:#eff6ff}
+.pager a.mid{flex:0 1 auto;text-align:center;color:#6b7280}
+.item{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 18px;margin-bottom:10px;text-decoration:none;color:inherit;transition:box-shadow .2s}
+.item:hover{box-shadow:0 4px 14px rgba(37,99,235,.12)}
+.item .no{color:#6b7280;font-variant-numeric:tabular-nums;min-width:56px}
+.item .ti{flex:1;font-size:15px}
+.item .go{font-size:12px;color:#9ca3af}
+footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
+
+
+/* 标记控件 v2 */
+.mk{display:inline-flex;align-items:center;gap:6px;cursor:pointer;user-select:none}
+.mk input[type=checkbox]{width:17px;height:17px;cursor:pointer;accent-color:#16a34a;margin:0}
+.lv{border:1.5px solid #d1d5db;background:#fff;border-radius:999px;padding:3px 14px;font-size:12px;cursor:pointer;color:#6b7280;transition:all .15s}
+.lv:hover{transform:translateY(-1px)}
+.lv.on-high{background:#dcfce7;border-color:#16a34a;color:#16a34a;font-weight:600}
+.lv.on-mid{background:#fef3c7;border-color:#d97706;color:#d97706;font-weight:600}
+.lv.on-low{background:#fee2e2;border-color:#dc2626;color:#dc2626;font-weight:600}
+/* 分类页卡片 */
+.card{display:block;background:#fff;border:1px solid #e5e7eb;border-radius:14px;margin-bottom:12px;overflow:hidden;transition:box-shadow .2s}
+.card:hover{box-shadow:0 4px 16px rgba(37,99,235,.10)}
+.card .row1{display:flex;align-items:center;gap:12px;padding:14px 18px 8px;cursor:pointer}
+.card .no{color:#9ca3af;font-variant-numeric:tabular-nums;min-width:52px;font-size:14px}
+.card .ti{flex:1;font-size:15px;font-weight:500;color:#1f2937}
+.card .row1:hover .ti{color:#2563eb}
+.card .go{font-size:12px;color:#c0c4cc}
+.card .row2{display:flex;align-items:center;gap:10px;padding:0 18px 12px 70px;font-size:13px;color:#6b7280;flex-wrap:wrap}
+.card .sep{color:#e5e7eb}
+/* 单题页标记条 */
+.markbar{display:flex;align-items:center;gap:12px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:12px 16px;margin:14px 0;font-size:14px;flex-wrap:wrap}
+.markbar .lab{color:#6b7280;font-size:13px}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+<h1>206. 反转链表 <span class="badge easy">简单</span></h1>
+<div class="crumb"><a href="../../index.html">目录</a> / <a href="../../07-linked-list.html">链表</a> / 206. 反转链表</div>
+</div></header>
+<div class="wrap">
+<section class="prob" id="p206">
+<h2>206. 反转链表 <span class="badge easy">简单</span></h2><div class="markbar"><span class="lab">标记本题：</span><span class="mkbox" data-n="206"></span></div>
+<div class="desc">给你单链表的头节点 head，反转链表并返回反转后的头节点。
+<div class="ex">示例：
+输入：1->2->3->4->5
+输出：5->4->3->2->1</div></div>
+<h3>解题思路</h3>
+<p><b>先想清楚两个问题：</b></p>
+<p><b>Q1：每到一个节点要做的事是什么？</b>就一件：把当前节点的 next 从"指向后面"改成"指向前一个（prev）"。所有节点都这么干，整条链就反过来了。</p>
+<p><b>Q2：改完指针后怎么继续往后走？</b>改 next 之前必须先用一个临时变量 nxt 存下原来的后继，否则链条断掉就再也找不到后面的节点了。</p>
+<p><b>照着写的 4 步：</b></p>
+<p>① 初始化 prev = null、cur = head；<br>② 循环条件 cur != null：先用 nxt = cur.next 存住后继；<br>③ cur.next = prev 完成反转，然后 prev = cur、cur = nxt 双双前进；<br>④ 循环结束后 return prev（cur 已是 null，prev 停在原尾节点，即新头）。</p>
+<p>易错点：nxt 的保存必须在「cur.next = prev 之前」不是之后；prev 初始值是 null 不是 head（这样原头节点的 next 才会被置成 null，成为新尾）；返回值是 prev 不是 cur（cur 已经是 null）。</p>
+<pre class="diagram">输入: 1 -> 2 -> 3 -> null
+逐步推演（每轮列出操作 / prev、cur 值 / 链表状态）：
+
+初始    prev=null, cur=1
+        1 -> 2 -> 3 -> null
+
+轮1     操作: nxt=2; 1.next=null; prev=1; cur=2
+        状态: null <- 1    2 -> 3 -> null
+              prev=1       cur=2
+
+轮2     操作: nxt=3; 2.next=1; prev=2; cur=3
+        状态: null <- 1 <- 2    3 -> null
+                     prev=2     cur=3
+
+轮3     操作: nxt=null; 3.next=2; prev=3; cur=null
+        状态: null <- 1 <- 2 <- 3
+                            prev=3, cur=null
+
+cur 为 null 退出循环，返回 prev=3：
+3 -> 2 -> 1 -> null</pre>
+<h3>代码（Java）</h3>
+<pre><code>class Solution {
+    public ListNode reverseList(ListNode head) {
+        // ① prev 初始为 null（新链表的末尾），cur 从头出发
+        ListNode prev = null, cur = head;
+        // ② 遍历每个节点
+        while (cur != null) {
+            ListNode nxt = cur.next; // ② 先保存后继节点
+            cur.next = prev;         // ③ 反转当前节点的指针
+            prev = cur;              // ③ prev 前进
+            cur = nxt;               // ③ cur 前进
+        }
+        // ④ prev 是新链表的头
+        return prev;
+    }
+}</code></pre>
+<p class="cx">时间复杂度 O(n) · 空间复杂度 O(1)</p>
+</section>
+<div class="pager"><a href="p160.html">← 上一题：160. 相交链表</a><a class="mid" href="../../07-linked-list.html">返回「链表」列表</a><a href="p234.html">下一题：234. 回文链表 →</a></div>
+</div>
+<footer>LeetCode 热题100 题解手册 · Java</footer>
+
+
+
+
+
+<script>
+(function(){
+  var KEY='hot100-marks';
+  function load(){ try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){return{}} }
+  function save(m){ localStorage.setItem(KEY, JSON.stringify(m)); }
+  function get(n){ var m=load(); return m[n]||{done:false,level:''}; }
+  function set(n,done,level){ var m=load(); m[n]={done:done,level:level}; save(m); }
+  window.HOT100={load:load,get:get,set:set};
+
+  window.renderMark=function(el,n){
+    var st=get(n);
+    el.innerHTML='';
+    // 勾选
+    var lab=document.createElement('label'); lab.className='mk';
+    var cb=document.createElement('input'); cb.type='checkbox'; cb.checked=!!st.done;
+    cb.addEventListener('change',function(e){ e.stopPropagation(); var s=get(n); set(n,cb.checked,s.level); });
+    lab.appendChild(cb); lab.appendChild(document.createTextNode(' 做过'));
+    el.appendChild(lab);
+    // 分隔
+    var sep=document.createElement('span'); sep.className='sep'; sep.textContent='|'; el.appendChild(sep);
+    el.appendChild(document.createTextNode('熟练度 '));
+    // 三档按钮
+    [['high','高'],['mid','中'],['low','低']].forEach(function(pair){
+      var b=document.createElement('button'); b.className='lv'+(st.level===pair[0]?' on-'+pair[0]:'');
+      b.textContent=pair[1];
+      b.addEventListener('click',function(e){
+        e.preventDefault(); e.stopPropagation();
+        var s=get(n);
+        set(n, s.done, s.level===pair[0]?'':pair[0]);
+        renderMark(el,n);
+        if(window.onMarkChange) window.onMarkChange();
+      });
+      el.appendChild(b);
+    });
+  };
+})();
+</script>
+
+<script>
+document.querySelectorAll('.mkbox').forEach(function(el){ renderMark(el, el.dataset.n); });
+</script>
+</body>
+</html>

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>24. 两两交换链表中的节点 · LeetCode 热题100题解</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:#f5f7fb;color:#1f2937;line-height:1.7}
+.wrap{max-width:900px;margin:0 auto;padding:24px}
+header{background:linear-gradient(135deg,#1e3a8a,#2563eb 55%,#38bdf8);color:#fff;padding:28px 24px}
+header .wrap{padding:0}
+header h1{font-size:22px}
+header p{opacity:.85;font-size:13px;margin-top:4px}
+.back{color:#fff;opacity:.9;font-size:13px;text-decoration:none}
+.crumb{font-size:12px;opacity:.85;margin-top:6px}
+.crumb a{color:#fff;text-decoration:underline}
+.toc{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px 20px;margin:20px 0}
+.toc h2{font-size:15px;margin-bottom:8px}
+.prob{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:22px 24px;margin-bottom:22px}
+.prob h2{font-size:17px;margin-bottom:10px}
+.prob h3{font-size:14px;color:#2563eb;margin:16px 0 6px}
+.badge{display:inline-block;padding:1px 9px;border-radius:999px;font-size:12px;font-weight:600;vertical-align:middle}
+.easy{color:#16a34a;background:#dcfce7}.medium{color:#d97706;background:#fef3c7}.hard{color:#dc2626;background:#fee2e2}
+.desc{background:#f9fafb;border-left:3px solid #2563eb;padding:10px 14px;border-radius:0 8px 8px 0;font-size:14px}
+.ex{background:#f3f4f6;border-radius:8px;padding:10px 14px;font-size:13px;margin-top:8px;white-space:pre-wrap;font-family:"SF Mono",Menlo,Consolas,monospace}
+pre{background:#0f172a;color:#e2e8f0;border-radius:10px;padding:14px 16px;overflow-x:auto;font-size:13px;line-height:1.6;font-family:"SF Mono",Menlo,Consolas,monospace}
+.diagram{background:#fffbeb;color:#78350f;border:1px solid #fde68a;white-space:pre}
+.cx{font-size:12px;color:#6b7280;margin-top:6px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin:8px 0 22px;flex-wrap:wrap}
+.pager a{flex:1;min-width:150px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px 16px;font-size:13px;color:#2563eb;text-decoration:none}
+.pager a:hover{background:#eff6ff}
+.pager a.mid{flex:0 1 auto;text-align:center;color:#6b7280}
+.item{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 18px;margin-bottom:10px;text-decoration:none;color:inherit;transition:box-shadow .2s}
+.item:hover{box-shadow:0 4px 14px rgba(37,99,235,.12)}
+.item .no{color:#6b7280;font-variant-numeric:tabular-nums;min-width:56px}
+.item .ti{flex:1;font-size:15px}
+.item .go{font-size:12px;color:#9ca3af}
+footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
+
+
+/* 标记控件 v2 */
+.mk{display:inline-flex;align-items:center;gap:6px;cursor:pointer;user-select:none}
+.mk input[type=checkbox]{width:17px;height:17px;cursor:pointer;accent-color:#16a34a;margin:0}
+.lv{border:1.5px solid #d1d5db;background:#fff;border-radius:999px;padding:3px 14px;font-size:12px;cursor:pointer;color:#6b7280;transition:all .15s}
+.lv:hover{transform:translateY(-1px)}
+.lv.on-high{background:#dcfce7;border-color:#16a34a;color:#16a34a;font-weight:600}
+.lv.on-mid{background:#fef3c7;border-color:#d97706;color:#d97706;font-weight:600}
+.lv.on-low{background:#fee2e2;border-color:#dc2626;color:#dc2626;font-weight:600}
+/* 分类页卡片 */
+.card{display:block;background:#fff;border:1px solid #e5e7eb;border-radius:14px;margin-bottom:12px;overflow:hidden;transition:box-shadow .2s}
+.card:hover{box-shadow:0 4px 16px rgba(37,99,235,.10)}
+.card .row1{display:flex;align-items:center;gap:12px;padding:14px 18px 8px;cursor:pointer}
+.card .no{color:#9ca3af;font-variant-numeric:tabular-nums;min-width:52px;font-size:14px}
+.card .ti{flex:1;font-size:15px;font-weight:500;color:#1f2937}
+.card .row1:hover .ti{color:#2563eb}
+.card .go{font-size:12px;color:#c0c4cc}
+.card .row2{display:flex;align-items:center;gap:10px;padding:0 18px 12px 70px;font-size:13px;color:#6b7280;flex-wrap:wrap}
+.card .sep{color:#e5e7eb}
+/* 单题页标记条 */
+.markbar{display:flex;align-items:center;gap:12px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:12px 16px;margin:14px 0;font-size:14px;flex-wrap:wrap}
+.markbar .lab{color:#6b7280;font-size:13px}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+<h1>24. 两两交换链表中的节点 <span class="badge medium">中等</span></h1>
+<div class="crumb"><a href="../../index.html">目录</a> / <a href="../../07-linked-list.html">链表</a> / 24. 两两交换链表中的节点</div>
+</div></header>
+<div class="wrap">
+<section class="prob" id="p24">
+<h2>24. 两两交换链表中的节点 <span class="badge medium">中等</span></h2><div class="markbar"><span class="lab">标记本题：</span><span class="mkbox" data-n="24"></span></div>
+<div class="desc">两两交换相邻的节点并返回头节点。不允许只修改节点值，必须改变节点连接。
+<div class="ex">示例：
+输入：1->2->3->4
+输出：2->1->4->3</div></div>
+<h3>解题思路</h3>
+<p><b>先想清楚两个问题：</b></p>
+<p><b>Q1：交换相邻两个节点要动几条指针？</b>三条：前驱的 next 要指向 b，b.next 要指向 a，a.next 要指向原来 b 后面的节点。少改任何一条链就断了。</p>
+<p><b>Q2：每轮处理完后 pre 移到哪里？</b>交换完成后 a 落到了本对的第二个位置，它就是下一对的前驱，所以 pre = a，继续下一轮。</p>
+<p><b>照着写的 4 步：</b></p>
+<p>① 建 dummy 指向 head，pre = dummy；<br>② 循环条件 pre.next != null && pre.next.next != null（后面至少还有两个节点才够一对）；<br>③ 令 a = pre.next、b = a.next，依次执行 a.next = b.next、b.next = a、pre.next = b；<br>④ pre = a，进入下一轮；循环结束 return dummy.next。</p>
+<p>易错点：三条指针的修改顺序是「a.next = b.next → b.next = a → pre.next = b」不能乱（先把 a 摘出去接到后面，再让 b 指向 a，最后前驱指向 b）；循环判断的是「pre.next 和 pre.next.next」不是 pre 自己；pre 更新为「a」不是 b（交换后 a 在后）。</p>
+<pre class="diagram">输入: 1 -> 2 -> 3 -> 4
+挂上 dummy: dummy -> 1 -> 2 -> 3 -> 4
+            pre=dummy, a=1, b=2
+
+第 1 对，三步改指针：
+  ① a.next = b.next  ->  1 指向 3
+  ② b.next = a       ->  2 指向 1
+  ③ pre.next = b     ->  dummy 指向 2
+状态: dummy -> 2 -> 1 -> 3 -> 4
+pre 移到 a(1)：pre=1, a=3, b=4
+
+第 2 对，同样三步：
+状态: dummy -> 2 -> 1 -> 4 -> 3
+pre 移到 a(3)，此时 pre.next=null，不足一对，退出
+
+返回 dummy.next: 2 -> 1 -> 4 -> 3</pre>
+<h3>代码（Java）</h3>
+<pre><code>class Solution {
+    public ListNode swapPairs(ListNode head) {
+        // ① dummy 挂在头前，第一对也有前驱
+        ListNode dummy = new ListNode(0, head);
+        ListNode pre = dummy;
+        // ② 后面至少剩两个节点才能凑一对
+        while (pre.next != null && pre.next.next != null) {
+            ListNode a = pre.next;   // ③ 本对第一个节点
+            ListNode b = a.next;     // ③ 本对第二个节点
+            a.next = b.next;         // ③ a 先接到 b 后面
+            b.next = a;              // ③ b 指向 a
+            pre.next = b;            // ③ 前驱指向 b，交换完成
+            pre = a;                 // ④ a 是下一对的前驱
+        }
+        return dummy.next;
+    }
+}</code></pre>
+<p class="cx">时间复杂度 O(n) · 空间复杂度 O(1)</p>
+</section>
+<div class="pager"><a href="p19.html">← 上一题：19. 删除链表的倒数第 N 个结点</a><a class="mid" href="../../07-linked-list.html">返回「链表」列表</a><a href="p25.html">下一题：25. K 个一组翻转链表 →</a></div>
+</div>
+<footer>LeetCode 热题100 题解手册 · Java</footer>
+
+
+
+
+
+<script>
+(function(){
+  var KEY='hot100-marks';
+  function load(){ try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){return{}} }
+  function save(m){ localStorage.setItem(KEY, JSON.stringify(m)); }
+  function get(n){ var m=load(); return m[n]||{done:false,level:''}; }
+  function set(n,done,level){ var m=load(); m[n]={done:done,level:level}; save(m); }
+  window.HOT100={load:load,get:get,set:set};
+
+  window.renderMark=function(el,n){
+    var st=get(n);
+    el.innerHTML='';
+    // 勾选
+    var lab=document.createElement('label'); lab.className='mk';
+    var cb=document.createElement('input'); cb.type='checkbox'; cb.checked=!!st.done;
+    cb.addEventListener('change',function(e){ e.stopPropagation(); var s=get(n); set(n,cb.checked,s.level); });
+    lab.appendChild(cb); lab.appendChild(document.createTextNode(' 做过'));
+    el.appendChild(lab);
+    // 分隔
+    var sep=document.createElement('span'); sep.className='sep'; sep.textContent='|'; el.appendChild(sep);
+    el.appendChild(document.createTextNode('熟练度 '));
+    // 三档按钮
+    [['high','高'],['mid','中'],['low','低']].forEach(function(pair){
+      var b=document.createElement('button'); b.className='lv'+(st.level===pair[0]?' on-'+pair[0]:'');
+      b.textContent=pair[1];
+      b.addEventListener('click',function(e){
+        e.preventDefault(); e.stopPropagation();
+        var s=get(n);
+        set(n, s.done, s.level===pair[0]?'':pair[0]);
+        renderMark(el,n);
+        if(window.onMarkChange) window.onMarkChange();
+      });
+      el.appendChild(b);
+    });
+  };
+})();
+</script>
+
+<script>
+document.querySelectorAll('.mkbox').forEach(function(el){ renderMark(el, el.dataset.n); });
+</script>
+</body>
+</html>

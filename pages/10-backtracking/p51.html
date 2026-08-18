@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>51. N 皇后 · LeetCode 热题100题解</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:#f5f7fb;color:#1f2937;line-height:1.7}
+.wrap{max-width:900px;margin:0 auto;padding:24px}
+header{background:linear-gradient(135deg,#1e3a8a,#2563eb 55%,#38bdf8);color:#fff;padding:28px 24px}
+header .wrap{padding:0}
+header h1{font-size:22px}
+header p{opacity:.85;font-size:13px;margin-top:4px}
+.back{color:#fff;opacity:.9;font-size:13px;text-decoration:none}
+.crumb{font-size:12px;opacity:.85;margin-top:6px}
+.crumb a{color:#fff;text-decoration:underline}
+.toc{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px 20px;margin:20px 0}
+.toc h2{font-size:15px;margin-bottom:8px}
+.prob{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:22px 24px;margin-bottom:22px}
+.prob h2{font-size:17px;margin-bottom:10px}
+.prob h3{font-size:14px;color:#2563eb;margin:16px 0 6px}
+.badge{display:inline-block;padding:1px 9px;border-radius:999px;font-size:12px;font-weight:600;vertical-align:middle}
+.easy{color:#16a34a;background:#dcfce7}.medium{color:#d97706;background:#fef3c7}.hard{color:#dc2626;background:#fee2e2}
+.desc{background:#f9fafb;border-left:3px solid #2563eb;padding:10px 14px;border-radius:0 8px 8px 0;font-size:14px}
+.ex{background:#f3f4f6;border-radius:8px;padding:10px 14px;font-size:13px;margin-top:8px;white-space:pre-wrap;font-family:"SF Mono",Menlo,Consolas,monospace}
+pre{background:#0f172a;color:#e2e8f0;border-radius:10px;padding:14px 16px;overflow-x:auto;font-size:13px;line-height:1.6;font-family:"SF Mono",Menlo,Consolas,monospace}
+.diagram{background:#fffbeb;color:#78350f;border:1px solid #fde68a;white-space:pre}
+.cx{font-size:12px;color:#6b7280;margin-top:6px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin:8px 0 22px;flex-wrap:wrap}
+.pager a{flex:1;min-width:150px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px 16px;font-size:13px;color:#2563eb;text-decoration:none}
+.pager a:hover{background:#eff6ff}
+.pager a.mid{flex:0 1 auto;text-align:center;color:#6b7280}
+.item{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 18px;margin-bottom:10px;text-decoration:none;color:inherit;transition:box-shadow .2s}
+.item:hover{box-shadow:0 4px 14px rgba(37,99,235,.12)}
+.item .no{color:#6b7280;font-variant-numeric:tabular-nums;min-width:56px}
+.item .ti{flex:1;font-size:15px}
+.item .go{font-size:12px;color:#9ca3af}
+footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
+
+
+/* 标记控件 v2 */
+.mk{display:inline-flex;align-items:center;gap:6px;cursor:pointer;user-select:none}
+.mk input[type=checkbox]{width:17px;height:17px;cursor:pointer;accent-color:#16a34a;margin:0}
+.lv{border:1.5px solid #d1d5db;background:#fff;border-radius:999px;padding:3px 14px;font-size:12px;cursor:pointer;color:#6b7280;transition:all .15s}
+.lv:hover{transform:translateY(-1px)}
+.lv.on-high{background:#dcfce7;border-color:#16a34a;color:#16a34a;font-weight:600}
+.lv.on-mid{background:#fef3c7;border-color:#d97706;color:#d97706;font-weight:600}
+.lv.on-low{background:#fee2e2;border-color:#dc2626;color:#dc2626;font-weight:600}
+/* 分类页卡片 */
+.card{display:block;background:#fff;border:1px solid #e5e7eb;border-radius:14px;margin-bottom:12px;overflow:hidden;transition:box-shadow .2s}
+.card:hover{box-shadow:0 4px 16px rgba(37,99,235,.10)}
+.card .row1{display:flex;align-items:center;gap:12px;padding:14px 18px 8px;cursor:pointer}
+.card .no{color:#9ca3af;font-variant-numeric:tabular-nums;min-width:52px;font-size:14px}
+.card .ti{flex:1;font-size:15px;font-weight:500;color:#1f2937}
+.card .row1:hover .ti{color:#2563eb}
+.card .go{font-size:12px;color:#c0c4cc}
+.card .row2{display:flex;align-items:center;gap:10px;padding:0 18px 12px 70px;font-size:13px;color:#6b7280;flex-wrap:wrap}
+.card .sep{color:#e5e7eb}
+/* 单题页标记条 */
+.markbar{display:flex;align-items:center;gap:12px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:12px 16px;margin:14px 0;font-size:14px;flex-wrap:wrap}
+.markbar .lab{color:#6b7280;font-size:13px}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+<h1>51. N 皇后 <span class="badge hard">困难</span></h1>
+<div class="crumb"><a href="../../index.html">目录</a> / <a href="../../10-backtracking.html">回溯</a> / 51. N 皇后</div>
+</div></header>
+<div class="wrap">
+<section class="prob" id="p51">
+<h2>51. N 皇后 <span class="badge hard">困难</span></h2><div class="markbar"><span class="lab">标记本题：</span><span class="mkbox" data-n="51"></span></div>
+<div class="desc">在 n×n 棋盘上放置 n 个皇后，使其互不攻击（不同行、不同列、不同对角线），返回所有摆法。<div class="ex">输入：n=4
+输出：[[".Q..","...Q","Q...","..Q."],["..Q.","Q...","...Q",".Q.."]]</div></div>
+<h3>解题思路</h3>
+<p><b>先想清楚两个问题：</b></p>
+<p><b>Q1：怎么组织回溯？</b>逐行放皇后：第 r 层递归只负责第 r 行，枚举每一列 c 尝试放置。每行必放且只放一个，天然去掉行冲突，只需检查列和两条对角线。</p>
+<p><b>Q2：怎么用 O(1) 判断冲突？</b>用三个布尔数组：col[c] 记列占用；主对角线上 r+c 是定值，用 d1[r+c]；副对角线上 r-c 是定值，加偏移 n-1 避免负数下标，用 d2[r-c+n-1]。</p>
+<p><b>照着写的 4 步：</b></p>
+<p>① 初始化 n×n 棋盘全为 '.'，开 col[n]、d1[2n-1]、d2[2n-1] 三个标记数组，从第 0 行开始回溯；<br>② 终止条件：r==n，把棋盘每行拼成字符串收集；<br>③ 枚举列 c：若 col[c]、d1[r+c]、d2[r-c+n-1] 任一为 true 则 continue；否则做选择——b[r][c]='Q' 且三个标记置 true，递归 backtrack(r+1)；<br>④ 撤销选择——b[r][c]='.' 且三个标记复位 false。</p>
+<p>易错点：副对角线下标是 r-c+n-1 不是 r-c（会越界）；撤销时三个标记和棋盘格是全部复位不是只复位棋盘；标记数组长度是 2n-1 不是 n。</p>
+<pre class="diagram">逐步推演：n=4，跟踪第一条成功路径
+r=0：c=0 无冲突 → 放Q，col[0]=d1[0]=d2[3]=T
+r=1：c=0 列冲突；c=1 d2[1-1+3=3]冲突；c=2 可放 → col[2]=d1[3]=d2[2]=T
+r=2：c=0 列冲突；c=1 d1[3]冲突；c=2 列冲突；c=3 d1[5]/d2[2]…均冲突
+  → 本行无解，回溯：撤销 r=1 的 Q（col[2]=d1[3]=d2[2]=F）
+r=1 改放 c=3：col[3]=d1[4]=d2[1]=T
+r=2：c=1 可放（col[1]、d1[3]、d2[4] 均空闲）→ 放Q
+r=3：c=2 可放 → 放Q，r=4=n，收集：
+. Q . .
+. . . Q
+Q . . .
+. . Q .
+随后逐层撤销，继续找第二组解</pre>
+<h3>代码（Java）</h3>
+<pre><code>class Solution {
+    List&lt;List&lt;String&gt;&gt; ans = new ArrayList&lt;&gt;();
+    public List&lt;List&lt;String&gt;&gt; solveNQueens(int n) {
+        // ① 初始化棋盘和三个冲突标记数组
+        char[][] board = new char[n][n];
+        for (char[] row : board) Arrays.fill(row, '.');
+        backtrack(board, 0, new boolean[n], new boolean[2*n-1], new boolean[2*n-1]);
+        return ans;
+    }
+    private void backtrack(char[][] b, int r, boolean[] col, boolean[] d1, boolean[] d2) {
+        int n = b.length;
+        // ② n 行都摆满，收集方案
+        if (r == n) {
+            List&lt;String&gt; sol = new ArrayList&lt;&gt;();
+            for (char[] row : b) sol.add(new String(row));
+            ans.add(sol);
+            return;
+        }
+        // ③ 枚举第 r 行的每一列，跳过冲突位置
+        for (int c = 0; c &lt; n; c++) {
+            if (col[c] || d1[r+c] || d2[r-c+n-1]) continue;
+            // 做选择：放皇后并占领列和两条对角线
+            b[r][c] = 'Q';
+            col[c] = d1[r+c] = d2[r-c+n-1] = true;
+            backtrack(b, r + 1, col, d1, d2);
+            // ④ 撤销选择：全部复位
+            b[r][c] = '.';
+            col[c] = d1[r+c] = d2[r-c+n-1] = false;
+        }
+    }
+}</code></pre>
+<p class="cx">时间复杂度 O(n!) · 空间复杂度 O(n²)（棋盘存储）</p>
+</section>
+<div class="pager"><a href="p131.html">← 上一题：131. 分割回文串</a><a class="mid" href="../../10-backtracking.html">返回「回溯」列表</a><a style="visibility:hidden"></a></div>
+</div>
+<footer>LeetCode 热题100 题解手册 · Java</footer>
+
+
+
+
+
+<script>
+(function(){
+  var KEY='hot100-marks';
+  function load(){ try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){return{}} }
+  function save(m){ localStorage.setItem(KEY, JSON.stringify(m)); }
+  function get(n){ var m=load(); return m[n]||{done:false,level:''}; }
+  function set(n,done,level){ var m=load(); m[n]={done:done,level:level}; save(m); }
+  window.HOT100={load:load,get:get,set:set};
+
+  window.renderMark=function(el,n){
+    var st=get(n);
+    el.innerHTML='';
+    // 勾选
+    var lab=document.createElement('label'); lab.className='mk';
+    var cb=document.createElement('input'); cb.type='checkbox'; cb.checked=!!st.done;
+    cb.addEventListener('change',function(e){ e.stopPropagation(); var s=get(n); set(n,cb.checked,s.level); });
+    lab.appendChild(cb); lab.appendChild(document.createTextNode(' 做过'));
+    el.appendChild(lab);
+    // 分隔
+    var sep=document.createElement('span'); sep.className='sep'; sep.textContent='|'; el.appendChild(sep);
+    el.appendChild(document.createTextNode('熟练度 '));
+    // 三档按钮
+    [['high','高'],['mid','中'],['low','低']].forEach(function(pair){
+      var b=document.createElement('button'); b.className='lv'+(st.level===pair[0]?' on-'+pair[0]:'');
+      b.textContent=pair[1];
+      b.addEventListener('click',function(e){
+        e.preventDefault(); e.stopPropagation();
+        var s=get(n);
+        set(n, s.done, s.level===pair[0]?'':pair[0]);
+        renderMark(el,n);
+        if(window.onMarkChange) window.onMarkChange();
+      });
+      el.appendChild(b);
+    });
+  };
+})();
+</script>
+
+<script>
+document.querySelectorAll('.mkbox').forEach(function(el){ renderMark(el, el.dataset.n); });
+</script>
+</body>
+</html>

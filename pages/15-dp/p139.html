@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>139. 单词拆分 · LeetCode 热题100题解</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:#f5f7fb;color:#1f2937;line-height:1.7}
+.wrap{max-width:900px;margin:0 auto;padding:24px}
+header{background:linear-gradient(135deg,#1e3a8a,#2563eb 55%,#38bdf8);color:#fff;padding:28px 24px}
+header .wrap{padding:0}
+header h1{font-size:22px}
+header p{opacity:.85;font-size:13px;margin-top:4px}
+.back{color:#fff;opacity:.9;font-size:13px;text-decoration:none}
+.crumb{font-size:12px;opacity:.85;margin-top:6px}
+.crumb a{color:#fff;text-decoration:underline}
+.toc{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px 20px;margin:20px 0}
+.toc h2{font-size:15px;margin-bottom:8px}
+.prob{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:22px 24px;margin-bottom:22px}
+.prob h2{font-size:17px;margin-bottom:10px}
+.prob h3{font-size:14px;color:#2563eb;margin:16px 0 6px}
+.badge{display:inline-block;padding:1px 9px;border-radius:999px;font-size:12px;font-weight:600;vertical-align:middle}
+.easy{color:#16a34a;background:#dcfce7}.medium{color:#d97706;background:#fef3c7}.hard{color:#dc2626;background:#fee2e2}
+.desc{background:#f9fafb;border-left:3px solid #2563eb;padding:10px 14px;border-radius:0 8px 8px 0;font-size:14px}
+.ex{background:#f3f4f6;border-radius:8px;padding:10px 14px;font-size:13px;margin-top:8px;white-space:pre-wrap;font-family:"SF Mono",Menlo,Consolas,monospace}
+pre{background:#0f172a;color:#e2e8f0;border-radius:10px;padding:14px 16px;overflow-x:auto;font-size:13px;line-height:1.6;font-family:"SF Mono",Menlo,Consolas,monospace}
+.diagram{background:#fffbeb;color:#78350f;border:1px solid #fde68a;white-space:pre}
+.cx{font-size:12px;color:#6b7280;margin-top:6px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin:8px 0 22px;flex-wrap:wrap}
+.pager a{flex:1;min-width:150px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px 16px;font-size:13px;color:#2563eb;text-decoration:none}
+.pager a:hover{background:#eff6ff}
+.pager a.mid{flex:0 1 auto;text-align:center;color:#6b7280}
+.item{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 18px;margin-bottom:10px;text-decoration:none;color:inherit;transition:box-shadow .2s}
+.item:hover{box-shadow:0 4px 14px rgba(37,99,235,.12)}
+.item .no{color:#6b7280;font-variant-numeric:tabular-nums;min-width:56px}
+.item .ti{flex:1;font-size:15px}
+.item .go{font-size:12px;color:#9ca3af}
+footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
+
+
+/* 标记控件 v2 */
+.mk{display:inline-flex;align-items:center;gap:6px;cursor:pointer;user-select:none}
+.mk input[type=checkbox]{width:17px;height:17px;cursor:pointer;accent-color:#16a34a;margin:0}
+.lv{border:1.5px solid #d1d5db;background:#fff;border-radius:999px;padding:3px 14px;font-size:12px;cursor:pointer;color:#6b7280;transition:all .15s}
+.lv:hover{transform:translateY(-1px)}
+.lv.on-high{background:#dcfce7;border-color:#16a34a;color:#16a34a;font-weight:600}
+.lv.on-mid{background:#fef3c7;border-color:#d97706;color:#d97706;font-weight:600}
+.lv.on-low{background:#fee2e2;border-color:#dc2626;color:#dc2626;font-weight:600}
+/* 分类页卡片 */
+.card{display:block;background:#fff;border:1px solid #e5e7eb;border-radius:14px;margin-bottom:12px;overflow:hidden;transition:box-shadow .2s}
+.card:hover{box-shadow:0 4px 16px rgba(37,99,235,.10)}
+.card .row1{display:flex;align-items:center;gap:12px;padding:14px 18px 8px;cursor:pointer}
+.card .no{color:#9ca3af;font-variant-numeric:tabular-nums;min-width:52px;font-size:14px}
+.card .ti{flex:1;font-size:15px;font-weight:500;color:#1f2937}
+.card .row1:hover .ti{color:#2563eb}
+.card .go{font-size:12px;color:#c0c4cc}
+.card .row2{display:flex;align-items:center;gap:10px;padding:0 18px 12px 70px;font-size:13px;color:#6b7280;flex-wrap:wrap}
+.card .sep{color:#e5e7eb}
+/* 单题页标记条 */
+.markbar{display:flex;align-items:center;gap:12px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:12px 16px;margin:14px 0;font-size:14px;flex-wrap:wrap}
+.markbar .lab{color:#6b7280;font-size:13px}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+<h1>139. 单词拆分 <span class="badge medium">中等</span></h1>
+<div class="crumb"><a href="../../index.html">目录</a> / <a href="../../15-dp.html">动态规划</a> / 139. 单词拆分</div>
+</div></header>
+<div class="wrap">
+<section class="prob" id="p139">
+<h2>139. 单词拆分 <span class="badge medium">中等</span></h2><div class="markbar"><span class="lab">标记本题：</span><span class="mkbox" data-n="139"></span></div>
+<div class="desc">给定字符串 s 和字典 wordDict，判断 s 能否被拆分成一个或多个在字典中出现的单词（单词可重复使用）。<div class="ex">输入：s = "leetcode", wordDict = ["leet","code"]
+输出：true
+解释："leetcode" = "leet" + "code"</div></div>
+<h3>解题思路</h3>
+<p><b>先想清楚两个问题（布尔型 DP）：</b></p>
+<p><b>Q1：状态怎么定义？</b>dp[i] = s 的前 i 个字符（s[0..i-1]）能否被成功拆分，布尔值；答案在 dp[n]。</p>
+<p><b>Q2：状态怎么转移？</b>只要存在一个 j &lt; i，使 dp[j] 为 true 且子串 s[j..i-1] 在字典中，则 dp[i] = true——前 j 个能拆、最后一段又是单词，前 i 个就能拆；初始化 dp[0]=true（空串视为可拆分，是递推起点）；i 从 1 到 n 正序、内层 j 从 0 到 i-1 枚举分割点。</p>
+<p><b>照着写的 3 步：</b></p>
+<p>① 开长度 n+1 的布尔 dp 数组并初始化 base case：dp[0]=true，其余默认 false；<br>② 按 i=1..n 正序遍历，内层枚举分割点 j，若 dp[j] 为 true 且 s.substring(j, i) 在字典中则置 dp[i]=true；<br>③ 返回 dp[n]；</p>
+<p>易错点：① dp 数组长度是 n+1 不是 n，下标 i 表示「前 i 个字符」，不是「第 i 个字符」；② 子串是 s.substring(j, i)，对应 s[j..i-1]，右端不含 i；③ dp[0] 必须是 true 不是 false，否则后面所有位置都无法起步。</p>
+<pre class="diagram">示例 s = "leetcode"，字典 = {"leet","code"}，逐步填 dp 表：
+① 初始化：dp[0]=T（空串可拆分）
+② i=1..3：没有任何 j 使 dp[j]=T 且 s[j..i-1] 在字典 → 全 F
+② i=4：j=0，dp[0]=T 且 s[0..3]="leet" 在字典 → dp[4]=T
+② i=5..7：无匹配 → 全 F
+② i=8：j=4，dp[4]=T 且 s[4..7]="code" 在字典 → dp[8]=T
+
+下标 i   0  1  2  3  4  5  6  7  8
+dp       T  F  F  F  T  F  F  F  T
+③ 返回 dp[8] = true（"leetcode" = "leet" + "code"）</pre>
+<h3>代码（Java）</h3>
+<pre><code>class Solution {
+    public boolean wordBreak(String s, List&lt;String&gt; wordDict) {
+        Set&lt;String&gt; dict = new HashSet&lt;&gt;(wordDict); // Set 查询 O(1)
+        int n = s.length();
+        boolean[] dp = new boolean[n + 1]; // ① 开长度 n+1 的 dp 数组
+        dp[0] = true; // ① base case：空串视为可拆分，是递推起点
+        for (int i = 1; i &lt;= n; i++) { // ② 按 i 正序遍历，dp[i] 依赖前面的 dp[j]
+            for (int j = 0; j &lt; i; j++) {
+                // ② 转移方程：[0,j) 可拆，且 [j,i) 是字典单词 → [0,i) 可拆
+                if (dp[j] &amp;&amp; dict.contains(s.substring(j, i))) {
+                    dp[i] = true;
+                    break; // 找到一种即可
+                }
+            }
+        }
+        return dp[n]; // ③ 返回 dp[n]
+    }
+}</code></pre>
+<p class="cx">时间复杂度 O(n² · 子串均长) · 空间复杂度 O(n)</p>
+</section>
+<div class="pager"><a href="p322.html">← 上一题：322. 零钱兑换</a><a class="mid" href="../../15-dp.html">返回「动态规划」列表</a><a href="p300.html">下一题：300. 最长递增子序列 →</a></div>
+</div>
+<footer>LeetCode 热题100 题解手册 · Java</footer>
+
+
+
+
+
+<script>
+(function(){
+  var KEY='hot100-marks';
+  function load(){ try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){return{}} }
+  function save(m){ localStorage.setItem(KEY, JSON.stringify(m)); }
+  function get(n){ var m=load(); return m[n]||{done:false,level:''}; }
+  function set(n,done,level){ var m=load(); m[n]={done:done,level:level}; save(m); }
+  window.HOT100={load:load,get:get,set:set};
+
+  window.renderMark=function(el,n){
+    var st=get(n);
+    el.innerHTML='';
+    // 勾选
+    var lab=document.createElement('label'); lab.className='mk';
+    var cb=document.createElement('input'); cb.type='checkbox'; cb.checked=!!st.done;
+    cb.addEventListener('change',function(e){ e.stopPropagation(); var s=get(n); set(n,cb.checked,s.level); });
+    lab.appendChild(cb); lab.appendChild(document.createTextNode(' 做过'));
+    el.appendChild(lab);
+    // 分隔
+    var sep=document.createElement('span'); sep.className='sep'; sep.textContent='|'; el.appendChild(sep);
+    el.appendChild(document.createTextNode('熟练度 '));
+    // 三档按钮
+    [['high','高'],['mid','中'],['low','低']].forEach(function(pair){
+      var b=document.createElement('button'); b.className='lv'+(st.level===pair[0]?' on-'+pair[0]:'');
+      b.textContent=pair[1];
+      b.addEventListener('click',function(e){
+        e.preventDefault(); e.stopPropagation();
+        var s=get(n);
+        set(n, s.done, s.level===pair[0]?'':pair[0]);
+        renderMark(el,n);
+        if(window.onMarkChange) window.onMarkChange();
+      });
+      el.appendChild(b);
+    });
+  };
+})();
+</script>
+
+<script>
+document.querySelectorAll('.mkbox').forEach(function(el){ renderMark(el, el.dataset.n); });
+</script>
+</body>
+</html>

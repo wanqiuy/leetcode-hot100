@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>45. 跳跃游戏 II · LeetCode 热题100题解</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:#f5f7fb;color:#1f2937;line-height:1.7}
+.wrap{max-width:900px;margin:0 auto;padding:24px}
+header{background:linear-gradient(135deg,#1e3a8a,#2563eb 55%,#38bdf8);color:#fff;padding:28px 24px}
+header .wrap{padding:0}
+header h1{font-size:22px}
+header p{opacity:.85;font-size:13px;margin-top:4px}
+.back{color:#fff;opacity:.9;font-size:13px;text-decoration:none}
+.crumb{font-size:12px;opacity:.85;margin-top:6px}
+.crumb a{color:#fff;text-decoration:underline}
+.toc{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px 20px;margin:20px 0}
+.toc h2{font-size:15px;margin-bottom:8px}
+.prob{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:22px 24px;margin-bottom:22px}
+.prob h2{font-size:17px;margin-bottom:10px}
+.prob h3{font-size:14px;color:#2563eb;margin:16px 0 6px}
+.badge{display:inline-block;padding:1px 9px;border-radius:999px;font-size:12px;font-weight:600;vertical-align:middle}
+.easy{color:#16a34a;background:#dcfce7}.medium{color:#d97706;background:#fef3c7}.hard{color:#dc2626;background:#fee2e2}
+.desc{background:#f9fafb;border-left:3px solid #2563eb;padding:10px 14px;border-radius:0 8px 8px 0;font-size:14px}
+.ex{background:#f3f4f6;border-radius:8px;padding:10px 14px;font-size:13px;margin-top:8px;white-space:pre-wrap;font-family:"SF Mono",Menlo,Consolas,monospace}
+pre{background:#0f172a;color:#e2e8f0;border-radius:10px;padding:14px 16px;overflow-x:auto;font-size:13px;line-height:1.6;font-family:"SF Mono",Menlo,Consolas,monospace}
+.diagram{background:#fffbeb;color:#78350f;border:1px solid #fde68a;white-space:pre}
+.cx{font-size:12px;color:#6b7280;margin-top:6px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin:8px 0 22px;flex-wrap:wrap}
+.pager a{flex:1;min-width:150px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px 16px;font-size:13px;color:#2563eb;text-decoration:none}
+.pager a:hover{background:#eff6ff}
+.pager a.mid{flex:0 1 auto;text-align:center;color:#6b7280}
+.item{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 18px;margin-bottom:10px;text-decoration:none;color:inherit;transition:box-shadow .2s}
+.item:hover{box-shadow:0 4px 14px rgba(37,99,235,.12)}
+.item .no{color:#6b7280;font-variant-numeric:tabular-nums;min-width:56px}
+.item .ti{flex:1;font-size:15px}
+.item .go{font-size:12px;color:#9ca3af}
+footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
+
+
+/* 标记控件 v2 */
+.mk{display:inline-flex;align-items:center;gap:6px;cursor:pointer;user-select:none}
+.mk input[type=checkbox]{width:17px;height:17px;cursor:pointer;accent-color:#16a34a;margin:0}
+.lv{border:1.5px solid #d1d5db;background:#fff;border-radius:999px;padding:3px 14px;font-size:12px;cursor:pointer;color:#6b7280;transition:all .15s}
+.lv:hover{transform:translateY(-1px)}
+.lv.on-high{background:#dcfce7;border-color:#16a34a;color:#16a34a;font-weight:600}
+.lv.on-mid{background:#fef3c7;border-color:#d97706;color:#d97706;font-weight:600}
+.lv.on-low{background:#fee2e2;border-color:#dc2626;color:#dc2626;font-weight:600}
+/* 分类页卡片 */
+.card{display:block;background:#fff;border:1px solid #e5e7eb;border-radius:14px;margin-bottom:12px;overflow:hidden;transition:box-shadow .2s}
+.card:hover{box-shadow:0 4px 16px rgba(37,99,235,.10)}
+.card .row1{display:flex;align-items:center;gap:12px;padding:14px 18px 8px;cursor:pointer}
+.card .no{color:#9ca3af;font-variant-numeric:tabular-nums;min-width:52px;font-size:14px}
+.card .ti{flex:1;font-size:15px;font-weight:500;color:#1f2937}
+.card .row1:hover .ti{color:#2563eb}
+.card .go{font-size:12px;color:#c0c4cc}
+.card .row2{display:flex;align-items:center;gap:10px;padding:0 18px 12px 70px;font-size:13px;color:#6b7280;flex-wrap:wrap}
+.card .sep{color:#e5e7eb}
+/* 单题页标记条 */
+.markbar{display:flex;align-items:center;gap:12px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:12px 16px;margin:14px 0;font-size:14px;flex-wrap:wrap}
+.markbar .lab{color:#6b7280;font-size:13px}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+<h1>45. 跳跃游戏 II <span class="badge medium">中等</span></h1>
+<div class="crumb"><a href="../../index.html">目录</a> / <a href="../../14-greedy.html">贪心算法</a> / 45. 跳跃游戏 II</div>
+</div></header>
+<div class="wrap">
+<section class="prob" id="p45">
+<h2>45. 跳跃游戏 II <span class="badge medium">中等</span></h2><div class="markbar"><span class="lab">标记本题：</span><span class="mkbox" data-n="45"></span></div>
+<div class="desc">与 55 题相同的跳跃规则，但保证一定可以到达终点。要求返回到达最后一个下标的最少跳跃次数。
+<div class="ex">示例：输入 nums = [2,3,1,1,4] → 输出 2（下标 0 → 1 → 4）
+输入 nums = [2,3,0,1,4] → 输出 2</div></div>
+<h3>解题思路</h3>
+<p><b>先想清楚两个问题：</b></p>
+<p><b>Q1：怎么把「最少跳几步」转化为逐层扩张？</b>把跳跃看成贪心版 BFS：当前这一步能到达的范围是一「层」。维护两个边界——end（本层覆盖的右边界）和 farthest（扫描本层时下一步能到的最远位置）。每一步都贪心地选「能让下一跳跳得最远」的落点，总步数自然最少。</p>
+<p><b>Q2：什么时候步数加一？</b>遍历 i 时先用 i + nums[i] 刷新 farthest；当 i 走到 end（本层探完），说明必须再跳一步：steps + 1，同时把 end 推进到 farthest 进入下一层。循环只需跑到 i = n-2：最后一次扩张边界已含终点，不必对终点本身再计步。</p>
+<p><b>照着写的 5 步：</b></p>
+<p>① steps = 0，end = 0，farthest = 0；<br>② 遍历 i = 0..n-2；<br>③ farthest = max(farthest, i + nums[i])；<br>④ 若 i == end：steps++ 且 end = farthest；<br>⑤ 循环结束返回 steps。</p>
+<p>易错点：循环上界是 i &lt; n - 1 不是 i &lt; n（终点不计步，否则多数一步）；计步时机是 i == end 时不是每次更新 farthest 时；end 推进为 farthest 不是 end + 1（跳着走不是走着走）。</p>
+<pre class="diagram">nums = [2, 3, 1, 1, 4]
+i:      0   1   2   3   4     n - 2 = 3（只遍历到 i=3）
+
+初始: steps=0, end=0, farthest=0
+第 1 层（第 1 跳覆盖范围）：end 将推进到 farthest
+
+i=0: farthest = max(0, 0+2) = 2
+     i == end=0 → 本层探完，steps=1，end=2
+     含义：第 1 跳最多到 2，扫描 [0..2] 决定第 2 跳
+i=1: farthest = max(2, 1+3) = 4   ← 从下标 1 能直跳终点
+i=2: farthest = max(4, 2+1) = 4
+     i == end=2 → 本层探完，steps=2，end=4
+     第 2 跳已覆盖终点 4
+i=3: farthest = max(4, 3+1) = 4，i ≠ end，不动
+
+返回 steps = 2 ✓（下标 0 → 1 → 4）</pre>
+<h3>代码（Java）</h3>
+<pre><code>class Solution {
+    public int jump(int[] nums) {
+        // ① steps 步数；end 本跳覆盖的右边界；farthest 下一跳最远处
+        int steps = 0;
+        int end = 0;
+        int farthest = 0;
+        // ② 只需遍历到 n-2：最后一次扩张已含终点
+        for (int i = 0; i &lt; nums.length - 1; i++) {
+            farthest = Math.max(farthest, i + nums[i]); // ③ 刷新下一跳最远处
+            if (i == end) {          // ④ 本层探完，必须再跳一步
+                steps++;
+                end = farthest;      // ④ 边界推进到下一跳范围
+            }
+        }
+        return steps;                // ⑤
+    }
+}</code></pre>
+<p class="cx">时间复杂度 O(n) · 空间复杂度 O(1)</p>
+</section>
+<div class="pager"><a href="p55.html">← 上一题：55. 跳跃游戏</a><a class="mid" href="../../14-greedy.html">返回「贪心算法」列表</a><a href="p763.html">下一题：763. 划分字母区间 →</a></div>
+</div>
+<footer>LeetCode 热题100 题解手册 · Java</footer>
+
+
+
+
+
+<script>
+(function(){
+  var KEY='hot100-marks';
+  function load(){ try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){return{}} }
+  function save(m){ localStorage.setItem(KEY, JSON.stringify(m)); }
+  function get(n){ var m=load(); return m[n]||{done:false,level:''}; }
+  function set(n,done,level){ var m=load(); m[n]={done:done,level:level}; save(m); }
+  window.HOT100={load:load,get:get,set:set};
+
+  window.renderMark=function(el,n){
+    var st=get(n);
+    el.innerHTML='';
+    // 勾选
+    var lab=document.createElement('label'); lab.className='mk';
+    var cb=document.createElement('input'); cb.type='checkbox'; cb.checked=!!st.done;
+    cb.addEventListener('change',function(e){ e.stopPropagation(); var s=get(n); set(n,cb.checked,s.level); });
+    lab.appendChild(cb); lab.appendChild(document.createTextNode(' 做过'));
+    el.appendChild(lab);
+    // 分隔
+    var sep=document.createElement('span'); sep.className='sep'; sep.textContent='|'; el.appendChild(sep);
+    el.appendChild(document.createTextNode('熟练度 '));
+    // 三档按钮
+    [['high','高'],['mid','中'],['low','低']].forEach(function(pair){
+      var b=document.createElement('button'); b.className='lv'+(st.level===pair[0]?' on-'+pair[0]:'');
+      b.textContent=pair[1];
+      b.addEventListener('click',function(e){
+        e.preventDefault(); e.stopPropagation();
+        var s=get(n);
+        set(n, s.done, s.level===pair[0]?'':pair[0]);
+        renderMark(el,n);
+        if(window.onMarkChange) window.onMarkChange();
+      });
+      el.appendChild(b);
+    });
+  };
+})();
+</script>
+
+<script>
+document.querySelectorAll('.mkbox').forEach(function(el){ renderMark(el, el.dataset.n); });
+</script>
+</body>
+</html>

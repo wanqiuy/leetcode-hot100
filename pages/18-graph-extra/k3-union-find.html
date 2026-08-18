@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>并查集 · 图论知识补充</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:#f5f7fb;color:#1f2937;line-height:1.7}
+.wrap{max-width:900px;margin:0 auto;padding:24px}
+header{background:linear-gradient(135deg,#1e3a8a,#2563eb 55%,#38bdf8);color:#fff;padding:28px 24px}
+header .wrap{padding:0}
+header h1{font-size:22px}
+header p{opacity:.85;font-size:13px;margin-top:4px}
+.back{color:#fff;opacity:.9;font-size:13px;text-decoration:none}
+.crumb{font-size:12px;opacity:.85;margin-top:6px}
+.crumb a{color:#fff;text-decoration:underline}
+.prob{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:22px 24px;margin-bottom:22px}
+.prob h2{font-size:17px;margin-bottom:10px}
+.prob h3{font-size:14px;color:#2563eb;margin:16px 0 6px}
+.badge{display:inline-block;padding:1px 9px;border-radius:999px;font-size:12px;font-weight:600;vertical-align:middle}
+.easy{color:#16a34a;background:#dcfce7}.medium{color:#d97706;background:#fef3c7}.hard{color:#dc2626;background:#fee2e2}
+.know{color:#7c3aed;background:#ede9fe}
+.desc{background:#f9fafb;border-left:3px solid #2563eb;padding:10px 14px;border-radius:0 8px 8px 0;font-size:14px}
+pre{background:#0f172a;color:#e2e8f0;border-radius:10px;padding:14px 16px;overflow-x:auto;font-size:13px;line-height:1.6;font-family:"SF Mono",Menlo,Consolas,monospace}
+.diagram{background:#fffbeb;color:#78350f;border:1px solid #fde68a;white-space:pre}
+.cx{font-size:12px;color:#6b7280;margin-top:6px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin:8px 0 22px;flex-wrap:wrap}
+.pager a{flex:1;min-width:150px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px 16px;font-size:13px;color:#2563eb;text-decoration:none}
+.pager a:hover{background:#eff6ff}
+.pager a.mid{flex:0 1 auto;text-align:center;color:#6b7280}
+.rel{background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:12px 16px;font-size:13px;margin-top:14px}
+.rel a{color:#2563eb;text-decoration:none;font-weight:500}
+.rel a:hover{text-decoration:underline}
+footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+<h1>并查集 <span class="badge know">知识点</span></h1>
+<div class="crumb"><a href="../../index.html">目录</a> / <a href="../../18-graph-extra.html">图论知识补充</a> / 并查集</div>
+</div></header>
+<div class="wrap">
+<section class="prob">
+<h2>并查集 <span class="badge know">知识点</span></h2>
+<div class="desc">并查集（Union-Find）是一种维护「元素分组」的数据结构：每个节点记录自己的祖宗，find 查询根、union 合并两个集合，配合路径压缩后单次操作近乎 O(1)，专门高效回答动态连通性问题。</div>
+<h3>核心思想</h3>
+<p>用 parent 数组表示森林：parent[i] 是 i 的父节点，根节点的父节点是自己。find(x) 沿父指针一路找到根，并在回溯时把路径上的节点直接挂到根下（路径压缩），树高被压到接近 1。union(x, y) 先各自 find 出根，若根不同则把一个根挂到另一个根下，两个集合即合并。判断 x、y 是否连通，只需比较 find(x) == find(y)。</p>
+<h3>什么时候用</h3>
+<p>1. 题目反复问「两个元素连不连通」「图里有几个连通块 / 省份 / 岛屿」。<br>2. 边是一条条动态加入的（离线加边、冗余连接、最小生成树 Kruskal）。<br>3. 不需要求具体路径，只需要连通性结论——要路径请用 DFS/BFS。</p>
+<h3>模板代码（Java）</h3>
+<pre><code>class UnionFind {
+    int[] parent;
+    int count; // 连通块个数
+
+    UnionFind(int n) {           // 初始化：每个节点自成一派
+        parent = new int[n];
+        count = n;
+        for (int i = 0; i &lt; n; i++) parent[i] = i;
+    }
+    int find(int x) {            // 找根 + 路径压缩
+        if (parent[x] != x)
+            parent[x] = find(parent[x]); // 递归路上全部指向根
+        return parent[x];
+    }
+    void union(int x, int y) {   // 合并两集合
+        int rx = find(x), ry = find(y);
+        if (rx == ry) return;    // 已连通，无需合并
+        parent[rx] = ry;
+        count--;                 // 连通块少一个
+    }
+    boolean connected(int x, int y) { return find(x) == find(y); }
+}</code></pre>
+<h3>图解</h3>
+<pre class="diagram">6 个节点 0~5，依次执行 union(0,1)、union(1,2)、union(3,4)
+
+初始：parent = [0, 1, 2, 3, 4, 5]   每个节点是自己的根，count=6
+
+union(0,1)：find(0)=0, find(1)=1，根 0 挂到根 1 下
+  parent = [1, 1, 2, 3, 4, 5]   count=5     结构：1 ← 0
+
+union(1,2)：find(1)=1, find(2)=2，根 1 挂到根 2 下
+  parent = [1, 2, 2, 3, 4, 5]   count=4     结构：2 ← 1 ← 0（链长 2）
+
+union(3,4)：find(3)=3, find(4)=4，根 3 挂到根 4 下
+  parent = [1, 2, 2, 4, 4, 5]   count=3     结构：{2←1←0}、{4←3}、{5}
+
+find(2)：2 本身是根，直接返回 2，无压缩
+find(0) 路径压缩前后对比：
+  压缩前：0 → 1 → 2，走 2 步，parent = [1, 2, 2, 4, 4, 5]
+  压缩后：0 直接挂到根 2 下，parent = [2, 2, 2, 4, 4, 5]
+  下次 find(0) 只需 1 步；树被压平，后续查询近乎 O(1)</pre>
+<h3>复杂度</h3>
+<p class="cx" style="font-size:14px;color:#374151">路径压缩后单次 find / union 均摊 O(α(n))，α 为反阿克曼函数，实际可视为 O(1)；空间 O(n)。</p>
+<div class="rel"><b>关联题目：</b><a href="../09-graph/p200.html">200. 岛屿数量</a>（并查集思路：每个 '1' 与右、下邻居 union，最终 count 即岛屿数）；推荐练习：547 省份数量、684 冗余连接</div>
+</section>
+<div class="pager"><a href="k2-topo.html">← 上一篇：拓扑排序</a><a class="mid" href="../../18-graph-extra.html">返回「图论知识补充」列表</a><a href="k4-dijkstra.html">下一篇：Dijkstra 最短路径 →</a></div>
+</div>
+<footer>LeetCode 热题100 题解手册 · Java</footer>
+</body>
+</html>

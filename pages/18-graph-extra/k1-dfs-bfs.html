@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>DFS 与 BFS 遍历 · 图论知识补充</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:#f5f7fb;color:#1f2937;line-height:1.7}
+.wrap{max-width:900px;margin:0 auto;padding:24px}
+header{background:linear-gradient(135deg,#1e3a8a,#2563eb 55%,#38bdf8);color:#fff;padding:28px 24px}
+header .wrap{padding:0}
+header h1{font-size:22px}
+header p{opacity:.85;font-size:13px;margin-top:4px}
+.back{color:#fff;opacity:.9;font-size:13px;text-decoration:none}
+.crumb{font-size:12px;opacity:.85;margin-top:6px}
+.crumb a{color:#fff;text-decoration:underline}
+.prob{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:22px 24px;margin-bottom:22px}
+.prob h2{font-size:17px;margin-bottom:10px}
+.prob h3{font-size:14px;color:#2563eb;margin:16px 0 6px}
+.badge{display:inline-block;padding:1px 9px;border-radius:999px;font-size:12px;font-weight:600;vertical-align:middle}
+.easy{color:#16a34a;background:#dcfce7}.medium{color:#d97706;background:#fef3c7}.hard{color:#dc2626;background:#fee2e2}
+.know{color:#7c3aed;background:#ede9fe}
+.desc{background:#f9fafb;border-left:3px solid #2563eb;padding:10px 14px;border-radius:0 8px 8px 0;font-size:14px}
+pre{background:#0f172a;color:#e2e8f0;border-radius:10px;padding:14px 16px;overflow-x:auto;font-size:13px;line-height:1.6;font-family:"SF Mono",Menlo,Consolas,monospace}
+.diagram{background:#fffbeb;color:#78350f;border:1px solid #fde68a;white-space:pre}
+.cx{font-size:12px;color:#6b7280;margin-top:6px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin:8px 0 22px;flex-wrap:wrap}
+.pager a{flex:1;min-width:150px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px 16px;font-size:13px;color:#2563eb;text-decoration:none}
+.pager a:hover{background:#eff6ff}
+.pager a.mid{flex:0 1 auto;text-align:center;color:#6b7280}
+.rel{background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:12px 16px;font-size:13px;margin-top:14px}
+.rel a{color:#2563eb;text-decoration:none;font-weight:500}
+.rel a:hover{text-decoration:underline}
+footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+<h1>DFS 与 BFS 遍历 <span class="badge know">知识点</span></h1>
+<div class="crumb"><a href="../../index.html">目录</a> / <a href="../../18-graph-extra.html">图论知识补充</a> / DFS 与 BFS 遍历</div>
+</div></header>
+<div class="wrap">
+<section class="prob">
+<h2>DFS 与 BFS 遍历 <span class="badge know">知识点</span></h2>
+<div class="desc">DFS（深度优先）和 BFS（广度优先）是图与网格遍历的两大基本范式：DFS 沿一条路走到底再回溯，BFS 从起点一圈圈向外扩散。几乎所有图论题的搜索部分都由这两个模板演化而来。</div>
+<h3>核心思想</h3>
+<p>DFS 用递归（隐式栈）实现：访问当前节点后立刻钻进第一个未访问的邻居，走到底再回退，天然适合枚举所有路径、判断连通性。BFS 用队列实现：起点入队，每次取出队首、把所有未访问邻居入队，节点按「离起点的层数」从小到大被访问，因此第一次到达终点时步数一定最少。</p>
+<h3>什么时候用</h3>
+<p>1. 问「最短路径 / 最少步数 / 最少几分钟扩散完」→ 用 BFS（层序即步数）。<br>2. 问「连不连通 / 存不存在 / 枚举所有方案 / 数连通块个数」→ 用 DFS。<br>3. 网格题中两者常可互换（如岛屿数量），但涉及「层数」语义的（腐烂扩散、最近距离）必须 BFS。</p>
+<h3>模板代码（Java）</h3>
+<pre><code>// ---------- 网格 DFS 模板 ----------
+int[][] dirs = {{0,1},{0,-1},{1,0},{-1,0}}; // 四方向
+void dfs(char[][] g, int i, int j) {
+    // 1. 越界判断 + 已访问/非法判断
+    if (i &lt; 0 || i &gt;= g.length || j &lt; 0 || j &gt;= g[0].length || g[i][j] != '1') return;
+    g[i][j] = '0'; // 2. 标记访问（就地标记，省 visited 数组）
+    for (int[] d : dirs) dfs(g, i + d[0], j + d[1]); // 3. 四方向递归
+}
+
+// ---------- BFS 层序模板 ----------
+void bfs(char[][] g, int si, int sj) {
+    Queue&lt;int[]&gt; q = new ArrayDeque&lt;&gt;();
+    q.offer(new int[]{si, sj});
+    g[si][sj] = '0'; // 入队时立刻标记，防止重复入队
+    while (!q.isEmpty()) {
+        int size = q.size();      // 当前层的节点数
+        for (int s = 0; s &lt; size; s++) { // 一层一层处理，层数=步数
+            int[] cur = q.poll();
+            for (int[] d : dirs) {
+                int ni = cur[0] + d[0], nj = cur[1] + d[1];
+                if (ni &gt;= 0 &amp;&amp; ni &lt; g.length &amp;&amp; nj &gt;= 0 &amp;&amp; nj &lt; g[0].length &amp;&amp; g[ni][nj] == '1') {
+                    g[ni][nj] = '0';
+                    q.offer(new int[]{ni, nj});
+                }
+            }
+        }
+    }
+}</code></pre>
+<h3>图解</h3>
+<pre class="diagram">3x4 网格，从 (0,0) 出发，数字 = 访问顺序
+
+DFS 访问顺序（一路钻到底再回溯）：
+  1  2  3  4
+  10 11 12  5
+  9  8  7   6
+过程：(0,0)→(0,1)→(0,2)→(0,3) 到头 → 向下 (1,3)→(2,3)
+      →(2,2)→(2,1)→(2,0) 到头 → 向上 (1,0)→(1,1)→(1,2) 全部走完
+
+BFS 访问顺序（按层一圈圈扩散）：
+  1  2  4  7
+  2  3  5  8
+  3  4  6  9
+过程：第0层 {(0,0)} → 第1层 {(0,1),(1,0)} → 第2层 {(0,2),(1,1),(2,0)}
+      → 第3层 {(0,3),(1,2),(2,1)} → 第4层 {(1,3),(2,2)} → 第5层 {(2,3)}
+关键差异：DFS 序号沿一条蛇形路径递增；BFS 序号按「到起点的曼哈顿距离」分层递增</pre>
+<h3>复杂度</h3>
+<p class="cx" style="font-size:14px;color:#374151">时间 O(m×n)：每个格子最多访问一次；空间 O(m×n)：DFS 递归栈 / BFS 队列最坏情况下装下整个网格。</p>
+<div class="rel"><b>关联题目：</b><a href="../09-graph/p200.html">200. 岛屿数量</a>（DFS 模板直接套用）；<a href="../09-graph/p994.html">994. 腐烂的橘子</a>（多源 BFS：所有烂橘子同时入队，层数即分钟数）</div>
+</section>
+<div class="pager"><a style="visibility:hidden"></a><a class="mid" href="../../18-graph-extra.html">返回「图论知识补充」列表</a><a href="k2-topo.html">下一篇：拓扑排序 →</a></div>
+</div>
+<footer>LeetCode 热题100 题解手册 · Java</footer>
+</body>
+</html>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>Dijkstra 最短路径 · 图论知识补充</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:#f5f7fb;color:#1f2937;line-height:1.7}
+.wrap{max-width:900px;margin:0 auto;padding:24px}
+header{background:linear-gradient(135deg,#1e3a8a,#2563eb 55%,#38bdf8);color:#fff;padding:28px 24px}
+header .wrap{padding:0}
+header h1{font-size:22px}
+header p{opacity:.85;font-size:13px;margin-top:4px}
+.back{color:#fff;opacity:.9;font-size:13px;text-decoration:none}
+.crumb{font-size:12px;opacity:.85;margin-top:6px}
+.crumb a{color:#fff;text-decoration:underline}
+.prob{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:22px 24px;margin-bottom:22px}
+.prob h2{font-size:17px;margin-bottom:10px}
+.prob h3{font-size:14px;color:#2563eb;margin:16px 0 6px}
+.badge{display:inline-block;padding:1px 9px;border-radius:999px;font-size:12px;font-weight:600;vertical-align:middle}
+.easy{color:#16a34a;background:#dcfce7}.medium{color:#d97706;background:#fef3c7}.hard{color:#dc2626;background:#fee2e2}
+.know{color:#7c3aed;background:#ede9fe}
+.desc{background:#f9fafb;border-left:3px solid #2563eb;padding:10px 14px;border-radius:0 8px 8px 0;font-size:14px}
+pre{background:#0f172a;color:#e2e8f0;border-radius:10px;padding:14px 16px;overflow-x:auto;font-size:13px;line-height:1.6;font-family:"SF Mono",Menlo,Consolas,monospace}
+.diagram{background:#fffbeb;color:#78350f;border:1px solid #fde68a;white-space:pre}
+.cx{font-size:12px;color:#6b7280;margin-top:6px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin:8px 0 22px;flex-wrap:wrap}
+.pager a{flex:1;min-width:150px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px 16px;font-size:13px;color:#2563eb;text-decoration:none}
+.pager a:hover{background:#eff6ff}
+.pager a.mid{flex:0 1 auto;text-align:center;color:#6b7280}
+.rel{background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:12px 16px;font-size:13px;margin-top:14px}
+.rel a{color:#2563eb;text-decoration:none;font-weight:500}
+.rel a:hover{text-decoration:underline}
+footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+<h1>Dijkstra 最短路径 <span class="badge know">知识点</span></h1>
+<div class="crumb"><a href="../../index.html">目录</a> / <a href="../../18-graph-extra.html">图论知识补充</a> / Dijkstra 最短路径</div>
+</div></header>
+<div class="wrap">
+<section class="prob">
+<h2>Dijkstra 最短路径 <span class="badge know">知识点</span></h2>
+<div class="desc">Dijkstra 求带权图中单源最短路径：从起点出发，每次用最小堆取出当前距离最小的节点，用它去松弛所有邻居。节点一旦被取出，其最短距离就已确定，不再更新。</div>
+<h3>核心思想</h3>
+<p>贪心策略：dist 数组记录起点到各节点的当前最短估计，初始 dist[起点]=0、其余为 ∞。把 (距离, 节点) 放入小顶堆，每次弹出距离最小的节点 u——由于所有边权非负，不存在「绕路更短」的可能，u 的距离就此定死。随后遍历 u 的邻居 v，若 dist[u] + w(u,v) &lt; dist[v] 则更新 dist[v] 并入堆。堆里会残留过期的大距离副本，弹出时用 if (d &gt; dist[u]) continue 跳过即可。</p>
+<h3>什么时候用</h3>
+<p>1. 边权非负的带权图，问「起点到某点/所有点的最短路径、最少时间、最小代价」。<br>2. 网格中每格代价不同、求最小总代价路径（可视为隐式图）。<br>3. 前提必须是边权非负；有负权边改用 Bellman-Ford（SPFA）。</p>
+<h3>模板代码（Java）</h3>
+<pre><code>// 堆优化版 Dijkstra：graph[u] = [[v, w], ...]，返回起点 s 到各点最短距离
+int[] dijkstra(List&lt;int[]&gt;[] graph, int n, int s) {
+    int[] dist = new int[n];
+    Arrays.fill(dist, Integer.MAX_VALUE);
+    dist[s] = 0;
+    // 小顶堆，按距离排序，元素 = {距离, 节点}
+    PriorityQueue&lt;int[]&gt; pq = new PriorityQueue&lt;&gt;((a, b) -&gt; a[0] - b[0]);
+    pq.offer(new int[]{0, s});
+    while (!pq.isEmpty()) {
+        int[] cur = pq.poll();
+        int d = cur[0], u = cur[1];
+        if (d &gt; dist[u]) continue; // 过期副本，跳过（关键！）
+        for (int[] e : graph[u]) { // 松弛所有邻居
+            int v = e[0], w = e[1];
+            if (dist[u] + w &lt; dist[v]) {
+                dist[v] = dist[u] + w;
+                pq.offer(new int[]{dist[v], v});
+            }
+        }
+    }
+    return dist; // 不可达的节点仍为 Integer.MAX_VALUE
+}</code></pre>
+<h3>图解</h3>
+<pre class="diagram">4 节点带权图，起点 0：
+  0 --2-- 1     边：0→1(2), 0→2(5), 1→2(1), 1→3(4), 2→3(1)
+  |       |
+  5       4
+  |       |
+  2 --1-- 3
+
+初始：dist = [0, ∞, ∞, ∞]   堆 = [(0,0)]
+
+第1轮：弹出 (0,0)，节点 0 距离定死 = 0
+  松弛：dist[1]=0+2=2，dist[2]=0+5=5
+  dist = [0, 2, 5, ∞]        堆 = [(2,1), (5,2)]
+第2轮：弹出 (2,1)，节点 1 距离定死 = 2
+  松弛：dist[2]=min(5, 2+1)=3，dist[3]=2+4=6
+  dist = [0, 2, 3, 6]        堆 = [(3,2), (5,2), (6,3)]
+第3轮：弹出 (3,2)，节点 2 距离定死 = 3
+  松弛：dist[3]=min(6, 3+1)=4
+  dist = [0, 2, 3, 4]        堆 = [(4,3), (5,2), (6,3)]
+第4轮：弹出 (4,3)，节点 3 距离定死 = 4，无更优松弛
+第5轮：弹出 (5,2)，5 &gt; dist[2]=3，过期跳过
+第6轮：弹出 (6,3)，6 &gt; dist[3]=4，过期跳过，堆空结束
+
+最终：dist = [0, 2, 3, 4]，弹出顺序 0 → 1 → 2 → 3（按距离从小到大定死）</pre>
+<h3>复杂度</h3>
+<p class="cx" style="font-size:14px;color:#374151">堆优化版时间 O(E log V)：每条边最多触发一次入堆；空间 O(V + E)。朴素 O(V²) 版适合稠密图，堆优化版适合稀疏图。</p>
+<div class="rel"><b>关联题目：</b>推荐练习：743 网络延迟时间（模板裸题，答案为 max(dist)）、1631 最小体力消耗路径（把「路径最大值最小化」改写成 dist 定义即可套用）</div>
+</section>
+<div class="pager"><a href="k3-union-find.html">← 上一篇：并查集</a><a class="mid" href="../../18-graph-extra.html">返回「图论知识补充」列表</a><a href="k5-trie.html">下一篇：Trie 前缀树 →</a></div>
+</div>
+<footer>LeetCode 热题100 题解手册 · Java</footer>
+</body>
+</html>

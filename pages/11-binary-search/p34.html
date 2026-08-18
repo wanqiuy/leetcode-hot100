@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>34. 在排序数组中查找元素的第一个和最后一个位置 · LeetCode 热题100题解</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:#f5f7fb;color:#1f2937;line-height:1.7}
+.wrap{max-width:900px;margin:0 auto;padding:24px}
+header{background:linear-gradient(135deg,#1e3a8a,#2563eb 55%,#38bdf8);color:#fff;padding:28px 24px}
+header .wrap{padding:0}
+header h1{font-size:22px}
+header p{opacity:.85;font-size:13px;margin-top:4px}
+.back{color:#fff;opacity:.9;font-size:13px;text-decoration:none}
+.crumb{font-size:12px;opacity:.85;margin-top:6px}
+.crumb a{color:#fff;text-decoration:underline}
+.toc{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px 20px;margin:20px 0}
+.toc h2{font-size:15px;margin-bottom:8px}
+.prob{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:22px 24px;margin-bottom:22px}
+.prob h2{font-size:17px;margin-bottom:10px}
+.prob h3{font-size:14px;color:#2563eb;margin:16px 0 6px}
+.badge{display:inline-block;padding:1px 9px;border-radius:999px;font-size:12px;font-weight:600;vertical-align:middle}
+.easy{color:#16a34a;background:#dcfce7}.medium{color:#d97706;background:#fef3c7}.hard{color:#dc2626;background:#fee2e2}
+.desc{background:#f9fafb;border-left:3px solid #2563eb;padding:10px 14px;border-radius:0 8px 8px 0;font-size:14px}
+.ex{background:#f3f4f6;border-radius:8px;padding:10px 14px;font-size:13px;margin-top:8px;white-space:pre-wrap;font-family:"SF Mono",Menlo,Consolas,monospace}
+pre{background:#0f172a;color:#e2e8f0;border-radius:10px;padding:14px 16px;overflow-x:auto;font-size:13px;line-height:1.6;font-family:"SF Mono",Menlo,Consolas,monospace}
+.diagram{background:#fffbeb;color:#78350f;border:1px solid #fde68a;white-space:pre}
+.cx{font-size:12px;color:#6b7280;margin-top:6px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin:8px 0 22px;flex-wrap:wrap}
+.pager a{flex:1;min-width:150px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px 16px;font-size:13px;color:#2563eb;text-decoration:none}
+.pager a:hover{background:#eff6ff}
+.pager a.mid{flex:0 1 auto;text-align:center;color:#6b7280}
+.item{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 18px;margin-bottom:10px;text-decoration:none;color:inherit;transition:box-shadow .2s}
+.item:hover{box-shadow:0 4px 14px rgba(37,99,235,.12)}
+.item .no{color:#6b7280;font-variant-numeric:tabular-nums;min-width:56px}
+.item .ti{flex:1;font-size:15px}
+.item .go{font-size:12px;color:#9ca3af}
+footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
+
+
+/* 标记控件 v2 */
+.mk{display:inline-flex;align-items:center;gap:6px;cursor:pointer;user-select:none}
+.mk input[type=checkbox]{width:17px;height:17px;cursor:pointer;accent-color:#16a34a;margin:0}
+.lv{border:1.5px solid #d1d5db;background:#fff;border-radius:999px;padding:3px 14px;font-size:12px;cursor:pointer;color:#6b7280;transition:all .15s}
+.lv:hover{transform:translateY(-1px)}
+.lv.on-high{background:#dcfce7;border-color:#16a34a;color:#16a34a;font-weight:600}
+.lv.on-mid{background:#fef3c7;border-color:#d97706;color:#d97706;font-weight:600}
+.lv.on-low{background:#fee2e2;border-color:#dc2626;color:#dc2626;font-weight:600}
+/* 分类页卡片 */
+.card{display:block;background:#fff;border:1px solid #e5e7eb;border-radius:14px;margin-bottom:12px;overflow:hidden;transition:box-shadow .2s}
+.card:hover{box-shadow:0 4px 16px rgba(37,99,235,.10)}
+.card .row1{display:flex;align-items:center;gap:12px;padding:14px 18px 8px;cursor:pointer}
+.card .no{color:#9ca3af;font-variant-numeric:tabular-nums;min-width:52px;font-size:14px}
+.card .ti{flex:1;font-size:15px;font-weight:500;color:#1f2937}
+.card .row1:hover .ti{color:#2563eb}
+.card .go{font-size:12px;color:#c0c4cc}
+.card .row2{display:flex;align-items:center;gap:10px;padding:0 18px 12px 70px;font-size:13px;color:#6b7280;flex-wrap:wrap}
+.card .sep{color:#e5e7eb}
+/* 单题页标记条 */
+.markbar{display:flex;align-items:center;gap:12px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:12px 16px;margin:14px 0;font-size:14px;flex-wrap:wrap}
+.markbar .lab{color:#6b7280;font-size:13px}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+<h1>34. 在排序数组中查找元素的第一个和最后一个位置 <span class="badge medium">中等</span></h1>
+<div class="crumb"><a href="../../index.html">目录</a> / <a href="../../11-binary-search.html">二分查找</a> / 34. 在排序数组中查找元素的第一个和最后一个位置</div>
+</div></header>
+<div class="wrap">
+<section class="prob" id="p34">
+<h2>34. 在排序数组中查找元素的第一个和最后一个位置 <span class="badge medium">中等</span></h2><div class="markbar"><span class="lab">标记本题：</span><span class="mkbox" data-n="34"></span></div>
+<div class="desc">给定非递减排序数组 nums 和目标值 target，返回 target 在数组中的开始位置和结束位置（按升序返回）；若不存在返回 [-1, -1]。要求 O(log n)。
+<div class="ex">示例：输入 nums = [5,7,7,8,8,10], target = 8 → 输出 [3,4]
+输入 nums = [5,7,7,8,8,10], target = 6 → 输出 [-1,-1]</div></div>
+<h3>解题思路</h3>
+<p><b>先想清楚两个问题：</b></p>
+<p><b>Q1：普通二分命中就返回，怎么找「第一个」和「最后一个」？</b>写两次边界二分：找左边界时即使 nums[mid] == target 也继续向左压（r = mid - 1），最终 l 停在第一个 ≥ target 的位置；找右边界时等于也继续向右扩（l = mid + 1），最终 r 停在最后一个 ≤ target 的位置。</p>
+<p><b>Q2：怎么判断 target 不存在？</b>先跑左边界二分，若结果越界（left == n）或 nums[left] ≠ target，说明 target 不在数组里，直接返回 [-1, -1]，右边界就不用找了。</p>
+<p><b>照着写的 5 步：</b></p>
+<p>① 调用边界二分（findLeft=true）求左边界 left；<br>② 校验 left 越界或 nums[left] ≠ target 则返回 [-1, -1]；<br>③ 再调用边界二分（findLeft=false）求右边界 right；<br>④ 返回 [left, right]；<br>⑤ 边界二分内部：闭区间循环，findLeft 时 nums[mid] ≥ target 就 r = mid - 1 否则 l = mid + 1；findRight 时 nums[mid] ＞ target 才 r = mid - 1 否则 l = mid + 1；结束时左边界返回 l、右边界返回 r。</p>
+<p>易错点：两种边界的收缩条件差别只在「等于号归哪边」，写反会得到错误边界；左边界看 l 不是 r，右边界看 r 不是 l；找到左边界后必须先校验是否真等于 target 再求右边界。</p>
+<pre class="diagram">nums = [5, 7, 7, 8, 8, 10]   target = 8
+下标:    0   1   2   3   4   5
+
+【找左边界：nums[mid] ≥ 8 → r = mid-1】
+第1轮: L=0, R=5, mid=2 → nums[2]=7 ＜ 8 → L=3
+第2轮: L=3, R=5, mid=4 → nums[4]=8 ≥ 8 → R=3
+第3轮: L=3, R=3, mid=3 → nums[3]=8 ≥ 8 → R=2
+结束: L=3 → 校验 nums[3]=8 ✓ → 左边界 = 3（第一个 8）
+
+【找右边界：nums[mid] ＞ 8 → r = mid-1，否则 l = mid+1】
+第1轮: L=0, R=5, mid=2 → nums[2]=7 ≤ 8 → L=3
+第2轮: L=3, R=5, mid=4 → nums[4]=8 ≤ 8 → L=5
+第3轮: L=5, R=5, mid=5 → nums[5]=10 ＞ 8 → R=4
+结束: R=4 → 右边界 = 4（最后一个 8）
+
+答案 = [3, 4]</pre>
+<h3>代码（Java）</h3>
+<pre><code>class Solution {
+    public int[] searchRange(int[] nums, int target) {
+        // ① 先找左边界（第一个 ≥ target 的下标）
+        int left = binarySearch(nums, target, true);
+        // ② 校验 target 是否真的存在
+        if (left == nums.length || nums[left] != target) {
+            return new int[]{-1, -1};
+        }
+        // ③ 再找右边界（最后一个 ≤ target 的下标）
+        int right = binarySearch(nums, target, false);
+        return new int[]{left, right};                 // ④
+    }
+
+    // ⑤ findLeft=true 找第一个 ≥ target 的下标；false 找最后一个 ≤ target 的下标
+    private int binarySearch(int[] nums, int target, boolean findLeft) {
+        int l = 0, r = nums.length - 1;
+        while (l &lt;= r) {
+            int mid = l + (r - l) / 2;
+            // 关键差别：等于号归哪边，决定压向左边界还是右边界
+            if (findLeft ? nums[mid] &gt;= target : nums[mid] &gt; target) {
+                r = mid - 1;
+            } else {
+                l = mid + 1;
+            }
+        }
+        return findLeft ? l : r;           // 左边界看 l，右边界看 r
+    }
+}</code></pre>
+<p class="cx">时间复杂度 O(log n) · 空间复杂度 O(1)</p>
+</section>
+<div class="pager"><a href="p74.html">← 上一题：74. 搜索二维矩阵</a><a class="mid" href="../../11-binary-search.html">返回「二分查找」列表</a><a href="p33.html">下一题：33. 搜索旋转排序数组 →</a></div>
+</div>
+<footer>LeetCode 热题100 题解手册 · Java</footer>
+
+
+
+
+
+<script>
+(function(){
+  var KEY='hot100-marks';
+  function load(){ try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){return{}} }
+  function save(m){ localStorage.setItem(KEY, JSON.stringify(m)); }
+  function get(n){ var m=load(); return m[n]||{done:false,level:''}; }
+  function set(n,done,level){ var m=load(); m[n]={done:done,level:level}; save(m); }
+  window.HOT100={load:load,get:get,set:set};
+
+  window.renderMark=function(el,n){
+    var st=get(n);
+    el.innerHTML='';
+    // 勾选
+    var lab=document.createElement('label'); lab.className='mk';
+    var cb=document.createElement('input'); cb.type='checkbox'; cb.checked=!!st.done;
+    cb.addEventListener('change',function(e){ e.stopPropagation(); var s=get(n); set(n,cb.checked,s.level); });
+    lab.appendChild(cb); lab.appendChild(document.createTextNode(' 做过'));
+    el.appendChild(lab);
+    // 分隔
+    var sep=document.createElement('span'); sep.className='sep'; sep.textContent='|'; el.appendChild(sep);
+    el.appendChild(document.createTextNode('熟练度 '));
+    // 三档按钮
+    [['high','高'],['mid','中'],['low','低']].forEach(function(pair){
+      var b=document.createElement('button'); b.className='lv'+(st.level===pair[0]?' on-'+pair[0]:'');
+      b.textContent=pair[1];
+      b.addEventListener('click',function(e){
+        e.preventDefault(); e.stopPropagation();
+        var s=get(n);
+        set(n, s.done, s.level===pair[0]?'':pair[0]);
+        renderMark(el,n);
+        if(window.onMarkChange) window.onMarkChange();
+      });
+      el.appendChild(b);
+    });
+  };
+})();
+</script>
+
+<script>
+document.querySelectorAll('.mkbox').forEach(function(el){ renderMark(el, el.dataset.n); });
+</script>
+</body>
+</html>

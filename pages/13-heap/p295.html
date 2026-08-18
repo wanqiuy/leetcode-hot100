@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>295. 数据流的中位数 · LeetCode 热题100题解</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:#f5f7fb;color:#1f2937;line-height:1.7}
+.wrap{max-width:900px;margin:0 auto;padding:24px}
+header{background:linear-gradient(135deg,#1e3a8a,#2563eb 55%,#38bdf8);color:#fff;padding:28px 24px}
+header .wrap{padding:0}
+header h1{font-size:22px}
+header p{opacity:.85;font-size:13px;margin-top:4px}
+.back{color:#fff;opacity:.9;font-size:13px;text-decoration:none}
+.crumb{font-size:12px;opacity:.85;margin-top:6px}
+.crumb a{color:#fff;text-decoration:underline}
+.toc{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px 20px;margin:20px 0}
+.toc h2{font-size:15px;margin-bottom:8px}
+.prob{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:22px 24px;margin-bottom:22px}
+.prob h2{font-size:17px;margin-bottom:10px}
+.prob h3{font-size:14px;color:#2563eb;margin:16px 0 6px}
+.badge{display:inline-block;padding:1px 9px;border-radius:999px;font-size:12px;font-weight:600;vertical-align:middle}
+.easy{color:#16a34a;background:#dcfce7}.medium{color:#d97706;background:#fef3c7}.hard{color:#dc2626;background:#fee2e2}
+.desc{background:#f9fafb;border-left:3px solid #2563eb;padding:10px 14px;border-radius:0 8px 8px 0;font-size:14px}
+.ex{background:#f3f4f6;border-radius:8px;padding:10px 14px;font-size:13px;margin-top:8px;white-space:pre-wrap;font-family:"SF Mono",Menlo,Consolas,monospace}
+pre{background:#0f172a;color:#e2e8f0;border-radius:10px;padding:14px 16px;overflow-x:auto;font-size:13px;line-height:1.6;font-family:"SF Mono",Menlo,Consolas,monospace}
+.diagram{background:#fffbeb;color:#78350f;border:1px solid #fde68a;white-space:pre}
+.cx{font-size:12px;color:#6b7280;margin-top:6px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin:8px 0 22px;flex-wrap:wrap}
+.pager a{flex:1;min-width:150px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px 16px;font-size:13px;color:#2563eb;text-decoration:none}
+.pager a:hover{background:#eff6ff}
+.pager a.mid{flex:0 1 auto;text-align:center;color:#6b7280}
+.item{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 18px;margin-bottom:10px;text-decoration:none;color:inherit;transition:box-shadow .2s}
+.item:hover{box-shadow:0 4px 14px rgba(37,99,235,.12)}
+.item .no{color:#6b7280;font-variant-numeric:tabular-nums;min-width:56px}
+.item .ti{flex:1;font-size:15px}
+.item .go{font-size:12px;color:#9ca3af}
+footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
+
+
+/* 标记控件 v2 */
+.mk{display:inline-flex;align-items:center;gap:6px;cursor:pointer;user-select:none}
+.mk input[type=checkbox]{width:17px;height:17px;cursor:pointer;accent-color:#16a34a;margin:0}
+.lv{border:1.5px solid #d1d5db;background:#fff;border-radius:999px;padding:3px 14px;font-size:12px;cursor:pointer;color:#6b7280;transition:all .15s}
+.lv:hover{transform:translateY(-1px)}
+.lv.on-high{background:#dcfce7;border-color:#16a34a;color:#16a34a;font-weight:600}
+.lv.on-mid{background:#fef3c7;border-color:#d97706;color:#d97706;font-weight:600}
+.lv.on-low{background:#fee2e2;border-color:#dc2626;color:#dc2626;font-weight:600}
+/* 分类页卡片 */
+.card{display:block;background:#fff;border:1px solid #e5e7eb;border-radius:14px;margin-bottom:12px;overflow:hidden;transition:box-shadow .2s}
+.card:hover{box-shadow:0 4px 16px rgba(37,99,235,.10)}
+.card .row1{display:flex;align-items:center;gap:12px;padding:14px 18px 8px;cursor:pointer}
+.card .no{color:#9ca3af;font-variant-numeric:tabular-nums;min-width:52px;font-size:14px}
+.card .ti{flex:1;font-size:15px;font-weight:500;color:#1f2937}
+.card .row1:hover .ti{color:#2563eb}
+.card .go{font-size:12px;color:#c0c4cc}
+.card .row2{display:flex;align-items:center;gap:10px;padding:0 18px 12px 70px;font-size:13px;color:#6b7280;flex-wrap:wrap}
+.card .sep{color:#e5e7eb}
+/* 单题页标记条 */
+.markbar{display:flex;align-items:center;gap:12px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:12px 16px;margin:14px 0;font-size:14px;flex-wrap:wrap}
+.markbar .lab{color:#6b7280;font-size:13px}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+<h1>295. 数据流的中位数 <span class="badge hard">困难</span></h1>
+<div class="crumb"><a href="../../index.html">目录</a> / <a href="../../13-heap.html">堆</a> / 295. 数据流的中位数</div>
+</div></header>
+<div class="wrap">
+<section class="prob" id="p295">
+<h2>295. 数据流的中位数 <span class="badge hard">困难</span></h2><div class="markbar"><span class="lab">标记本题：</span><span class="mkbox" data-n="295"></span></div>
+<div class="desc">设计一个数据结构支持：addNum(int num) 从数据流中添加一个整数；findMedian() 返回目前所有元素的中位数（偶数个时取中间两数平均值）。
+<div class="ex">示例：addNum(1), addNum(2), findMedian() → 1.5
+addNum(3), findMedian() → 2.0</div></div>
+<h3>解题思路</h3>
+<p><b>先想清楚两个问题：</b></p>
+<p><b>Q1：数据流动态到达，怎么 O(1) 拿到中位数？</b>用两个堆把数据切成两半：大顶堆 left 存较小的一半（堆顶 = 左半最大值），小顶堆 right 存较大的一半（堆顶 = 右半最小值）。中位数只与这两个堆顶有关，findMedian 读堆顶即可。</p>
+<p><b>Q2：怎么维持「左半 ≤ 右半」且两堆大小差 ≤ 1？</b>addNum 固定三步：新数先全进 left；立刻把 left 堆顶挪给 right——保证 left 里所有元素 ≤ right；若此时 right 比 left 多，就把 right 堆顶回挪一个给 left。约定 left 可多存一个：总数为奇数时中位数 = left 堆顶，偶数 = 两堆顶平均。</p>
+<p><b>照着写的 4 步：</b></p>
+<p>① 建大顶堆 left（比较器 (a,b) -&gt; b-a）和小顶堆 right（默认）；<br>② addNum：left.offer(num)；<br>③ right.offer(left.poll()) 保证左半 ≤ 右半；若 right.size() ＞ left.size() 则 left.offer(right.poll()) 恢复平衡；<br>④ findMedian：left 比 right 多则返回 left.peek()，否则返回 (left.peek() + right.peek()) / 2.0。</p>
+<p>易错点：left 是大顶堆要传反向比较器，right 是小顶堆用默认，写反整个结构就错；每次 addNum 都必须经过「left → right」的倒手不是直接按大小选堆（倒手同时完成排序与平衡）；奇数时中位数取 left 堆顶不是 right 堆顶（因为约定 left 可多存一个）。</p>
+<pre class="diagram">依次 addNum(1), addNum(2), addNum(3)
+（left = 大顶堆存较小半，right = 小顶堆存较大半；堆顶在左）
+
+加 1: left=[1] → 倒手 1 给 right=[1] → right 多，回挪
+      结果: left=[1]        right=[]
+加 2: left=[2,1] → 倒手堆顶 2 给 right
+      结果: left=[1]        right=[2]   大小相等，不动
+加 3: left=[3,1] → 倒手堆顶 3 给 right=[2,3] → right 多，回挪 2
+      结果: left=[2,1]      right=[3]
+
+         left 堆顶 = 2       right 堆顶 = 3
+             ↑ 左半最大          ↑ 右半最小
+
+findMedian: 共 3 个（奇数）→ left 堆顶 = 2 ✓
+若只加了 1 和 2（偶数）→ (1 + 2) / 2 = 1.5 ✓</pre>
+<h3>代码（Java）</h3>
+<pre><code>class MedianFinder {
+    // ① left 大顶堆存较小一半（可多存一个），right 小顶堆存较大一半
+    private PriorityQueue&lt;Integer&gt; left;
+    private PriorityQueue&lt;Integer&gt; right;
+
+    public MedianFinder() {
+        left = new PriorityQueue&lt;&gt;((a, b) -&gt; b - a);   // 大顶堆
+        right = new PriorityQueue&lt;&gt;();                  // 小顶堆
+    }
+
+    public void addNum(int num) {
+        left.offer(num);                  // ② 新数先进 left
+        right.offer(left.poll());         // ③ 倒手：保证左半所有元素 ≤ 右半
+        if (right.size() &gt; left.size()) {
+            left.offer(right.poll());     // ③ right 多了就回挪，维持差 ≤ 1
+        }
+    }
+
+    public double findMedian() {
+        if (left.size() &gt; right.size()) {
+            return left.peek();                       // ④ 奇数个：left 堆顶
+        }
+        return (left.peek() + right.peek()) / 2.0;    // ④ 偶数个：两堆顶平均
+    }
+}</code></pre>
+<p class="cx">时间复杂度 addNum O(log n) / findMedian O(1) · 空间复杂度 O(n)</p>
+</section>
+<div class="pager"><a href="p347.html">← 上一题：347. 前 K 个高频元素</a><a class="mid" href="../../13-heap.html">返回「堆」列表</a><a style="visibility:hidden"></a></div>
+</div>
+<footer>LeetCode 热题100 题解手册 · Java</footer>
+
+
+
+
+
+<script>
+(function(){
+  var KEY='hot100-marks';
+  function load(){ try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){return{}} }
+  function save(m){ localStorage.setItem(KEY, JSON.stringify(m)); }
+  function get(n){ var m=load(); return m[n]||{done:false,level:''}; }
+  function set(n,done,level){ var m=load(); m[n]={done:done,level:level}; save(m); }
+  window.HOT100={load:load,get:get,set:set};
+
+  window.renderMark=function(el,n){
+    var st=get(n);
+    el.innerHTML='';
+    // 勾选
+    var lab=document.createElement('label'); lab.className='mk';
+    var cb=document.createElement('input'); cb.type='checkbox'; cb.checked=!!st.done;
+    cb.addEventListener('change',function(e){ e.stopPropagation(); var s=get(n); set(n,cb.checked,s.level); });
+    lab.appendChild(cb); lab.appendChild(document.createTextNode(' 做过'));
+    el.appendChild(lab);
+    // 分隔
+    var sep=document.createElement('span'); sep.className='sep'; sep.textContent='|'; el.appendChild(sep);
+    el.appendChild(document.createTextNode('熟练度 '));
+    // 三档按钮
+    [['high','高'],['mid','中'],['low','低']].forEach(function(pair){
+      var b=document.createElement('button'); b.className='lv'+(st.level===pair[0]?' on-'+pair[0]:'');
+      b.textContent=pair[1];
+      b.addEventListener('click',function(e){
+        e.preventDefault(); e.stopPropagation();
+        var s=get(n);
+        set(n, s.done, s.level===pair[0]?'':pair[0]);
+        renderMark(el,n);
+        if(window.onMarkChange) window.onMarkChange();
+      });
+      el.appendChild(b);
+    });
+  };
+})();
+</script>
+
+<script>
+document.querySelectorAll('.mkbox').forEach(function(el){ renderMark(el, el.dataset.n); });
+</script>
+</body>
+</html>

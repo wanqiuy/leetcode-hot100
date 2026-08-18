@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>138. 随机链表的复制 · LeetCode 热题100题解</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:#f5f7fb;color:#1f2937;line-height:1.7}
+.wrap{max-width:900px;margin:0 auto;padding:24px}
+header{background:linear-gradient(135deg,#1e3a8a,#2563eb 55%,#38bdf8);color:#fff;padding:28px 24px}
+header .wrap{padding:0}
+header h1{font-size:22px}
+header p{opacity:.85;font-size:13px;margin-top:4px}
+.back{color:#fff;opacity:.9;font-size:13px;text-decoration:none}
+.crumb{font-size:12px;opacity:.85;margin-top:6px}
+.crumb a{color:#fff;text-decoration:underline}
+.toc{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px 20px;margin:20px 0}
+.toc h2{font-size:15px;margin-bottom:8px}
+.prob{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:22px 24px;margin-bottom:22px}
+.prob h2{font-size:17px;margin-bottom:10px}
+.prob h3{font-size:14px;color:#2563eb;margin:16px 0 6px}
+.badge{display:inline-block;padding:1px 9px;border-radius:999px;font-size:12px;font-weight:600;vertical-align:middle}
+.easy{color:#16a34a;background:#dcfce7}.medium{color:#d97706;background:#fef3c7}.hard{color:#dc2626;background:#fee2e2}
+.desc{background:#f9fafb;border-left:3px solid #2563eb;padding:10px 14px;border-radius:0 8px 8px 0;font-size:14px}
+.ex{background:#f3f4f6;border-radius:8px;padding:10px 14px;font-size:13px;margin-top:8px;white-space:pre-wrap;font-family:"SF Mono",Menlo,Consolas,monospace}
+pre{background:#0f172a;color:#e2e8f0;border-radius:10px;padding:14px 16px;overflow-x:auto;font-size:13px;line-height:1.6;font-family:"SF Mono",Menlo,Consolas,monospace}
+.diagram{background:#fffbeb;color:#78350f;border:1px solid #fde68a;white-space:pre}
+.cx{font-size:12px;color:#6b7280;margin-top:6px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin:8px 0 22px;flex-wrap:wrap}
+.pager a{flex:1;min-width:150px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px 16px;font-size:13px;color:#2563eb;text-decoration:none}
+.pager a:hover{background:#eff6ff}
+.pager a.mid{flex:0 1 auto;text-align:center;color:#6b7280}
+.item{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 18px;margin-bottom:10px;text-decoration:none;color:inherit;transition:box-shadow .2s}
+.item:hover{box-shadow:0 4px 14px rgba(37,99,235,.12)}
+.item .no{color:#6b7280;font-variant-numeric:tabular-nums;min-width:56px}
+.item .ti{flex:1;font-size:15px}
+.item .go{font-size:12px;color:#9ca3af}
+footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
+
+
+/* 标记控件 v2 */
+.mk{display:inline-flex;align-items:center;gap:6px;cursor:pointer;user-select:none}
+.mk input[type=checkbox]{width:17px;height:17px;cursor:pointer;accent-color:#16a34a;margin:0}
+.lv{border:1.5px solid #d1d5db;background:#fff;border-radius:999px;padding:3px 14px;font-size:12px;cursor:pointer;color:#6b7280;transition:all .15s}
+.lv:hover{transform:translateY(-1px)}
+.lv.on-high{background:#dcfce7;border-color:#16a34a;color:#16a34a;font-weight:600}
+.lv.on-mid{background:#fef3c7;border-color:#d97706;color:#d97706;font-weight:600}
+.lv.on-low{background:#fee2e2;border-color:#dc2626;color:#dc2626;font-weight:600}
+/* 分类页卡片 */
+.card{display:block;background:#fff;border:1px solid #e5e7eb;border-radius:14px;margin-bottom:12px;overflow:hidden;transition:box-shadow .2s}
+.card:hover{box-shadow:0 4px 16px rgba(37,99,235,.10)}
+.card .row1{display:flex;align-items:center;gap:12px;padding:14px 18px 8px;cursor:pointer}
+.card .no{color:#9ca3af;font-variant-numeric:tabular-nums;min-width:52px;font-size:14px}
+.card .ti{flex:1;font-size:15px;font-weight:500;color:#1f2937}
+.card .row1:hover .ti{color:#2563eb}
+.card .go{font-size:12px;color:#c0c4cc}
+.card .row2{display:flex;align-items:center;gap:10px;padding:0 18px 12px 70px;font-size:13px;color:#6b7280;flex-wrap:wrap}
+.card .sep{color:#e5e7eb}
+/* 单题页标记条 */
+.markbar{display:flex;align-items:center;gap:12px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:12px 16px;margin:14px 0;font-size:14px;flex-wrap:wrap}
+.markbar .lab{color:#6b7280;font-size:13px}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+<h1>138. 随机链表的复制 <span class="badge medium">中等</span></h1>
+<div class="crumb"><a href="../../index.html">目录</a> / <a href="../../07-linked-list.html">链表</a> / 138. 随机链表的复制</div>
+</div></header>
+<div class="wrap">
+<section class="prob" id="p138">
+<h2>138. 随机链表的复制 <span class="badge medium">中等</span></h2><div class="markbar"><span class="lab">标记本题：</span><span class="mkbox" data-n="138"></span></div>
+<div class="desc">链表节点除 next 外还有一个 random 指针，指向链表中任意节点或 null。要求深拷贝整个链表（所有节点必须新建，不能复用原链表的任何节点），并返回新链表的头节点。
+<div class="ex">示例：
+输入：head = [[7,null],[13,0],[11,4],[10,2],[1,0]]
+输出：[[7,null],[13,0],[11,4],[10,2],[1,0]]
+解释：序列化中每个节点用 [val, random下标] 表示——random下标 是该节点 random 指向的节点在链表中的位置（从 0 开始，null 表示不指向任何节点）。输出的序列化结果与输入完全相同，但它必须是一条由全新节点构成的链表（深拷贝），例如新链表中第 2 个节点的 random 应指向新链表中第 1 个节点，而不是原链表的节点。</div></div>
+<h3>解题思路</h3>
+<p><b>先想清楚两个问题：</b></p>
+<p><b>Q1：random 指针乱指，怎么找到"复制节点对应的 random 目标"？</b>哈希表能做但费空间。更巧的办法：把每个复制节点直接插在原节点后面，形成 A→A'→B→B' 的交错链——这样"原节点 random 的下一个"恰好就是"复制节点的 random"，不需要任何映射结构。</p>
+<p><b>Q2：三遍循环各自干什么？</b>第一遍只插复制节点（只动 next）；第二遍只设复制节点的 random（利用交错结构）；第三遍把交错链拆成原链和复制链两条。</p>
+<p><b>照着写的 4 步：</b></p>
+<p>① head 为 null 直接返回 null；<br>② 第一遍：cur 遍历原节点，每轮 new 一个同值节点 copy 插到 cur 后面，cur 跳到 copy.next（即下一个原节点）；<br>③ 第二遍：cur 步长为 2（cur = cur.next.next）只踩原节点，若 cur.random 非空则 cur.next.random = cur.random.next；<br>④ 第三遍：每轮取出 copy = cur.next，cur.next = copy.next 恢复原链，copy 依次挂到 dummy 链上，cur 前进；返回 dummy.next。</p>
+<p>易错点：第二遍 random 的赋值是「cur.next.random = cur.random.next」不是 cur.random（指向的是复制节点不是原节点）；cur.random 为 null 时「跳过不设」不是设成 null.next（会空指针）；第三遍必须先「cur.next = copy.next 恢复原链」再让 cur 前进，顺序反了会丢节点。</p>
+<pre class="diagram">原表: A -> B -> C（A.random=C, B.random=null, C.random=B）
+
+第 1 遍 交错插入：
+  cur=A: new A' 插到 A 后，cur 跳到 B
+  cur=B: new B' 插到 B 后，cur 跳到 C
+  cur=C: new C' 插到 C 后，cur 跳到 null
+状态: A -> A' -> B -> B' -> C -> C'
+
+第 2 遍 设 random（只踩原节点，步长 2）：
+  cur=A: A.random=C 非空 -> A'.random = C.next = C'
+  cur=B: B.random=null   -> 跳过
+  cur=C: C.random=B 非空 -> C'.random = B.next = B'
+
+第 3 遍 拆分（每轮：copy=cur.next；cur.next=copy.next；copy 挂新链）：
+  cur=A: copy=A'，A.next=B， 新链: A'
+  cur=B: copy=B'，B.next=C， 新链: A' -> B'
+  cur=C: copy=C'，C.next=null，新链: A' -> B' -> C'
+
+返回: A' -> B' -> C'（random 指向一一对应）</pre>
+<h3>代码（Java）</h3>
+<pre><code>// 题目给定的节点定义：
+// class Node { int val; Node next; Node random; ... }
+class Solution {
+    public Node copyRandomList(Node head) {
+        // ① 空表直接返回
+        if (head == null) return null;
+        // ② 第一遍：每个原节点后插入它的复制节点
+        for (Node cur = head; cur != null; ) {
+            Node copy = new Node(cur.val);
+            copy.next = cur.next;
+            cur.next = copy;
+            cur = copy.next;         // ② 跳到下一个原节点
+        }
+        // ③ 第二遍：设置复制节点的 random（cur 步长 2，只踩原节点）
+        for (Node cur = head; cur != null; cur = cur.next.next) {
+            if (cur.random != null) {
+                // ③ random 的"下一个"即对应的复制节点
+                cur.next.random = cur.random.next;
+            }
+        }
+        // ④ 第三遍：拆分原链表与复制链表
+        Node dummy = new Node(0), tail = dummy;
+        for (Node cur = head; cur != null; ) {
+            Node copy = cur.next;
+            cur.next = copy.next;    // ④ 恢复原链表连接
+            tail.next = copy;        // ④ 复制节点接入新链表
+            tail = copy;
+            cur = copy.next;
+        }
+        return dummy.next;
+    }
+}</code></pre>
+<p class="cx">时间复杂度 O(n) · 空间复杂度 O(1)（不含结果链表；哈希表写法为 O(n)）</p>
+</section>
+<div class="pager"><a href="p25.html">← 上一题：25. K 个一组翻转链表</a><a class="mid" href="../../07-linked-list.html">返回「链表」列表</a><a href="p148.html">下一题：148. 排序链表 →</a></div>
+</div>
+<footer>LeetCode 热题100 题解手册 · Java</footer>
+
+
+
+
+
+<script>
+(function(){
+  var KEY='hot100-marks';
+  function load(){ try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){return{}} }
+  function save(m){ localStorage.setItem(KEY, JSON.stringify(m)); }
+  function get(n){ var m=load(); return m[n]||{done:false,level:''}; }
+  function set(n,done,level){ var m=load(); m[n]={done:done,level:level}; save(m); }
+  window.HOT100={load:load,get:get,set:set};
+
+  window.renderMark=function(el,n){
+    var st=get(n);
+    el.innerHTML='';
+    // 勾选
+    var lab=document.createElement('label'); lab.className='mk';
+    var cb=document.createElement('input'); cb.type='checkbox'; cb.checked=!!st.done;
+    cb.addEventListener('change',function(e){ e.stopPropagation(); var s=get(n); set(n,cb.checked,s.level); });
+    lab.appendChild(cb); lab.appendChild(document.createTextNode(' 做过'));
+    el.appendChild(lab);
+    // 分隔
+    var sep=document.createElement('span'); sep.className='sep'; sep.textContent='|'; el.appendChild(sep);
+    el.appendChild(document.createTextNode('熟练度 '));
+    // 三档按钮
+    [['high','高'],['mid','中'],['low','低']].forEach(function(pair){
+      var b=document.createElement('button'); b.className='lv'+(st.level===pair[0]?' on-'+pair[0]:'');
+      b.textContent=pair[1];
+      b.addEventListener('click',function(e){
+        e.preventDefault(); e.stopPropagation();
+        var s=get(n);
+        set(n, s.done, s.level===pair[0]?'':pair[0]);
+        renderMark(el,n);
+        if(window.onMarkChange) window.onMarkChange();
+      });
+      el.appendChild(b);
+    });
+  };
+})();
+</script>
+
+<script>
+document.querySelectorAll('.mkbox').forEach(function(el){ renderMark(el, el.dataset.n); });
+</script>
+</body>
+</html>

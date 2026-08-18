@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>拓扑排序 · 图论知识补充</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:#f5f7fb;color:#1f2937;line-height:1.7}
+.wrap{max-width:900px;margin:0 auto;padding:24px}
+header{background:linear-gradient(135deg,#1e3a8a,#2563eb 55%,#38bdf8);color:#fff;padding:28px 24px}
+header .wrap{padding:0}
+header h1{font-size:22px}
+header p{opacity:.85;font-size:13px;margin-top:4px}
+.back{color:#fff;opacity:.9;font-size:13px;text-decoration:none}
+.crumb{font-size:12px;opacity:.85;margin-top:6px}
+.crumb a{color:#fff;text-decoration:underline}
+.prob{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:22px 24px;margin-bottom:22px}
+.prob h2{font-size:17px;margin-bottom:10px}
+.prob h3{font-size:14px;color:#2563eb;margin:16px 0 6px}
+.badge{display:inline-block;padding:1px 9px;border-radius:999px;font-size:12px;font-weight:600;vertical-align:middle}
+.easy{color:#16a34a;background:#dcfce7}.medium{color:#d97706;background:#fef3c7}.hard{color:#dc2626;background:#fee2e2}
+.know{color:#7c3aed;background:#ede9fe}
+.desc{background:#f9fafb;border-left:3px solid #2563eb;padding:10px 14px;border-radius:0 8px 8px 0;font-size:14px}
+pre{background:#0f172a;color:#e2e8f0;border-radius:10px;padding:14px 16px;overflow-x:auto;font-size:13px;line-height:1.6;font-family:"SF Mono",Menlo,Consolas,monospace}
+.diagram{background:#fffbeb;color:#78350f;border:1px solid #fde68a;white-space:pre}
+.cx{font-size:12px;color:#6b7280;margin-top:6px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin:8px 0 22px;flex-wrap:wrap}
+.pager a{flex:1;min-width:150px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px 16px;font-size:13px;color:#2563eb;text-decoration:none}
+.pager a:hover{background:#eff6ff}
+.pager a.mid{flex:0 1 auto;text-align:center;color:#6b7280}
+.rel{background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:12px 16px;font-size:13px;margin-top:14px}
+.rel a{color:#2563eb;text-decoration:none;font-weight:500}
+.rel a:hover{text-decoration:underline}
+footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+<h1>拓扑排序 <span class="badge know">知识点</span></h1>
+<div class="crumb"><a href="../../index.html">目录</a> / <a href="../../18-graph-extra.html">图论知识补充</a> / 拓扑排序</div>
+</div></header>
+<div class="wrap">
+<section class="prob">
+<h2>拓扑排序 <span class="badge know">知识点</span></h2>
+<div class="desc">拓扑排序处理「有先后依赖关系」的任务排序问题：给定有向无环图（DAG），输出一个满足所有依赖的线性顺序；如果图中有环，则不存在合法顺序——因此它也是判环的标准手段。</div>
+<h3>核心思想</h3>
+<p>Kahn 算法（BFS 版）：入度为 0 的节点没有任何前置依赖，可以直接摘走；摘掉后它的邻居入度减 1，可能产生新的入度 0 节点。不断重复直到队列为空。如果摘走的节点数等于总节点数，说明无环且得到了合法顺序；否则剩下的节点都在环上，拓扑排序不存在。</p>
+<h3>什么时候用</h3>
+<p>1. 题目出现「先修 / 前置 / 依赖 / 先后顺序」等关键词，要求给出顺序或判断能否完成。<br>2. 需要判断有向图是否有环。<br>3. 需要按依赖层级逐层处理（如课程按学期安排）。</p>
+<h3>模板代码（Java）</h3>
+<pre><code>// Kahn 算法：numCourses = n，prerequisites[i] = [a, b] 表示先修 b 才能学 a
+public boolean canFinish(int n, int[][] prerequisites) {
+    // 第一步：建图 + 入度表
+    List&lt;Integer&gt;[] g = new List[n];
+    for (int i = 0; i &lt; n; i++) g[i] = new ArrayList&lt;&gt;();
+    int[] indeg = new int[n];
+    for (int[] p : prerequisites) {
+        g[p[1]].add(p[0]); // b -&gt; a
+        indeg[p[0]]++;
+    }
+    // 第二步：所有入度 0 的节点入队
+    Queue&lt;Integer&gt; q = new ArrayDeque&lt;&gt;();
+    for (int i = 0; i &lt; n; i++)
+        if (indeg[i] == 0) q.offer(i);
+    // 第三步：出队，邻居入度 -1，减到 0 再入队
+    int cnt = 0; // 已摘走的节点数（需要顺序时用 List 记录出队顺序）
+    while (!q.isEmpty()) {
+        int u = q.poll();
+        cnt++;
+        for (int v : g[u])
+            if (--indeg[v] == 0) q.offer(v);
+    }
+    return cnt == n; // 摘完有剩 = 有环
+}</code></pre>
+<h3>图解</h3>
+<pre class="diagram">课程表例子：4 门课，依赖 [[1,0],[2,1],[3,1],[3,2]]
+含义：学 1 先学 0；学 2 先学 1；学 3 先学 1 和 2
+图：0 → 1 → 2 → 3，另有 1 → 3
+
+初始入度表：indeg = [0, 1, 1, 2]   队列 = [0]
+
+第1轮：出队 0，cnt=1
+  邻居 1：indeg[1] 1→0，入队      indeg = [0, 0, 1, 2]   队列 = [1]
+第2轮：出队 1，cnt=2
+  邻居 2：indeg[2] 1→0，入队
+  邻居 3：indeg[3] 2→1，不入队    indeg = [0, 0, 0, 1]   队列 = [2]
+第3轮：出队 2，cnt=3
+  邻居 3：indeg[3] 1→0，入队      indeg = [0, 0, 0, 0]   队列 = [3]
+第4轮：出队 3，cnt=4，队列空
+
+出队顺序：0 → 1 → 2 → 3，cnt == n == 4，无环，可以完成所有课程
+若存在依赖 [0,3]（学 0 先学 3），则 0/1/2/3 入度都 ≥1，队列为空 cnt=0，直接判有环</pre>
+<h3>复杂度</h3>
+<p class="cx" style="font-size:14px;color:#374151">时间 O(V + E)：每个节点入出队一次，每条边松弛一次；空间 O(V + E)：邻接表 + 入度数组 + 队列。</p>
+<div class="rel"><b>关联题目：</b><a href="../09-graph/p207.html">207. 课程表</a>（本手册题解）；推荐练习：210 课程表 II（把 cnt 换成记录出队顺序的数组即可）</div>
+</section>
+<div class="pager"><a href="k1-dfs-bfs.html">← 上一篇：DFS 与 BFS 遍历</a><a class="mid" href="../../18-graph-extra.html">返回「图论知识补充」列表</a><a href="k3-union-find.html">下一篇：并查集 →</a></div>
+</div>
+<footer>LeetCode 热题100 题解手册 · Java</footer>
+</body>
+</html>

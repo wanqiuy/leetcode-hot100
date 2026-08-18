@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>763. 划分字母区间 · LeetCode 热题100题解</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:#f5f7fb;color:#1f2937;line-height:1.7}
+.wrap{max-width:900px;margin:0 auto;padding:24px}
+header{background:linear-gradient(135deg,#1e3a8a,#2563eb 55%,#38bdf8);color:#fff;padding:28px 24px}
+header .wrap{padding:0}
+header h1{font-size:22px}
+header p{opacity:.85;font-size:13px;margin-top:4px}
+.back{color:#fff;opacity:.9;font-size:13px;text-decoration:none}
+.crumb{font-size:12px;opacity:.85;margin-top:6px}
+.crumb a{color:#fff;text-decoration:underline}
+.toc{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px 20px;margin:20px 0}
+.toc h2{font-size:15px;margin-bottom:8px}
+.prob{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:22px 24px;margin-bottom:22px}
+.prob h2{font-size:17px;margin-bottom:10px}
+.prob h3{font-size:14px;color:#2563eb;margin:16px 0 6px}
+.badge{display:inline-block;padding:1px 9px;border-radius:999px;font-size:12px;font-weight:600;vertical-align:middle}
+.easy{color:#16a34a;background:#dcfce7}.medium{color:#d97706;background:#fef3c7}.hard{color:#dc2626;background:#fee2e2}
+.desc{background:#f9fafb;border-left:3px solid #2563eb;padding:10px 14px;border-radius:0 8px 8px 0;font-size:14px}
+.ex{background:#f3f4f6;border-radius:8px;padding:10px 14px;font-size:13px;margin-top:8px;white-space:pre-wrap;font-family:"SF Mono",Menlo,Consolas,monospace}
+pre{background:#0f172a;color:#e2e8f0;border-radius:10px;padding:14px 16px;overflow-x:auto;font-size:13px;line-height:1.6;font-family:"SF Mono",Menlo,Consolas,monospace}
+.diagram{background:#fffbeb;color:#78350f;border:1px solid #fde68a;white-space:pre}
+.cx{font-size:12px;color:#6b7280;margin-top:6px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin:8px 0 22px;flex-wrap:wrap}
+.pager a{flex:1;min-width:150px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px 16px;font-size:13px;color:#2563eb;text-decoration:none}
+.pager a:hover{background:#eff6ff}
+.pager a.mid{flex:0 1 auto;text-align:center;color:#6b7280}
+.item{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 18px;margin-bottom:10px;text-decoration:none;color:inherit;transition:box-shadow .2s}
+.item:hover{box-shadow:0 4px 14px rgba(37,99,235,.12)}
+.item .no{color:#6b7280;font-variant-numeric:tabular-nums;min-width:56px}
+.item .ti{flex:1;font-size:15px}
+.item .go{font-size:12px;color:#9ca3af}
+footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
+
+
+/* 标记控件 v2 */
+.mk{display:inline-flex;align-items:center;gap:6px;cursor:pointer;user-select:none}
+.mk input[type=checkbox]{width:17px;height:17px;cursor:pointer;accent-color:#16a34a;margin:0}
+.lv{border:1.5px solid #d1d5db;background:#fff;border-radius:999px;padding:3px 14px;font-size:12px;cursor:pointer;color:#6b7280;transition:all .15s}
+.lv:hover{transform:translateY(-1px)}
+.lv.on-high{background:#dcfce7;border-color:#16a34a;color:#16a34a;font-weight:600}
+.lv.on-mid{background:#fef3c7;border-color:#d97706;color:#d97706;font-weight:600}
+.lv.on-low{background:#fee2e2;border-color:#dc2626;color:#dc2626;font-weight:600}
+/* 分类页卡片 */
+.card{display:block;background:#fff;border:1px solid #e5e7eb;border-radius:14px;margin-bottom:12px;overflow:hidden;transition:box-shadow .2s}
+.card:hover{box-shadow:0 4px 16px rgba(37,99,235,.10)}
+.card .row1{display:flex;align-items:center;gap:12px;padding:14px 18px 8px;cursor:pointer}
+.card .no{color:#9ca3af;font-variant-numeric:tabular-nums;min-width:52px;font-size:14px}
+.card .ti{flex:1;font-size:15px;font-weight:500;color:#1f2937}
+.card .row1:hover .ti{color:#2563eb}
+.card .go{font-size:12px;color:#c0c4cc}
+.card .row2{display:flex;align-items:center;gap:10px;padding:0 18px 12px 70px;font-size:13px;color:#6b7280;flex-wrap:wrap}
+.card .sep{color:#e5e7eb}
+/* 单题页标记条 */
+.markbar{display:flex;align-items:center;gap:12px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:12px 16px;margin:14px 0;font-size:14px;flex-wrap:wrap}
+.markbar .lab{color:#6b7280;font-size:13px}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+<h1>763. 划分字母区间 <span class="badge medium">中等</span></h1>
+<div class="crumb"><a href="../../index.html">目录</a> / <a href="../../14-greedy.html">贪心算法</a> / 763. 划分字母区间</div>
+</div></header>
+<div class="wrap">
+<section class="prob" id="p763">
+<h2>763. 划分字母区间 <span class="badge medium">中等</span></h2><div class="markbar"><span class="lab">标记本题：</span><span class="mkbox" data-n="763"></span></div>
+<div class="desc">给定小写字母字符串 s，把它划分成尽可能多的片段，要求同一字母最多只能出现在其中一个片段中。返回每个片段的长度列表。
+<div class="ex">示例：输入 s = "ababcbacadefegdehijhklij"
+输出 [9,7,8]（划分为 "ababcbaca" / "defegde" / "hijhklij"）</div></div>
+<h3>解题思路</h3>
+<p><b>先想清楚两个问题：</b></p>
+<p><b>Q1：一个片段的边界由什么决定？</b>由片段内所有字母的「最后出现位置」决定：只要片段包含某字母，片段就至少要延伸到它的最后一次出现处，否则同一字母会出现在两段。所以先扫一遍记录 last[c] = 字母 c 最后出现的下标。</p>
+<p><b>Q2：什么时候可以收割一段？</b>第二遍扫描维护 end = 本段必须延伸到的最远位置：到 i 时 end = max(end, last[s[i]])。当 i == end，说明段内所有字母都已在段内收尾，贪心收割（长度 = i - start + 1）并从 i+1 开新段。每段尽早结束，段数自然最多。</p>
+<p><b>照着写的 5 步：</b></p>
+<p>① 建 last[26]，第一遍扫描记录每个字母最后出现的下标；<br>② 初始化 ans 列表、start = 0、end = 0；<br>③ 第二遍扫描 i = 0..n-1：end = max(end, last[s[i] - 'a'])；<br>④ 若 i == end：收割，ans.add(i - start + 1)，并令 start = i + 1；<br>⑤ 扫描结束返回 ans。</p>
+<p>易错点：段长是 i - start + 1 不是 i - start（闭区间含两端）；收割条件是 i == end 不是 i &gt;= last[s[i]]（要被段内所有字母的最后位置共同决定）；end 的更新要取 max 不是直接赋值（后来的字母可能收尾更早，不能回退）。</p>
+<pre class="diagram">s = "ababcbacadefegdehijhklij"
+下标 0        8 9      15 16     23
+
+① last 表: a→8, b→5, c→7, d→14, e→15, f→11, g→13, h→19,
+            i→22, j→23, k→20, l→21
+
+②③④ 第二遍扫描（end 变化轨迹）：
+i=0 'a': end = max(0, 8) = 8
+i=1 'b': end = max(8, 5) = 8      i=4 'c': end = max(8, 7) = 8
+... i=8 'a': i == end=8 → 收割 [0..8]，长度 9，start=9
+
+i=9 'd': end = max(0→, 14) = 14
+i=12 'e': end = max(14, 15) = 15
+i=15 'e': i == end=15 → 收割 [9..15]，长度 7，start=16
+
+i=16 'h': end = 19 → ... → i=23 'j': i == end=23
+         → 收割 [16..23]，长度 8
+
+答案 = [9, 7, 8] ✓</pre>
+<h3>代码（Java）</h3>
+<pre><code>class Solution {
+    public List&lt;Integer&gt; partitionLabels(String s) {
+        // ① 第一遍：记录每个字母最后出现的下标
+        int[] last = new int[26];
+        for (int i = 0; i &lt; s.length(); i++) {
+            last[s.charAt(i) - 'a'] = i;
+        }
+        // ② start 是本段起点，end 是本段必须延伸到的最远位置
+        List&lt;Integer&gt; ans = new ArrayList&lt;&gt;();
+        int start = 0, end = 0;
+        // ③ 第二遍扫描
+        for (int i = 0; i &lt; s.length(); i++) {
+            end = Math.max(end, last[s.charAt(i) - 'a']); // 扩张段边界
+            if (i == end) {                 // ④ 段内所有字母已收尾
+                ans.add(i - start + 1);     // ④ 收割本段长度
+                start = i + 1;              // ④ 开启新段
+            }
+        }
+        return ans;                         // ⑤
+    }
+}</code></pre>
+<p class="cx">时间复杂度 O(n) · 空间复杂度 O(1)（字母表固定 26）</p>
+</section>
+<div class="pager"><a href="p45.html">← 上一题：45. 跳跃游戏 II</a><a class="mid" href="../../14-greedy.html">返回「贪心算法」列表</a><a style="visibility:hidden"></a></div>
+</div>
+<footer>LeetCode 热题100 题解手册 · Java</footer>
+
+
+
+
+
+<script>
+(function(){
+  var KEY='hot100-marks';
+  function load(){ try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){return{}} }
+  function save(m){ localStorage.setItem(KEY, JSON.stringify(m)); }
+  function get(n){ var m=load(); return m[n]||{done:false,level:''}; }
+  function set(n,done,level){ var m=load(); m[n]={done:done,level:level}; save(m); }
+  window.HOT100={load:load,get:get,set:set};
+
+  window.renderMark=function(el,n){
+    var st=get(n);
+    el.innerHTML='';
+    // 勾选
+    var lab=document.createElement('label'); lab.className='mk';
+    var cb=document.createElement('input'); cb.type='checkbox'; cb.checked=!!st.done;
+    cb.addEventListener('change',function(e){ e.stopPropagation(); var s=get(n); set(n,cb.checked,s.level); });
+    lab.appendChild(cb); lab.appendChild(document.createTextNode(' 做过'));
+    el.appendChild(lab);
+    // 分隔
+    var sep=document.createElement('span'); sep.className='sep'; sep.textContent='|'; el.appendChild(sep);
+    el.appendChild(document.createTextNode('熟练度 '));
+    // 三档按钮
+    [['high','高'],['mid','中'],['low','低']].forEach(function(pair){
+      var b=document.createElement('button'); b.className='lv'+(st.level===pair[0]?' on-'+pair[0]:'');
+      b.textContent=pair[1];
+      b.addEventListener('click',function(e){
+        e.preventDefault(); e.stopPropagation();
+        var s=get(n);
+        set(n, s.done, s.level===pair[0]?'':pair[0]);
+        renderMark(el,n);
+        if(window.onMarkChange) window.onMarkChange();
+      });
+      el.appendChild(b);
+    });
+  };
+})();
+</script>
+
+<script>
+document.querySelectorAll('.mkbox').forEach(function(el){ renderMark(el, el.dataset.n); });
+</script>
+</body>
+</html>

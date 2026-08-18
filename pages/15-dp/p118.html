@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>118. 杨辉三角 · LeetCode 热题100题解</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:#f5f7fb;color:#1f2937;line-height:1.7}
+.wrap{max-width:900px;margin:0 auto;padding:24px}
+header{background:linear-gradient(135deg,#1e3a8a,#2563eb 55%,#38bdf8);color:#fff;padding:28px 24px}
+header .wrap{padding:0}
+header h1{font-size:22px}
+header p{opacity:.85;font-size:13px;margin-top:4px}
+.back{color:#fff;opacity:.9;font-size:13px;text-decoration:none}
+.crumb{font-size:12px;opacity:.85;margin-top:6px}
+.crumb a{color:#fff;text-decoration:underline}
+.toc{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px 20px;margin:20px 0}
+.toc h2{font-size:15px;margin-bottom:8px}
+.prob{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:22px 24px;margin-bottom:22px}
+.prob h2{font-size:17px;margin-bottom:10px}
+.prob h3{font-size:14px;color:#2563eb;margin:16px 0 6px}
+.badge{display:inline-block;padding:1px 9px;border-radius:999px;font-size:12px;font-weight:600;vertical-align:middle}
+.easy{color:#16a34a;background:#dcfce7}.medium{color:#d97706;background:#fef3c7}.hard{color:#dc2626;background:#fee2e2}
+.desc{background:#f9fafb;border-left:3px solid #2563eb;padding:10px 14px;border-radius:0 8px 8px 0;font-size:14px}
+.ex{background:#f3f4f6;border-radius:8px;padding:10px 14px;font-size:13px;margin-top:8px;white-space:pre-wrap;font-family:"SF Mono",Menlo,Consolas,monospace}
+pre{background:#0f172a;color:#e2e8f0;border-radius:10px;padding:14px 16px;overflow-x:auto;font-size:13px;line-height:1.6;font-family:"SF Mono",Menlo,Consolas,monospace}
+.diagram{background:#fffbeb;color:#78350f;border:1px solid #fde68a;white-space:pre}
+.cx{font-size:12px;color:#6b7280;margin-top:6px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin:8px 0 22px;flex-wrap:wrap}
+.pager a{flex:1;min-width:150px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px 16px;font-size:13px;color:#2563eb;text-decoration:none}
+.pager a:hover{background:#eff6ff}
+.pager a.mid{flex:0 1 auto;text-align:center;color:#6b7280}
+.item{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 18px;margin-bottom:10px;text-decoration:none;color:inherit;transition:box-shadow .2s}
+.item:hover{box-shadow:0 4px 14px rgba(37,99,235,.12)}
+.item .no{color:#6b7280;font-variant-numeric:tabular-nums;min-width:56px}
+.item .ti{flex:1;font-size:15px}
+.item .go{font-size:12px;color:#9ca3af}
+footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
+
+
+/* 标记控件 v2 */
+.mk{display:inline-flex;align-items:center;gap:6px;cursor:pointer;user-select:none}
+.mk input[type=checkbox]{width:17px;height:17px;cursor:pointer;accent-color:#16a34a;margin:0}
+.lv{border:1.5px solid #d1d5db;background:#fff;border-radius:999px;padding:3px 14px;font-size:12px;cursor:pointer;color:#6b7280;transition:all .15s}
+.lv:hover{transform:translateY(-1px)}
+.lv.on-high{background:#dcfce7;border-color:#16a34a;color:#16a34a;font-weight:600}
+.lv.on-mid{background:#fef3c7;border-color:#d97706;color:#d97706;font-weight:600}
+.lv.on-low{background:#fee2e2;border-color:#dc2626;color:#dc2626;font-weight:600}
+/* 分类页卡片 */
+.card{display:block;background:#fff;border:1px solid #e5e7eb;border-radius:14px;margin-bottom:12px;overflow:hidden;transition:box-shadow .2s}
+.card:hover{box-shadow:0 4px 16px rgba(37,99,235,.10)}
+.card .row1{display:flex;align-items:center;gap:12px;padding:14px 18px 8px;cursor:pointer}
+.card .no{color:#9ca3af;font-variant-numeric:tabular-nums;min-width:52px;font-size:14px}
+.card .ti{flex:1;font-size:15px;font-weight:500;color:#1f2937}
+.card .row1:hover .ti{color:#2563eb}
+.card .go{font-size:12px;color:#c0c4cc}
+.card .row2{display:flex;align-items:center;gap:10px;padding:0 18px 12px 70px;font-size:13px;color:#6b7280;flex-wrap:wrap}
+.card .sep{color:#e5e7eb}
+/* 单题页标记条 */
+.markbar{display:flex;align-items:center;gap:12px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:12px 16px;margin:14px 0;font-size:14px;flex-wrap:wrap}
+.markbar .lab{color:#6b7280;font-size:13px}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+<h1>118. 杨辉三角 <span class="badge easy">简单</span></h1>
+<div class="crumb"><a href="../../index.html">目录</a> / <a href="../../15-dp.html">动态规划</a> / 118. 杨辉三角</div>
+</div></header>
+<div class="wrap">
+<section class="prob" id="p118">
+<h2>118. 杨辉三角 <span class="badge easy">简单</span></h2><div class="markbar"><span class="lab">标记本题：</span><span class="mkbox" data-n="118"></span></div>
+<div class="desc">给定行数 numRows，生成杨辉三角的前 numRows 行。每个数是它左上方和右上方两数之和。<div class="ex">输入：numRows = 5
+输出：[[1],[1,1],[1,2,1],[1,3,3,1],[1,4,6,4,1]]</div></div>
+<h3>解题思路</h3>
+<p><b>先想清楚两个问题：</b></p>
+<p><b>Q1：状态怎么定义？</b>第 i 行第 j 个数 row[j]（第 i 行共 i+1 个数），整表逐行存进 res；答案就是 res 整体。</p>
+<p><b>Q2：状态怎么转移？</b>row[j] = 上一行[j-1] + 上一行[j]——每个数由它左上方和右上方两数相加得到；初始化每行首尾（j=0 和 j=i）固定填 1；按行从上到下、行内从左到右填。</p>
+<p><b>照着写的 3 步：</b></p>
+<p>① 开空表 res，逐行开空行 row；<br>② 按从上到下遍历每一行、从左到右填：首尾初始化 base case 填 1，中间用 row[j] = 上一行[j-1] + 上一行[j] 填表，每行填完加入 res；<br>③ 返回 res（整个三角）；</p>
+<p>易错点：① 第 i 行有 i+1 个数，内层循环条件是 j &lt;= i，不是 j &lt; i；② 首尾填的是 1，不是 0；③ 取的是上一行 res.get(i-1)，不是当前行自己。</p>
+<pre class="diagram">示例 numRows = 5，逐行构造：
+① 初始化：第0行 = [1]
+① 初始化：第1行 = [1,1]（首尾都是 1）
+② 第2行 j=1：上1+上1=2 → [1,2,1]
+② 第3行 j=1：1+2=3；j=2：2+1=3 → [1,3,3,1]
+② 第4行 j=1：1+3=4；j=2：3+3=6；j=3：3+1=4 → [1,4,6,4,1]
+
+最终三角：
+        1
+      1   1
+    1   2   1
+  1   3   3   1
+1   4   6   4   1
+③ 返回 res</pre>
+<h3>代码（Java）</h3>
+<pre><code>class Solution {
+    public List&lt;List&lt;Integer&gt;&gt; generate(int numRows) {
+        List&lt;List&lt;Integer&gt;&gt; res = new ArrayList&lt;&gt;(); // ① 开 res 存整表
+        for (int i = 0; i &lt; numRows; i++) { // ② 按行从上到下遍历，当前行依赖上一行
+            List&lt;Integer&gt; row = new ArrayList&lt;&gt;();
+            for (int j = 0; j &lt;= i; j++) {
+                if (j == 0 || j == i) {
+                    row.add(1); // ① base case：每行首尾固定填 1
+                } else {
+                    // ② 转移方程：当前位置 = 上一行左上方 + 上一行右上方
+                    row.add(res.get(i - 1).get(j - 1) + res.get(i - 1).get(j));
+                }
+            }
+            res.add(row);
+        }
+        return res; // ③ 返回整个杨辉三角
+    }
+}</code></pre>
+<p class="cx">时间复杂度 O(numRows²) · 空间复杂度 O(1)（不计返回结果）</p>
+</section>
+<div class="pager"><a href="p70.html">← 上一题：70. 爬楼梯</a><a class="mid" href="../../15-dp.html">返回「动态规划」列表</a><a href="p198.html">下一题：198. 打家劫舍 →</a></div>
+</div>
+<footer>LeetCode 热题100 题解手册 · Java</footer>
+
+
+
+
+
+<script>
+(function(){
+  var KEY='hot100-marks';
+  function load(){ try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){return{}} }
+  function save(m){ localStorage.setItem(KEY, JSON.stringify(m)); }
+  function get(n){ var m=load(); return m[n]||{done:false,level:''}; }
+  function set(n,done,level){ var m=load(); m[n]={done:done,level:level}; save(m); }
+  window.HOT100={load:load,get:get,set:set};
+
+  window.renderMark=function(el,n){
+    var st=get(n);
+    el.innerHTML='';
+    // 勾选
+    var lab=document.createElement('label'); lab.className='mk';
+    var cb=document.createElement('input'); cb.type='checkbox'; cb.checked=!!st.done;
+    cb.addEventListener('change',function(e){ e.stopPropagation(); var s=get(n); set(n,cb.checked,s.level); });
+    lab.appendChild(cb); lab.appendChild(document.createTextNode(' 做过'));
+    el.appendChild(lab);
+    // 分隔
+    var sep=document.createElement('span'); sep.className='sep'; sep.textContent='|'; el.appendChild(sep);
+    el.appendChild(document.createTextNode('熟练度 '));
+    // 三档按钮
+    [['high','高'],['mid','中'],['low','低']].forEach(function(pair){
+      var b=document.createElement('button'); b.className='lv'+(st.level===pair[0]?' on-'+pair[0]:'');
+      b.textContent=pair[1];
+      b.addEventListener('click',function(e){
+        e.preventDefault(); e.stopPropagation();
+        var s=get(n);
+        set(n, s.done, s.level===pair[0]?'':pair[0]);
+        renderMark(el,n);
+        if(window.onMarkChange) window.onMarkChange();
+      });
+      el.appendChild(b);
+    });
+  };
+})();
+</script>
+
+<script>
+document.querySelectorAll('.mkbox').forEach(function(el){ renderMark(el, el.dataset.n); });
+</script>
+</body>
+</html>
