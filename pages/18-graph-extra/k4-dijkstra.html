@@ -46,7 +46,11 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 <h3>核心思想</h3>
 <p>贪心策略：dist 数组记录起点到各节点的当前最短估计，初始 dist[起点]=0、其余为 ∞。把 (距离, 节点) 放入小顶堆，每次弹出距离最小的节点 u——由于所有边权非负，不存在「绕路更短」的可能，u 的距离就此定死。随后遍历 u 的邻居 v，若 dist[u] + w(u,v) &lt; dist[v] 则更新 dist[v] 并入堆。堆里会残留过期的大距离副本，弹出时用 if (d &gt; dist[u]) continue 跳过即可。</p>
 <h3>什么时候用</h3>
-<p>1. 边权非负的带权图，问「起点到某点/所有点的最短路径、最少时间、最小代价」。<br>2. 网格中每格代价不同、求最小总代价路径（可视为隐式图）。<br>3. 前提必须是边权非负；有负权边改用 Bellman-Ford（SPFA）。</p>
+<p>看到以下信号就想到 Dijkstra：</p>
+<p>① 题目给的是<b>带权图</b>（边有权值：时间/距离/代价），且问「从某点出发到别处的<b>最短</b>路径/最少时间/最小代价」；<br>
+② 网格题中每格代价不同，求从左上到右下的最小总代价（网格是隐式图，每格是节点，相邻格是边）；<br>
+③ 关键词「单源」——只关心<b>一个起点</b>到所有点的距离（多源用 Floyd，任意点对用别的）。</p>
+<p><b>硬性前提：所有边权必须非负。</b>有负权边时 Dijkstra 的「取出即定死」不再成立，要改用 Bellman-Ford（或 SPFA）。判断不了正负权时，先默认非负、检查题面。</p>
 <h3>模板代码（Java）</h3>
 <pre><code>// 堆优化版 Dijkstra：graph[u] = [[v, w], ...]，返回起点 s 到各点最短距离
 int[] dijkstra(List&lt;int[]&gt;[] graph, int n, int s) {
@@ -70,8 +74,65 @@ int[] dijkstra(List&lt;int[]&gt;[] graph, int n, int s) {
     }
     return dist; // 不可达的节点仍为 Integer.MAX_VALUE
 }</code></pre>
+<h3>完整例题：743. 网络延迟时间</h3>
+<div class="desc">有 n 个节点（编号 1~n），给定有向边 times[i] = (u, v, w) 表示信号从 u 到 v 耗时 w。从节点 k 发出信号，求所有节点都收到信号的最短时间；若有节点收不到返回 -1。<div class="ex">示例：
+输入：times = [[2,1,1],[2,3,1],[3,4,1]], n = 4, k = 2
+输出：2
+解释：2→1 耗时1，2→3 耗时1，3→4 耗时1，最远节点 4 在时刻 2 收到</div></div>
+<p><b>怎么套模板：</b>这就是「单源最短路」裸题——起点是 k，边权是耗时 w。跑一遍 Dijkstra 得到 dist 数组，答案是 <b>max(dist)</b>（所有节点都收到信号的时刻取决于最远的那个）；若某个 dist 仍是 ∞ 说明有节点不可达，返回 -1。</p>
+<pre><code>class Solution {
+    public int networkDelayTime(int[][] times, int n, int k) {
+        // ① 建图：邻接表 graph[u] = [[v, w], ...]（节点编号 1~n，开 n+1 大小）
+        List&lt;int[]&gt;[] g = new ArrayList[n + 1];
+        for (int i = 1; i &lt;= n; i++) g[i] = new ArrayList&lt;&gt;();
+        for (int[] t : times) g[t[0]].add(new int[]{t[1], t[2]});
+        // ② Dijkstra 模板
+        int[] dist = new int[n + 1];
+        Arrays.fill(dist, Integer.MAX_VALUE);
+        dist[k] = 0;
+        PriorityQueue&lt;int[]&gt; pq = new PriorityQueue&lt;&gt;((a, b) -&gt; a[0] - b[0]);
+        pq.offer(new int[]{0, k});
+        while (!pq.isEmpty()) {
+            int[] cur = pq.poll();
+            int d = cur[0], u = cur[1];
+            if (d &gt; dist[u]) continue;          // 过期副本跳过
+            for (int[] e : g[u]) {
+                int v = e[0], nd = d + e[1];
+                if (nd &lt; dist[v]) { dist[v] = nd; pq.offer(new int[]{nd, v}); }
+            }
+        }
+        // ③ 答案 = max(dist)；有节点不可达则返回 -1
+        int ans = 0;
+        for (int i = 1; i &lt;= n; i++) {
+            if (dist[i] == Integer.MAX_VALUE) return -1;
+            ans = Math.max(ans, dist[i]);
+        }
+        return ans;
+    }
+}</code></pre>
 <h3>图解</h3>
-<pre class="diagram">4 节点带权图，起点 0：
+<pre class="diagram">用上面的例题：times = [[2,1,1],[2,3,1],[3,4,1]]，起点 k=2
+图：  2 --1--&gt; 1
+      |
+      1
+      v
+      3 --1--&gt; 4
+
+初始：dist = [-, ∞, 0, ∞, ∞]（下标 1~4，0 号位不用）  堆 = [(0,2)]
+
+第1轮：弹出 (0,2)，节点 2 距离定死 = 0
+  松弛：dist[1]=0+1=1，dist[3]=0+1=1
+  dist = [-, 1, 0, 1, ∞]      堆 = [(1,1), (1,3)]
+第2轮：弹出 (1,1)，节点 1 距离定死 = 1，无出边
+第3轮：弹出 (1,3)，节点 3 距离定死 = 1
+  松弛：dist[4]=1+1=2
+  dist = [-, 1, 0, 1, 2]      堆 = [(2,4)]
+第4轮：弹出 (2,4)，节点 4 距离定死 = 2，堆空结束
+
+答案 = max(1, 0, 1, 2) = 2 ✓
+
+—— 再看一个体现「绕路更短」的例子 ——
+4 节点带权图，起点 0：
   0 --2-- 1     边：0→1(2), 0→2(5), 1→2(1), 1→3(4), 2→3(1)
   |       |
   5       4
@@ -79,24 +140,23 @@ int[] dijkstra(List&lt;int[]&gt;[] graph, int n, int s) {
   2 --1-- 3
 
 初始：dist = [0, ∞, ∞, ∞]   堆 = [(0,0)]
-
-第1轮：弹出 (0,0)，节点 0 距离定死 = 0
-  松弛：dist[1]=0+2=2，dist[2]=0+5=5
+第1轮：弹出 (0,0)，定死 dist[0]=0
+  松弛：dist[1]=2，dist[2]=5
   dist = [0, 2, 5, ∞]        堆 = [(2,1), (5,2)]
-第2轮：弹出 (2,1)，节点 1 距离定死 = 2
-  松弛：dist[2]=min(5, 2+1)=3，dist[3]=2+4=6
+第2轮：弹出 (2,1)，定死 dist[1]=2
+  松弛：dist[2]=min(5, 2+1)=3（绕路 0→1→2 比直达 0→2 更短！），dist[3]=2+4=6
   dist = [0, 2, 3, 6]        堆 = [(3,2), (5,2), (6,3)]
-第3轮：弹出 (3,2)，节点 2 距离定死 = 3
+第3轮：弹出 (3,2)，定死 dist[2]=3
   松弛：dist[3]=min(6, 3+1)=4
   dist = [0, 2, 3, 4]        堆 = [(4,3), (5,2), (6,3)]
-第4轮：弹出 (4,3)，节点 3 距离定死 = 4，无更优松弛
+第4轮：弹出 (4,3)，定死 dist[3]=4
 第5轮：弹出 (5,2)，5 &gt; dist[2]=3，过期跳过
 第6轮：弹出 (6,3)，6 &gt; dist[3]=4，过期跳过，堆空结束
 
-最终：dist = [0, 2, 3, 4]，弹出顺序 0 → 1 → 2 → 3（按距离从小到大定死）</pre>
+最终：dist = [0, 2, 3, 4]，弹出顺序 0 → 1 → 2 → 3（按距离从小到大依次定死）</pre>
 <h3>复杂度</h3>
 <p class="cx" style="font-size:14px;color:#374151">堆优化版时间 O(E log V)：每条边最多触发一次入堆；空间 O(V + E)。朴素 O(V²) 版适合稠密图，堆优化版适合稀疏图。</p>
-<div class="rel"><b>关联题目：</b>推荐练习：743 网络延迟时间（模板裸题，答案为 max(dist)）、1631 最小体力消耗路径（把「路径最大值最小化」改写成 dist 定义即可套用）</div>
+<div class="rel"><b>关联题目：</b>推荐练习：743 网络延迟时间（上方完整例题，模板裸题）、1631 最小体力消耗路径（把 dist 定义改成「路径上最大高度差的最小值」，松弛时取 max 而非求和，即可套用同一框架）</div>
 </section>
 <div class="pager"><a href="k3-union-find.html">← 上一篇：并查集</a><a class="mid" href="../../18-graph-extra.html">返回「图论知识补充」列表</a><a href="k5-trie.html">下一篇：Trie 前缀树 →</a></div>
 </div>
