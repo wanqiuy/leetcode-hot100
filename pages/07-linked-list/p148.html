@@ -74,6 +74,7 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 输入：4->2->1->3
 输出：1->2->3->4</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：自顶向下归并排序（快慢指针找中点劈半 + 合并两个有序链表）。</p>
 <p><b>先想清楚两个问题：</b></p>
 <p><b>Q1：为什么选归并排序？</b>链表不能 O(1) 随机访问，快排/堆排都不顺手；归并只需要顺序遍历和合并两个有序链表（第 21 题现成），天然 O(n log n)。</p>
 <p><b>Q2：怎么把链表均分成两段？</b>快慢指针：slow 一步、fast 两步，但 fast 从 head.next 出发——这样偶数个节点时 slow 停在前半段末尾（而不是后半段开头），slow.next 就是后半段的头，断开即可。</p>
@@ -98,7 +99,7 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
     -> [1->2->3->4]
 
 返回: 1 -> 2 -> 3 -> 4</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
     public ListNode sortList(ListNode head) {
         // ① 递归基：空表或单节点天然有序

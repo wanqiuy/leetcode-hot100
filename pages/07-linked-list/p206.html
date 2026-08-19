@@ -74,43 +74,44 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 输入：1->2->3->4->5
 输出：5->4->3->2->1</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：迭代反转（prev / curr / nextTemp 三指针）。</p>
 <p><b>先想清楚两个问题：</b></p>
 <p><b>Q1：每到一个节点要做的事是什么？</b>就一件：把当前节点的 next 从"指向后面"改成"指向前一个（prev）"。所有节点都这么干，整条链就反过来了。</p>
-<p><b>Q2：改完指针后怎么继续往后走？</b>改 next 之前必须先用一个临时变量 nxt 存下原来的后继，否则链条断掉就再也找不到后面的节点了。</p>
+<p><b>Q2：改完指针后怎么继续往后走？</b>改 next 之前必须先用一个临时变量 nextTemp 存下原来的后继，否则链条断掉就再也找不到后面的节点了。</p>
 <p><b>照着写的 4 步：</b></p>
-<p>① 初始化 prev = null、cur = head；<br>② 循环条件 cur != null：先用 nxt = cur.next 存住后继；<br>③ cur.next = prev 完成反转，然后 prev = cur、cur = nxt 双双前进；<br>④ 循环结束后 return prev（cur 已是 null，prev 停在原尾节点，即新头）。</p>
-<p>易错点：nxt 的保存必须在「cur.next = prev 之前」不是之后；prev 初始值是 null 不是 head（这样原头节点的 next 才会被置成 null，成为新尾）；返回值是 prev 不是 cur（cur 已经是 null）。</p>
+<p>① 初始化 prev = null、curr = head；<br>② 循环条件 curr != null：先用 nextTemp = curr.next 存住后继；<br>③ curr.next = prev 完成反转，然后 prev = curr、curr = nextTemp 双双前进；<br>④ 循环结束后 return prev（curr 已是 null，prev 停在原尾节点，即新头）。</p>
+<p>易错点：nextTemp 的保存必须在「curr.next = prev 之前」不是之后；prev 初始值是 null 不是 head（这样原头节点的 next 才会被置成 null，成为新尾）；返回值是 prev 不是 curr（curr 已经是 null）。</p>
 <pre class="diagram">输入: 1 -> 2 -> 3 -> null
-逐步推演（每轮列出操作 / prev、cur 值 / 链表状态）：
+逐步推演（每轮列出操作 / prev、curr 值 / 链表状态）：
 
-初始    prev=null, cur=1
+初始    prev=null, curr=1
         1 -> 2 -> 3 -> null
 
-轮1     操作: nxt=2; 1.next=null; prev=1; cur=2
+轮1     操作: nextTemp=2; 1.next=null; prev=1; curr=2
         状态: null <- 1    2 -> 3 -> null
-              prev=1       cur=2
+              prev=1       curr=2
 
-轮2     操作: nxt=3; 2.next=1; prev=2; cur=3
+轮2     操作: nextTemp=3; 2.next=1; prev=2; curr=3
         状态: null <- 1 <- 2    3 -> null
-                     prev=2     cur=3
+                     prev=2     curr=3
 
-轮3     操作: nxt=null; 3.next=2; prev=3; cur=null
+轮3     操作: nextTemp=null; 3.next=2; prev=3; curr=null
         状态: null <- 1 <- 2 <- 3
-                            prev=3, cur=null
+                            prev=3, curr=null
 
-cur 为 null 退出循环，返回 prev=3：
+curr 为 null 退出循环，返回 prev=3：
 3 -> 2 -> 1 -> null</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
     public ListNode reverseList(ListNode head) {
-        // ① prev 初始为 null（新链表的末尾），cur 从头出发
-        ListNode prev = null, cur = head;
+        // ① prev 初始为 null（新链表的末尾），curr 从头出发
+        ListNode prev = null, curr = head;
         // ② 遍历每个节点
-        while (cur != null) {
-            ListNode nxt = cur.next; // ② 先保存后继节点
-            cur.next = prev;         // ③ 反转当前节点的指针
-            prev = cur;              // ③ prev 前进
-            cur = nxt;               // ③ cur 前进
+        while (curr != null) {
+            ListNode nextTemp = curr.next; // ② 先保存后继节点
+            curr.next = prev;              // ③ 反转当前节点的指针
+            prev = curr;                   // ③ prev 前进
+            curr = nextTemp;               // ③ curr 前进
         }
         // ④ prev 是新链表的头
         return prev;

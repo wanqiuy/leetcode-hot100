@@ -74,6 +74,7 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 输入：3->2->0->-4，尾节点 -4 指向节点 2
 输出：true</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：快慢指针（Floyd 判圈算法）。</p>
 <p><b>先想清楚两个问题：</b></p>
 <p><b>Q1：为什么快慢指针能判环？</b>slow 每次 1 步、fast 每次 2 步。若有环，fast 进环后相对 slow 以每轮 1 步的速度逼近，环内距离有限，必然追上并相遇；若无环，fast 先走到 null。</p>
 <p><b>Q2：循环退出条件怎么写才安全？</b>条件必须同时保证 fast != null 且 fast.next != null，因为循环体里要执行 fast.next.next，少一个判断就会空指针。</p>
@@ -93,7 +94,7 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 若无环（如 1 -> 2 -> 3 -> null）：
 轮1  slow=2, fast=3
 轮2  slow=3, fast=null -> 退出循环，返回 false</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>public class Solution {
     public boolean hasCycle(ListNode head) {
         // ① 双指针同从头出发

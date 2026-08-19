@@ -74,6 +74,7 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 输入：1->2->3->4
 输出：2->1->4->3</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：迭代交换（虚拟头 + 前驱指针，每对改三条指针）。</p>
 <p><b>先想清楚两个问题：</b></p>
 <p><b>Q1：交换相邻两个节点要动几条指针？</b>三条：前驱的 next 要指向 b，b.next 要指向 a，a.next 要指向原来 b 后面的节点。少改任何一条链就断了。</p>
 <p><b>Q2：每轮处理完后 pre 移到哪里？</b>交换完成后 a 落到了本对的第二个位置，它就是下一对的前驱，所以 pre = a，继续下一轮。</p>
@@ -96,7 +97,7 @@ pre 移到 a(1)：pre=1, a=3, b=4
 pre 移到 a(3)，此时 pre.next=null，不足一对，退出
 
 返回 dummy.next: 2 -> 1 -> 4 -> 3</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
     public ListNode swapPairs(ListNode head) {
         // ① dummy 挂在头前，第一对也有前驱

@@ -73,6 +73,7 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 <div class="ex">示例：
 cache = LRUCache(2); put(1,1); put(2,2); get(1)=1; put(3,3)（淘汰2）; get(2)=-1</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：哈希表 + 双向链表（虚拟头尾哨兵，头侧最旧、尾侧最新）。</p>
 <p><b>先想清楚两个问题：</b></p>
 <p><b>Q1：为什么必须"哈希表 + 双向链表"组合？</b>get/put 要 O(1) 定位就得用 HashMap；但哈希表记不住"谁最久没用"，需要一条按使用顺序排的链。用双向而不是单向，是因为删除中间节点要改前驱的指针，单向链找前驱得 O(n)。</p>
 <p><b>Q2：链表头和尾各放什么？</b>约定：越靠近头越"旧"（最久未用），越靠近尾越"新"（最近使用）。任何一次 get/put 命中都把节点挪到尾部；容量满时淘汰 head.next（最旧的那个）。</p>
@@ -94,7 +95,7 @@ cache = LRUCache(2); put(1,1); put(2,2); get(1)=1; put(3,3)（淘汰2）; get(2)
    再把 [3:3] 插到尾
    链: H <-> [1:1] <-> [3:3] <-> T   map: {1,3}
 ⑤ get(2):   map 里已没有 2，返回 -1   （2 刚被淘汰，验证正确）</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>import java.util.HashMap;
 import java.util.Map;
 

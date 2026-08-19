@@ -74,6 +74,7 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 输入：1->2->3->4->5，k = 2
 输出：2->1->4->3->5</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：迭代分组翻转（每段先判长度够 k 个再翻转，不足不翻）。</p>
 <p><b>先想清楚两个问题：</b></p>
 <p><b>Q1：一组一组翻转，每组的边界怎么确定？</b>维护两个指针：pre 指向本组的前驱，end 从 pre 位置出发先走 k 步定位本组末尾；end 走到 null 说明剩余不足 k 个，直接结束不翻转。</p>
 <p><b>Q2：翻转本组后怎么接回去？</b>记 start = pre.next（本组原头）、nxt = end.next（下一组头）；先 end.next = null 把本组断开，翻转后 start 变成了本组的尾：于是 pre.next 接翻转后的新头，start.next 接回 nxt，再把 pre、end 都移到 start 继续处理下一组。</p>
@@ -102,7 +103,7 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
   => 剩余 [5] 不足 k=2，break
 
 返回 dummy.next: 2 -> 1 -> 4 -> 3 -> 5</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
     public ListNode reverseKGroup(ListNode head, int k) {
         // ① dummy + 组前驱 pre + 组尾定位指针 end
@@ -127,12 +128,12 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
         return dummy.next;
     }
     private ListNode reverse(ListNode head) {
-        ListNode prev = null, cur = head;
-        while (cur != null) {
-            ListNode nxt = cur.next;
-            cur.next = prev;
-            prev = cur;
-            cur = nxt;
+        ListNode prev = null, curr = head;
+        while (curr != null) {
+            ListNode nextTemp = curr.next;
+            curr.next = prev;
+            prev = curr;
+            curr = nextTemp;
         }
         return prev;
     }

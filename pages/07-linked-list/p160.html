@@ -74,6 +74,7 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 输入：A = 4->1->8->4->5，B = 5->6->1->8->4->5（相交于 8）
 输出：节点 8</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：双指针「换表走」（两指针各走 a+b 步后必在交点或 null 处相遇）。</p>
 <p><b>先想清楚两个问题：</b></p>
 <p><b>Q1：两个链表长度不同，怎么让两个指针"对齐"？</b>让 pA 走完 A 表后接着走 B 表，pB 走完 B 表后接着走 A 表。这样两者都走 a+b 步后一定同时到达交点（或同为 null），长度差被抹平。</p>
 <p><b>Q2：不相交时循环会不会死循环？</b>不会。不相交时 pA、pB 最终同时走到 null，pA == pB 成立，循环照样退出，返回 null 恰好就是答案。</p>
@@ -95,7 +96,7 @@ B: b1 -> b2 -> b3 -> c1 -> c2 -> c3   （相交于 c1）
 轮8  pA=b3     pB=a2
 轮9  pA=c1     pB=c1      -> 相等，退出循环，返回 c1
 （两指针各走了 a+b 步，路程相等，必在 c1 相遇）</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>public class Solution {
     public ListNode getIntersectionNode(ListNode headA, ListNode headB) {
         // ① 边界：任一表为空必不相交

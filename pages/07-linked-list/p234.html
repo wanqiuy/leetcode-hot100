@@ -74,12 +74,13 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 输入：1->2->2->1
 输出：true</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：快慢指针找中点 + 反转后半段原地比对（O(1) 空间）。</p>
 <p><b>先想清楚两个问题：</b></p>
 <p><b>Q1：回文要比对"首 vs 尾"，单链表没法从后往前走怎么办？</b>把后半段反转，这样从"后半段的新头"往后走，就等价于从原链表的尾往前走，比对问题就变成两条链同步比。</p>
 <p><b>Q2：中点怎么找、后半段从哪开始？</b>快慢指针：slow 一步、fast 两步，循环条件 fast.next != null && fast.next.next != null，退出时 slow 恰好停在前半段末尾，slow.next 就是后半段的头。</p>
 <p><b>照着写的 4 步：</b></p>
-<p>① 空表或单节点直接 return true；<br>② 快慢指针找中点：fast 每次两步、slow 每次一步，直到 fast 走不动，slow 停在前半段末尾；<br>③ p2 = reverse(slow.next)，把后半段反转；<br>④ p1 从头、p2 从反转后的头同步后移，只要有一个值不等就返回 false；p2 走完仍全等则返回 true。</p>
-<p>易错点：找中点的循环条件是「fast.next != null && fast.next.next != null」不是「fast != null && fast.next != null」（前者让 slow 停在前半末尾，奇数个时正中间节点归前半段，不影响比对）；比对时循环以「p2 != null」为准不是 p1（后半段更短或等长）；reverse 的参数是 slow.next 不是 slow。</p>
+<p>① 空表或单节点直接 return true；<br>② 快慢指针找中点：fast 每次两步、slow 每次一步，直到 fast 走不动，slow 停在前半段末尾；<br>③ p2 = reverseList(slow.next)，把后半段反转；<br>④ p1 从头、p2 从反转后的头同步后移，只要有一个值不等就返回 false；p2 走完仍全等则返回 true。</p>
+<p>易错点：找中点的循环条件是「fast.next != null && fast.next.next != null」不是「fast != null && fast.next != null」（前者让 slow 停在前半末尾，奇数个时正中间节点归前半段，不影响比对）；比对时循环以「p2 != null」为准不是 p1（后半段更短或等长）；reverseList 的参数是 slow.next 不是 slow。</p>
 <pre class="diagram">输入: 1 -> 2 -> 2 -> 1
 
 逐步推演：
@@ -88,17 +89,17 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
   轮1  slow=2(前), fast=2(后)   fast.next.next=null，退出
   => slow 停在第一个 2，后半段 = slow.next = 2 -> 1
 
-反转后半段（reverse 内部）：
-  初始  prev=null, cur=2(后)
-  轮1   2.next=null; prev=2, cur=1
-  轮2   1.next=2;    prev=1, cur=null
+反转后半段（reverseList 内部）：
+  初始  prev=null, curr=2(后)
+  轮1   2.next=null; prev=2, curr=1
+  轮2   1.next=2;    prev=1, curr=null
   => 反转后 p2 = 1 -> 2 -> null
 
 比对（p1 从 head，p2 从反转后的头）：
   轮1  p1.val=1 == p2.val=1   p1=2, p2=2
   轮2  p1.val=2 == p2.val=2   p1=2, p2=null
   p2 走完，全部相等 => 返回 true</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
     public boolean isPalindrome(ListNode head) {
         // ① 空表 / 单节点必为回文
@@ -110,24 +111,24 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
             fast = fast.next.next;
         }
         // ③ 反转后半段（slow.next 起）
-        ListNode p2 = reverse(slow.next);
+        ListNode p2 = reverseList(slow.next);
         // ④ 双指针比对前后两段
         ListNode p1 = head;
-        boolean ok = true;
+        boolean result = true;
         while (p2 != null) {
-            if (p1.val != p2.val) { ok = false; break; }
+            if (p1.val != p2.val) { result = false; break; }
             p1 = p1.next;
             p2 = p2.next;
         }
-        return ok;
+        return result;
     }
-    private ListNode reverse(ListNode head) {
-        ListNode prev = null, cur = head;
-        while (cur != null) {
-            ListNode nxt = cur.next;
-            cur.next = prev;
-            prev = cur;
-            cur = nxt;
+    private ListNode reverseList(ListNode head) {
+        ListNode prev = null, curr = head;
+        while (curr != null) {
+            ListNode nextTemp = curr.next;
+            curr.next = prev;
+            prev = curr;
+            curr = nextTemp;
         }
         return prev;
     }

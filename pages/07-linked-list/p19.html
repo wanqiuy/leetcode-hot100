@@ -74,6 +74,7 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 输入：1->2->3->4->5，n = 2
 输出：1->2->3->5</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：一次遍历快慢指针（fast 先走 n+1 步拉开身位）+ 虚拟头 dummy。</p>
 <p><b>先想清楚两个问题：</b></p>
 <p><b>Q1：删"倒数第 n 个"，怎么一次遍历就找到它？</b>让 fast 先走 n+1 步，领先 slow 共 n+1 个身位；然后两指针同步走，fast 撞 null 时 slow 恰好停在"待删节点的前驱"上——多走的那 1 步就是为了让 slow 停在前驱而不是待删节点本身。</p>
 <p><b>Q2：删掉的是头节点怎么办？</b>在头前面挂一个 dummy 节点，slow、fast 都从 dummy 出发。删头节点时 slow 就停在 dummy 上，照样用 slow.next = slow.next.next 统一处理，返回 dummy.next。</p>
@@ -98,7 +99,7 @@ slow=3 正是待删节点 4 的前驱：
 slow.next = slow.next.next  =>  3 跳过 4 指向 5
 
 返回 dummy.next: 1 -> 2 -> 3 -> 5</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
     public ListNode removeNthFromEnd(ListNode head, int n) {
         // ① dummy 挂在头前，统一处理"删头节点"

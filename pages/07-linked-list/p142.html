@@ -74,6 +74,7 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 输入：3->2->0->-4，尾节点指向节点 2
 输出：节点 2（环的入口）</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：快慢指针（Floyd 算法两阶段——先判环，再从头部和相遇点同步走求入口）。</p>
 <p><b>先想清楚两个问题：</b></p>
 <p><b>Q1：相遇点和环入口有什么关系？</b>设头到入口距离 a、入口到相遇点 b、相遇点绕回入口 c。fast 路程是 slow 两倍：a + b + (b + c) = 2(a + b)，化简得 a = c——从"头"和"相遇点"各派一个指针同步走，相遇处就是环入口。</p>
 <p><b>Q2：怎么区分"无环"和"有环求入口"？</b>沿用 141 题的快慢指针：fast 走到 null 说明无环，直接返回 null；相遇了才进入第二阶段求入口。</p>
@@ -94,7 +95,7 @@ head --2步--> 入口(2) --2步--> 相遇点(-4)
 第二阶段 p 从 head、slow 从相遇点同步走：
 轮0  p=3, slow=-4
 轮1  p=2, slow=2    相遇！返回节点 2（即环入口）</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>public class Solution {
     public ListNode detectCycle(ListNode head) {
         // ① 双指针同从头出发

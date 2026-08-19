@@ -74,6 +74,7 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 输入：l1 = 1->2->4，l2 = 1->3->4
 输出：1->1->2->3->4->4</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：迭代 + 虚拟头（dummy）哨兵。</p>
 <p><b>先想清楚两个问题：</b></p>
 <p><b>Q1：为什么要虚拟头节点 dummy？</b>合并时第一个节点就要被"接到某个东西后面"，没有 dummy 就得特判头节点；有了 dummy，所有节点统一用 tail.next = x 接入，最后 return dummy.next 即可。</p>
 <p><b>Q2：每轮做什么、循环结束后的尾巴怎么处理？</b>每轮取两表当前节点中较小的那个接到 tail 后，并让该表指针前移；当一表走空时，另一表的剩余部分必然整体有序，直接整段接到 tail 后，不用再逐节点搬。</p>
@@ -95,7 +96,7 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
      dummy -> 1 -> 1 -> 2 -> 3 -> 4    l1=null, l2=4
 循环退出，tail.next = l2 整段接上
 结果: 1 -> 1 -> 2 -> 3 -> 4 -> 4</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
     public ListNode mergeTwoLists(ListNode list1, ListNode list2) {
         // ① 虚拟头 + 尾指针，免去头节点特判
