@@ -73,11 +73,12 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 输出：3
 解释：11 = 5 + 5 + 1</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：动态规划（完全背包），dp[i] 表示凑出金额 i 的最少硬币个数。</p>
 <p><b>先想清楚两个问题（完全背包求最小数量）：</b></p>
 <p><b>Q1：状态怎么定义？</b>dp[i] = 凑出金额 i 所需的最少硬币个数；答案在 dp[amount]（若大于 amount 说明凑不出，返回 -1）。</p>
-<p><b>Q2：状态怎么转移？</b>dp[i] = min(dp[i - c] + 1)，枚举每种面额 c（要求 i ≥ c）——最后一枚用 c，剩下 i-c 已经算过，枚数加 1，所有面额取最小；初始化 dp[0]=0，其余置 amount+1（比任何合法答案都大，表示凑不出）；i 从 1 到 amount 正序填，硬币可重复用（完全背包）所以不需要倒序。</p>
+<p><b>Q2：状态怎么转移？</b>dp[i] = min(dp[i - c] + 1)，枚举每种面额 c（要求 c ≤ i）——最后一枚用 c，剩下 i-c 已经算过，枚数加 1，所有面额取最小；初始化 dp[0]=0，其余置 max = amount+1（比任何合法答案都大，表示凑不出）；i 从 1 到 amount 正序填，硬币可重复用（完全背包）所以不需要倒序。</p>
 <p><b>照着写的 3 步：</b></p>
-<p>① 开长度 amount+1 的 dp 数组并初始化 base case：dp[0]=0，其余置 amount+1；<br>② 按 i=1..amount 正序遍历，内层枚举每种硬币 c，用 dp[i] = min(dp[i], dp[i-c]+1) 填表；<br>③ 返回 dp[amount]，若大于 amount 则返回 -1；</p>
+<p>① 开长度 amount+1 的 dp 数组并初始化 base case：dp[0]=0，其余置 amount+1；<br>② 按 i=1..amount 正序遍历，内层枚举每种硬币 coins[j]，用 dp[i] = min(dp[i], dp[i-coins[j]]+1) 填表；<br>③ 返回 dp[amount]，若大于 amount 则返回 -1；</p>
 <p>易错点：① 不可达的初始值用 amount+1，不是 Integer.MAX_VALUE（MAX+1 会溢出成负数）；② 最后要判断 dp[amount] &gt; amount 时返回 -1，不是直接返回 dp[amount]；③ 硬币无限用是完全背包，内层无顺序要求，不是 01 背包的倒序。</p>
 <pre class="diagram">示例 coins = [1,2,5]，amount = 11，逐步填 dp 表：
 ① 初始化：dp[0]=0，其余 = 12（amount+1）
@@ -90,17 +91,18 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 金额 i  0  1  2  3  4  5  6  7  8  9  10 11
 dp      0  1  1  2  2  1  2  2  3  3  2  3
 ③ 返回 dp[11] = 3（11 = 5+5+1）</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
     public int coinChange(int[] coins, int amount) {
+        int max = amount + 1; // ① “不可能值”：任何合法答案都不超过 amount
         int[] dp = new int[amount + 1]; // ① 开长度 amount+1 的 dp 数组
-        Arrays.fill(dp, amount + 1); // ① 初始化：amount+1 是“不可能值”，表示凑不出
+        Arrays.fill(dp, max); // ① 初始化：先全部置为凑不出
         dp[0] = 0; // ① base case：金额 0 需要 0 枚硬币
         for (int i = 1; i &lt;= amount; i++) { // ② 按 i 正序遍历，硬币可重复用（完全背包）
-            for (int c : coins) {
-                if (i &gt;= c) {
-                    // ② 转移方程：用一枚面额 c 的硬币，剩下凑 i-c
-                    dp[i] = Math.min(dp[i], dp[i - c] + 1);
+            for (int j = 0; j &lt; coins.length; j++) {
+                if (coins[j] &lt;= i) {
+                    // ② 转移方程：用一枚面额 coins[j]，剩下凑 i - coins[j]
+                    dp[i] = Math.min(dp[i], dp[i - coins[j]] + 1);
                 }
             }
         }

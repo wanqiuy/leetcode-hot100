@@ -73,6 +73,7 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 输出：true
 解释："leetcode" = "leet" + "code"</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：动态规划（布尔 dp + 字典转哈希集查询）。</p>
 <p><b>先想清楚两个问题（布尔型 DP）：</b></p>
 <p><b>Q1：状态怎么定义？</b>dp[i] = s 的前 i 个字符（s[0..i-1]）能否被成功拆分，布尔值；答案在 dp[n]。</p>
 <p><b>Q2：状态怎么转移？</b>只要存在一个 j &lt; i，使 dp[j] 为 true 且子串 s[j..i-1] 在字典中，则 dp[i] = true——前 j 个能拆、最后一段又是单词，前 i 个就能拆；初始化 dp[0]=true（空串视为可拆分，是递推起点）；i 从 1 到 n 正序、内层 j 从 0 到 i-1 枚举分割点。</p>
@@ -89,23 +90,22 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 下标 i   0  1  2  3  4  5  6  7  8
 dp       T  F  F  F  T  F  F  F  T
 ③ 返回 dp[8] = true（"leetcode" = "leet" + "code"）</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
     public boolean wordBreak(String s, List&lt;String&gt; wordDict) {
-        Set&lt;String&gt; dict = new HashSet&lt;&gt;(wordDict); // Set 查询 O(1)
-        int n = s.length();
-        boolean[] dp = new boolean[n + 1]; // ① 开长度 n+1 的 dp 数组
+        Set&lt;String&gt; wordDictSet = new HashSet&lt;&gt;(wordDict); // 字典转 Set，查询 O(1)
+        boolean[] dp = new boolean[s.length() + 1]; // ① 开长度 n+1 的 dp 数组
         dp[0] = true; // ① base case：空串视为可拆分，是递推起点
-        for (int i = 1; i &lt;= n; i++) { // ② 按 i 正序遍历，dp[i] 依赖前面的 dp[j]
+        for (int i = 1; i &lt;= s.length(); i++) { // ② 按 i 正序遍历，dp[i] 依赖前面的 dp[j]
             for (int j = 0; j &lt; i; j++) {
                 // ② 转移方程：[0,j) 可拆，且 [j,i) 是字典单词 → [0,i) 可拆
-                if (dp[j] &amp;&amp; dict.contains(s.substring(j, i))) {
+                if (dp[j] &amp;&amp; wordDictSet.contains(s.substring(j, i))) {
                     dp[i] = true;
                     break; // 找到一种即可
                 }
             }
         }
-        return dp[n]; // ③ 返回 dp[n]
+        return dp[s.length()]; // ③ 返回 dp[n]
     }
 }</code></pre>
 <p class="cx">时间复杂度 O(n² · 子串均长) · 空间复杂度 O(n)</p>

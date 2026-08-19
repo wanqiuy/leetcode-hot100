@@ -73,43 +73,47 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 输出：6
 解释：子数组 [2,3] 的乘积 6 最大</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：动态规划，同时维护 maxF、minF 两个 dp 数组。</p>
 <p><b>先想清楚两个问题：</b></p>
-<p><b>Q1：状态怎么定义？</b>要维护两个状态：maxEnd = 以当前元素结尾的连续子数组最大乘积，minEnd = 以当前元素结尾的最小乘积（负数会把「最小 × 负数」翻转成最大）；答案在全局最大值 ans。</p>
-<p><b>Q2：状态怎么转移？</b>若当前 x 为负，先交换 maxEnd 和 minEnd（乘负数后大小关系颠倒）；然后 maxEnd = max(x, maxEnd × x)、minEnd = min(x, minEnd × x)——「从 x 重新开始」与「接上前面的段」取大/取小；初始化 maxEnd = minEnd = ans = nums[0]；从 i=1 开始正序填。</p>
+<p><b>Q1：状态怎么定义？</b>要维护两个状态：maxF[i] = 以第 i 个元素结尾的连续子数组最大乘积，minF[i] = 以第 i 个元素结尾的最小乘积（负数会把「最小 × 负数」翻转成最大）；答案在 maxF 的最大值 ans。</p>
+<p><b>Q2：状态怎么转移？</b>每个位置的候选有三个：x 自己重新开头、maxF[i-1] × x、minF[i-1] × x——maxF[i] 取三者最大，minF[i] 取三者最小；初始化直接把 nums 拷进两个数组（首元素自成一段）；从 i=1 开始正序填。</p>
 <p><b>照着写的 3 步：</b></p>
-<p>① 初始化 base case：maxEnd = minEnd = ans = nums[0]；<br>② 按正序从 i=1 遍历，x 为负先交换 maxEnd/minEnd，再用 maxEnd = max(x, maxEnd*x)、minEnd = min(x, minEnd*x) 更新，并同步 ans；<br>③ 返回 ans；</p>
-<p>易错点：① 要同时维护最大和最小两个状态，不是只维护最大——负数会让最小值翻转成最大值；② 遇到负数是先交换再乘，不是乘完再交换；③ 每步是「x 自己重新开头」与「maxEnd×x 接上前面」取大，不是无脑累乘。</p>
+<p>① 开 maxF、minF 两个数组并用 arraycopy 拷入 nums 作为 base case（首格就是 nums[0]）；<br>② 按正序从 i=1 遍历，用 maxF[i] = max(maxF[i-1]*x, x, minF[i-1]*x)、minF[i] = min(minF[i-1]*x, x, maxF[i-1]*x) 填表；<br>③ 再扫一遍 maxF 取最大值 ans 返回；</p>
+<p>易错点：① 要同时维护最大和最小两个状态，不是只维护最大——负数会让最小值翻转成最大值；② 每步候选有三个：x 自己、maxF[i-1]×x、minF[i-1]×x，不是只比较两个；③ 答案是 maxF 数组的最大值，不是 maxF 最后一格——最大段未必以末尾元素结尾。</p>
 <pre class="diagram">示例 nums = [2,3,-2,4]，逐步填表：
-① 初始化：i=0：maxEnd=2，minEnd=2，ans=2
-② i=1，x=3：maxEnd=max(3, 2×3)=6，minEnd=min(3, 2×3)=3，ans=6
-② i=2，x=-2：负数先交换 → maxEnd=3，minEnd=6
-   maxEnd=max(-2, 3×-2)=-2，minEnd=min(-2, 6×-2)=-12，ans=6
-② i=3，x=4：maxEnd=max(4, -2×4)=4，minEnd=min(4, -12×4)=-48，ans=6
+① 初始化：maxF = minF = nums 拷贝，首格 maxF[0]=minF[0]=2
+② i=1，x=3：maxF[1]=max(2×3, 3, 2×3)=6，minF[1]=min(2×3, 3, 2×3)=3
+② i=2，x=-2：maxF[2]=max(6×-2, -2, 3×-2)=-2，minF[2]=min(3×-2, -2, 6×-2)=-12
+② i=3，x=4：maxF[3]=max(-2×4, 4, -12×4)=4，minF[3]=min(-12×4, 4, -2×4)=-48
 
-i        0   1    2    3
-nums     2   3   -2    4
-maxEnd   2   6   -2    4
-minEnd   2   3  -12  -48
-ans      2   6    6    6
-③ 返回 6（子数组 [2,3]）</pre>
-<h3>代码（Java）</h3>
+i      0   1    2    3
+nums   2   3   -2    4
+maxF   2   6   -2    4
+minF   2   3  -12  -48
+③ 返回 max(maxF) = 6（子数组 [2,3]）</pre>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
     public int maxProduct(int[] nums) {
-        int maxEnd = nums[0], minEnd = nums[0], ans = nums[0]; // ① base case：首元素自成一段
-        for (int i = 1; i &lt; nums.length; i++) { // ② 按正序逐个元素决策
-            int x = nums[i];
-            if (x &lt; 0) { // 乘负数后大小关系翻转，先交换
-                int t = maxEnd; maxEnd = minEnd; minEnd = t;
-            }
-            // ② 转移方程：「x 重新开头」与「接上前面的段」取大 / 取小
-            maxEnd = Math.max(x, maxEnd * x);
-            minEnd = Math.min(x, minEnd * x);
-            ans = Math.max(ans, maxEnd);
+        int length = nums.length;
+        // ① 状态定义：maxF[i] = 以 i 结尾的最大乘积，minF[i] = 以 i 结尾的最小乘积
+        int[] maxF = new int[length];
+        int[] minF = new int[length];
+        // ① base case：首元素自成一段，直接把 nums 拷进两个数组
+        System.arraycopy(nums, 0, maxF, 0, length);
+        System.arraycopy(nums, 0, minF, 0, length);
+        for (int i = 1; i &lt; length; i++) { // ② 按正序逐个元素决策，依赖 i-1
+            // ② 转移方程：x 自己重新开头，或乘上前面的最大/最小段（负数会翻转大小）
+            maxF[i] = Math.max(maxF[i - 1] * nums[i], Math.max(nums[i], minF[i - 1] * nums[i]));
+            minF[i] = Math.min(minF[i - 1] * nums[i], Math.min(nums[i], maxF[i - 1] * nums[i]));
         }
-        return ans; // ③ 返回全局最大乘积
+        int ans = maxF[0];
+        for (int i = 1; i &lt; length; i++) {
+            ans = Math.max(ans, maxF[i]); // ③ 答案是 max(maxF)，不是最后一格
+        }
+        return ans;
     }
 }</code></pre>
-<p class="cx">时间复杂度 O(n) · 空间复杂度 O(1)</p>
+<p class="cx">时间复杂度 O(n) · 空间复杂度 O(n)（可改用滚动变量降到 O(1)）</p>
 </section>
 <div class="pager"><a href="p300.html">← 上一题：300. 最长递增子序列</a><a class="mid" href="../../15-dp.html">返回「动态规划」列表</a><a href="p416.html">下一题：416. 分割等和子集 →</a></div>
 </div>

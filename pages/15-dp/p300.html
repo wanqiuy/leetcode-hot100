@@ -73,11 +73,12 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 输出：4
 解释：最长递增子序列是 [2,3,7,101]，长度为 4</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：动态规划 O(n²)（官方进阶解法是贪心 + 二分查找 O(n log n)）。</p>
 <p><b>先想清楚两个问题（O(n²) 写法，另有 O(n log n) 贪心+二分）：</b></p>
-<p><b>Q1：状态怎么定义？</b>dp[i] = 以 nums[i] 结尾的最长递增子序列长度（注意是「以它结尾」，不是「前 i 个里」）；答案不在最后一格，而是 max(dp)。</p>
-<p><b>Q2：状态怎么转移？</b>dp[i] = max(dp[j] + 1)，其中 j &lt; i 且 nums[j] &lt; nums[i]——nums[i] 接在任何一个比它小的 nums[j] 后面，长度加 1，所有可接位置取最大；初始化每个 dp[i]=1（最差只含自己）；外层 i 正序、内层 j 从 0 到 i-1 枚举前驱。</p>
+<p><b>Q1：状态怎么定义？</b>dp[i] = 以 nums[i] 结尾的最长递增子序列长度（注意是「以它结尾」，不是「前 i 个里」）；答案不在最后一格，而是 max(dp)，代码用 maxans 维护。</p>
+<p><b>Q2：状态怎么转移？</b>dp[i] = max(dp[j] + 1)，其中 j &lt; i 且 nums[i] &gt; nums[j]——nums[i] 接在任何一个比它小的 nums[j] 后面，长度加 1，所有可接位置取最大；初始化 dp[0]=1、maxans=1（每个位置最差只含自己）；外层 i 正序、内层 j 从 0 到 i-1 枚举前驱。</p>
 <p><b>照着写的 3 步：</b></p>
-<p>① 开长度 n 的 dp 数组，逐格初始化 base case dp[i]=1；<br>② 按 i 正序遍历，内层枚举前驱 j，若 nums[j] &lt; nums[i] 则用 dp[i] = max(dp[i], dp[j]+1) 填表，同步更新 ans = max(ans, dp[i])；<br>③ 返回 ans（即 max(dp)）；</p>
+<p>① 特判空数组；开长度 n 的 dp 数组，初始化 base case dp[0]=1 与 maxans=1；<br>② 按 i=1..n-1 正序遍历，每个位置先置 dp[i]=1，内层枚举前驱 j，若 nums[i] &gt; nums[j] 则用 dp[i] = max(dp[i], dp[j]+1) 填表，同步更新 maxans = max(maxans, dp[i])；<br>③ 返回 maxans（即 max(dp)）；</p>
 <p>易错点：① 状态是「以 nums[i] 结尾」不是「前 i 个元素中」，两者含义不同；② 答案是 dp 数组的最大值，不是 dp[n-1]——最长子序列未必以最后一个元素结尾；③ 每个位置初始值是 1 不是 0。</p>
 <pre class="diagram">示例 nums = [10,9,2,5,3,7,101,18]，逐步填 dp 表：
 ① 初始化：所有 dp[i]=1
@@ -91,21 +92,25 @@ i       0   1  2  3  4  5   6    7
 nums   10   9  2  5  3  7  101  18
 dp      1   1  1  2  2  3   4    4
 ③ 返回 max(dp) = 4（子序列 [2,3,7,101] 或 [2,3,7,18]）</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
     public int lengthOfLIS(int[] nums) {
-        int n = nums.length, ans = 0;
-        int[] dp = new int[n]; // ① 开长度 n 的 dp 数组
-        for (int i = 0; i &lt; n; i++) { // ② 按 i 正序遍历，dp[i] 依赖前面的 dp[j]
-            dp[i] = 1; // ① base case：至少包含自己，长度为 1
+        if (nums.length == 0) {
+            return 0; // ① 特判空数组
+        }
+        int[] dp = new int[nums.length]; // ① 开长度 n 的 dp 数组
+        dp[0] = 1; // ① base case：至少包含自己，长度为 1
+        int maxans = 1; // 答案是 max(dp)，不是 dp[n-1]
+        for (int i = 1; i &lt; nums.length; i++) { // ② 按 i 正序遍历，dp[i] 依赖前面的 dp[j]
+            dp[i] = 1;
             for (int j = 0; j &lt; i; j++) {
-                if (nums[j] &lt; nums[i]) {
+                if (nums[i] &gt; nums[j]) {
                     dp[i] = Math.max(dp[i], dp[j] + 1); // ② 转移方程：接到 j 后面，长度 +1
                 }
             }
-            ans = Math.max(ans, dp[i]); // 答案是 max(dp)，不是 dp[n-1]
+            maxans = Math.max(maxans, dp[i]);
         }
-        return ans; // ③ 返回 max(dp)
+        return maxans; // ③ 返回 max(dp)
     }
 }</code></pre>
 <p class="cx">时间复杂度 O(n²)（贪心+二分可降至 O(n log n)） · 空间复杂度 O(n)</p>

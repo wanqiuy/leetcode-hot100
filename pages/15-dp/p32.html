@@ -73,6 +73,7 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 输出：6
 解释：整个字符串就是有效括号子串</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：动态规划，dp[i] 表示以 s[i] 结尾的最长有效括号子串长度。</p>
 <p><b>DP 四件套，想清楚这四个问题就是代码：</b></p>
 <p><b>① 状态定义：</b>dp[i] = 以 s[i] 结尾的最长有效括号子串长度（以 '(' 结尾必为 0，所以只需处理 s[i] = ')' 的位置）；<br>
 <b>② 转移方程：</b>分两种情况——情况一：s[i-1] = '('，形如「...()」，则 dp[i] = dp[i-2] + 2；情况二：s[i-1] = ')'，形如「...))」，跨过 dp[i-1] 那一整段，看更前面的字符 s[i-dp[i-1]-1] 是否为 '('，是则 dp[i] = dp[i-1] + 2 + dp[i-dp[i-1]-2]（把跨过段前面已有的有效段也接上）；<br>
@@ -91,13 +92,13 @@ i =   0  1  2  3  4  5
 s =   (  (  )  (  )  )
 dp =  0  0  2  0  4  6
 答案：max(dp) = 6</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
     // ① 状态定义：dp[i] = 以 s[i] 结尾的最长有效括号子串长度（以 '(' 结尾必为 0）
     public int longestValidParentheses(String s) {
-        int n = s.length(), ans = 0;
-        int[] dp = new int[n]; // ③ 初始化：全 0
-        for (int i = 1; i &lt; n; i++) { // ④ 遍历顺序：正序，dp[i] 依赖前面的 dp 值
+        int maxans = 0;
+        int[] dp = new int[s.length()]; // ③ 初始化：全 0
+        for (int i = 1; i &lt; s.length(); i++) { // ④ 遍历顺序：正序，dp[i] 依赖前面的 dp 值
             if (s.charAt(i) == ')') {
                 if (s.charAt(i - 1) == '(') {
                     // ② 转移情况一：...() 直接成对，长度 = 前面有效段 + 2
@@ -105,13 +106,12 @@ dp =  0  0  2  0  4  6
                 } else if (i - dp[i - 1] - 1 &gt;= 0
                         &amp;&amp; s.charAt(i - dp[i - 1] - 1) == '(') {
                     // ② 转移情况二：...))，跨过内部有效段与更前面的 '(' 配对
-                    dp[i] = dp[i - 1] + 2
-                          + (i - dp[i - 1] - 2 &gt;= 0 ? dp[i - dp[i - 1] - 2] : 0);
+                    dp[i] = dp[i - 1] + ((i - dp[i - 1]) &gt;= 2 ? dp[i - dp[i - 1] - 2] : 0) + 2;
                 }
-                ans = Math.max(ans, dp[i]);
+                maxans = Math.max(maxans, dp[i]);
             }
         }
-        return ans;
+        return maxans;
     }
 }</code></pre>
 <p class="cx">时间复杂度 O(n) · 空间复杂度 O(n)（另有 O(1) 空间的栈/计数法）</p>

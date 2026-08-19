@@ -73,37 +73,51 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 输出：true
 解释：[1,5,5] 和 [11] 的和都是 11</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：动态规划（01 背包），一维布尔 dp 倒序更新。</p>
 <p><b>先想清楚两个问题（01 背包模型）：</b></p>
 <p><b>Q1：状态怎么定义？</b>问题等价于：能否从数组中选出一些数，使和恰好等于 sum/2？dp[j] = 能否从已遍历的数中选出若干个凑出和恰好 j，布尔值；答案在 dp[target]，target = sum/2。</p>
-<p><b>Q2：状态怎么转移？</b>dp[j] = dp[j] || dp[j - x]——对当前数 x：不选它看原来的 dp[j]，选它看 dp[j-x]，两者或起来；初始化 dp[0]=true（和为 0 一个数都不用选），其余 false；外层正序遍历每个数 x，内层 j 从 target 倒序到 x——倒序保证 dp[j-x] 还是旧值，每个数只用一次。</p>
+<p><b>Q2：状态怎么转移？</b>dp[j] |= dp[j - num]——对当前数 num：不选它看原来的 dp[j]，选它看 dp[j-num]，两者或起来；初始化 dp[0]=true（和为 0 一个数都不用选），其余 false；外层正序遍历每个数 num，内层 j 从 target 倒序到 num——倒序保证 dp[j-num] 还是旧值，每个数只用一次。</p>
 <p><b>照着写的 3 步：</b></p>
-<p>① 求总和，sum 为奇数直接返回 false；开长度 target+1 的布尔 dp 数组并初始化 base case：dp[0]=true；<br>② 外层正序遍历每个数 x，内层 j 从 target 倒序到 x，用 dp[j] = dp[j] || dp[j-x] 填表；<br>③ 返回 dp[target]；</p>
-<p>易错点：① 内层是倒序不是正序——正序会让同一个数被重复选取，变成完全背包；② 总和 sum 为奇数时直接返回 false，不用进 DP；③ 目标是 sum/2，dp 数组大小是 target+1，不是 sum+1。</p>
+<p>① 先特判：元素少于 2 个、总和为奇数、最大值超过 sum/2 都直接返回 false；开长度 target+1 的布尔 dp 数组并初始化 base case：dp[0]=true；<br>② 外层正序遍历每个数 num，内层 j 从 target 倒序到 num，用 dp[j] |= dp[j-num] 填表；<br>③ 返回 dp[target]；</p>
+<p>易错点：① 内层是倒序不是正序——正序会让同一个数被重复选取，变成完全背包；② 总和 sum 为奇数、最大值超过 target 都直接返回 false，不用进 DP；③ 目标是 sum/2，dp 数组大小是 target+1，不是 sum+1。</p>
 <pre class="diagram">示例 nums = [1,5,11,5]，sum = 22，target = 11，逐步填 dp 表：
 ① 初始化：dp[0]=T，其余 F
-② x=1：j 从 11 倒序到 1，dp[1]=dp[1]||dp[0]=T
+② num=1：j 从 11 倒序到 1，dp[1]|=dp[0] → T
    → T T F F F F F F F F F F
-② x=5：倒序，dp[6]=dp[6]||dp[1]=T，dp[5]=dp[5]||dp[0]=T
+② num=5：倒序，dp[6]|=dp[1] → T，dp[5]|=dp[0] → T
    → T T F F F T T F F F F F
-② x=11：倒序，dp[11]=dp[11]||dp[0]=T
+② num=11：倒序，dp[11]|=dp[0] → T
    → T T F F F T T F F F F T
-② x=5：dp[11] 已为 T，提前确定成功
+② num=5：dp[11] 已为 T，提前确定成功
 
 dp 下标:  0  1  2  3  4  5  6  7  8  9 10 11
 ③ 返回 dp[11] = true（[1,5,5] 与 [11] 各为 11）</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
     public boolean canPartition(int[] nums) {
-        int sum = 0;
-        for (int x : nums) sum += x;
-        if (sum % 2 == 1) return false; // ① 总和为奇数不可能平分
+        int n = nums.length;
+        if (n &lt; 2) {
+            return false; // ① 特判：少于两个数不可能平分
+        }
+        int sum = 0, maxNum = 0;
+        for (int num : nums) {
+            sum += num;
+            maxNum = Math.max(maxNum, num);
+        }
+        if (sum % 2 != 0) {
+            return false; // ① 特判：总和为奇数不可能平分
+        }
         int target = sum / 2;
+        if (maxNum &gt; target) {
+            return false; // ① 特判：单个数超过一半不可能平分
+        }
         boolean[] dp = new boolean[target + 1]; // ① 开长度 target+1 的 dp 数组
         dp[0] = true; // ① base case：和为 0 不选任何数即可凑出
-        for (int x : nums) {
+        for (int i = 0; i &lt; n; i++) {
+            int num = nums[i];
             // ② 内层倒序遍历，保证每个数字只用一次（01 背包）
-            for (int j = target; j &gt;= x; j--) {
-                dp[j] = dp[j] || dp[j - x]; // ② 转移方程：不选 x，或选 x 去凑 j-x
+            for (int j = target; j &gt;= num; j--) {
+                dp[j] |= dp[j - num]; // ② 转移方程：不选 num，或选 num 去凑 j-num
             }
         }
         return dp[target]; // ③ 返回 dp[target]

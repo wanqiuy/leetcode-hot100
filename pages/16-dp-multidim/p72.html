@@ -73,19 +73,21 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 输出：3
 解释：horse → rorse（替换 h→r）→ rose（删 r）→ ros（删 e）</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：二维动态规划，每个格子对 left / down / left_down 三个方向取最小。</p>
 <p><b>DP 四件套，想清楚这四个问题就是代码：</b></p>
-<p><b>① 状态定义：</b>dp[i][j] = 把 word1 前 i 个字符转换成 word2 前 j 个字符所需的最少操作数；<br>
-<b>② 转移方程：</b>若 word1[i-1] == word2[j-1]，末位已相同无需操作，dp[i][j] = dp[i-1][j-1]；若不等，三种操作取最小再 +1——替换：dp[i-1][j-1]，删除 word1 末位：dp[i-1][j]，插入一个字符：dp[i][j-1]；<br>
-<b>③ 初始化：</b>dp[i][0] = i（word1 前 i 个字符全删掉才能变成空串），dp[0][j] = j（空串要插入 j 个字符）；<br>
-<b>④ 遍历顺序：</b>i 从 1 到 m、j 从 1 到 n，从上到下、从左到右，因为 dp[i][j] 依赖上方、左方和左上方。</p>
-<p>易错点：① dp 数组大小是 (m+1)×(n+1)，第 0 行/列对应空串，初始化值是 i 和 j 本身，不是 0；② 字符相等时直接抄 dp[i-1][j-1]，不加 1；③ 比较字符用 word1[i-1]、word2[j-1]，下标比 dp 偏移 1。</p>
+<p><b>① 状态定义：</b>dp[i][j] = 把 word1 前 i 个字符转换成 word2 前 j 个字符所需的最少操作数（代码记 n = word1 长度、m = word2 长度）；<br>
+<b>② 转移方程：</b>三个候选取最小——left = dp[i-1][j] + 1（删除 word1 末位），down = dp[i][j-1] + 1（在 word1 末尾插入 word2 的第 j 个字符），left_down = dp[i-1][j-1]（word1[i-1] == word2[j-1] 时不加 1，不等则 +1 表示替换）；<br>
+<b>③ 初始化：</b>dp[i][0] = i（word1 前 i 个字符全删掉才能变成空串），dp[0][j] = j（空串要插入 j 个字符）；任一字符串为空串时直接返回两长度之和；<br>
+<b>④ 遍历顺序：</b>i 从 1 到 n、j 从 1 到 m，从上到下、从左到右，因为 dp[i][j] 依赖上方、左方和左上方。</p>
+<p>易错点：① dp 数组大小是 (n+1)×(m+1)，第 0 行/列对应空串，初始化值是 i 和 j 本身，不是 0；② 字符相等时 left_down 不加 1，不等才 +1；③ 比较字符用 word1[i-1]、word2[j-1]，下标比 dp 偏移 1。</p>
 <pre class="diagram">示例 word1 = "horse"（行），word2 = "ros"（列），逐步填表：
 第1步（③初始化）：dp[i][0]=i（全删），dp[0][j]=j（全插）
-第2步（②转移）：i=1（h），j=1：h≠r → 1+min(替换 dp[0][0]=0, 删 dp[0][1]=1, 插 dp[1][0]=1)=1
-第3步（②转移）：i=2（o），j=2：o==o → dp[2][2]=dp[1][1]=1
-第4步（②转移）：i=4（s），j=3：s==s → dp[4][3]=dp[3][2]=2
-第5步（②转移）：i=5（e），j=3：e≠s
-   → 1+min(替换 dp[4][2]=3, 删 dp[4][3]=2, 插 dp[5][2]=4)=1+2=3
+第2步（②转移）：i=1（h），j=1：h≠r → left=dp[0][1]+1=2，down=dp[1][0]+1=2，
+   left_down=dp[0][0]+1=1 → dp[1][1]=1
+第3步（②转移）：i=2（o），j=2：o==o → left_down=dp[1][1]=1（不加 1）→ dp[2][2]=1
+第4步（②转移）：i=4（s），j=3：s==s → left_down=dp[3][2]=2 → dp[4][3]=2
+第5步（②转移）：i=5（e），j=3：e≠s → left=dp[4][3]+1=3，down=dp[5][2]+1=5，
+   left_down=dp[4][2]+1=4 → dp[5][3]=3
 
        ""  r  o  s
   ""    0  1  2  3
@@ -95,26 +97,30 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
   s     4  3  3  2
   e     5  4  4 [3]
 答案：dp[5][3] = 3（horse→rorse→rose→ros）</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
     // ① 状态定义：dp[i][j] = word1 前 i 个转成 word2 前 j 个的最少操作数
     public int minDistance(String word1, String word2) {
-        int m = word1.length(), n = word2.length();
-        int[][] dp = new int[m + 1][n + 1];
-        for (int i = 0; i &lt;= m; i++) dp[i][0] = i; // ③ 初始化：转成空串只能全删，需 i 次
-        for (int j = 0; j &lt;= n; j++) dp[0][j] = j; // ③ 初始化：空串转目标只能全插，需 j 次
-        for (int i = 1; i &lt;= m; i++) { // ④ 遍历顺序：从上到下、从左到右，依赖上/左/左上
-            for (int j = 1; j &lt;= n; j++) {
-                if (word1.charAt(i - 1) == word2.charAt(j - 1)) {
-                    dp[i][j] = dp[i - 1][j - 1]; // ② 转移：字符相等，无需操作
-                } else {
-                    dp[i][j] = 1 + Math.min( // ② 转移：三种操作取最小 +1
-                        dp[i - 1][j - 1],                       // 替换
-                        Math.min(dp[i - 1][j], dp[i][j - 1]));  // 删除 / 插入
+        int n = word1.length(), m = word2.length();
+        // ③ 有一个字符串为空串，只能全删或全插
+        if (n * m == 0) {
+            return n + m;
+        }
+        int[][] dp = new int[n + 1][m + 1];
+        for (int i = 0; i &lt; n + 1; i++) dp[i][0] = i; // ③ 初始化：转成空串只能全删，需 i 次
+        for (int j = 0; j &lt; m + 1; j++) dp[0][j] = j; // ③ 初始化：空串转目标只能全插，需 j 次
+        for (int i = 1; i &lt; n + 1; i++) { // ④ 遍历顺序：从上到下、从左到右，依赖上/左/左上
+            for (int j = 1; j &lt; m + 1; j++) {
+                int left = dp[i - 1][j] + 1;      // ② 删除 word1 末位
+                int down = dp[i][j - 1] + 1;      // ② 插入 word2 的第 j 个字符
+                int leftDown = dp[i - 1][j - 1];  // ② 替换（末位相等则无需 +1）
+                if (word1.charAt(i - 1) != word2.charAt(j - 1)) {
+                    leftDown += 1;
                 }
+                dp[i][j] = Math.min(left, Math.min(down, leftDown)); // 三种操作取最小
             }
         }
-        return dp[m][n];
+        return dp[n][m];
     }
 }</code></pre>
 <p class="cx">时间复杂度 O(m×n) · 空间复杂度 O(m×n)（可压缩到 O(n)）</p>
