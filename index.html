@@ -83,7 +83,9 @@ document.getElementById("list").innerHTML=CATS.map(c=>{
 (function(){
   var marks={}; try{marks=JSON.parse(localStorage.getItem('hot100-marks')||'{}')}catch(e){}
   var done=0,high=0,mid=0,low=0;
+  var kdone=0;
   Object.keys(marks).forEach(function(k){
+    if(/^[a-z]/.test(k)){ if(marks[k].done) kdone++; return; } // 知识点 key(k1..k5) 单独计
     if(marks[k].done) done++;
     if(marks[k].level==='high') high++;
     else if(marks[k].level==='mid') mid++;
@@ -94,7 +96,7 @@ document.getElementById("list").innerHTML=CATS.map(c=>{
     el.innerHTML='已完成 <b style="color:#16a34a">'+done+'</b>/100 题 · 熟练度 '
       +'<b style="color:#16a34a">高 '+high+'</b> / '
       +'<b style="color:#d97706">中 '+mid+'</b> / '
-      +'<b style="color:#dc2626">低 '+low+'</b>';
+      +'<b style="color:#dc2626">低 '+low+'</b> · 知识点已学 <b style="color:#7c3aed">'+kdone+'</b>/5';
     document.getElementById('msBar').style.width=Math.round(done/100*100)+'%';
   }
 })();

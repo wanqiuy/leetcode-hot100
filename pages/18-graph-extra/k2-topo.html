@@ -32,6 +32,19 @@ pre{background:#0f172a;color:#e2e8f0;border-radius:10px;padding:14px 16px;overfl
 .rel a{color:#2563eb;text-decoration:none;font-weight:500}
 .rel a:hover{text-decoration:underline}
 footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
+
+/* 标记控件 v2 */
+.mk{display:inline-flex;align-items:center;gap:6px;cursor:pointer;user-select:none}
+.mk input[type=checkbox]{width:17px;height:17px;cursor:pointer;accent-color:#16a34a;margin:0}
+.lv{border:1.5px solid #d1d5db;background:#fff;border-radius:999px;padding:3px 14px;font-size:12px;cursor:pointer;color:#6b7280;transition:all .15s}
+.lv:hover{transform:translateY(-1px)}
+.lv.on-high{background:#dcfce7;border-color:#16a34a;color:#16a34a;font-weight:600}
+.lv.on-mid{background:#fef3c7;border-color:#d97706;color:#d97706;font-weight:600}
+.lv.on-low{background:#fee2e2;border-color:#dc2626;color:#dc2626;font-weight:600}
+.markbar{display:flex;align-items:center;gap:12px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:12px 16px;margin:14px 0;font-size:14px;flex-wrap:wrap}
+.markbar .lab{color:#6b7280;font-size:13px}
+.card .row2{display:flex;align-items:center;gap:10px;padding:0 18px 12px 70px;font-size:13px;color:#6b7280;flex-wrap:wrap}
+.card .sep{color:#e5e7eb}
 </style>
 </head>
 <body>
@@ -41,7 +54,7 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 </div></header>
 <div class="wrap">
 <section class="prob">
-<h2>拓扑排序 <span class="badge know">知识点</span></h2>
+<h2>拓扑排序 <span class="badge know">知识点</span></h2><div class="markbar"><span class="lab">标记本知识点：</span><span class="mkbox" data-n="k2"></span></div>
 <div class="desc">拓扑排序处理「有先后依赖关系」的任务排序问题：给定有向无环图（DAG），输出一个满足所有依赖的线性顺序；如果图中有环，则不存在合法顺序——因此它也是判环的标准手段。</div>
 <h3>核心思想</h3>
 <p>Kahn 算法（BFS 版）：入度为 0 的节点没有任何前置依赖，可以直接摘走；摘掉后它的邻居入度减 1，可能产生新的入度 0 节点。不断重复直到队列为空。如果摘走的节点数等于总节点数，说明无环且得到了合法顺序；否则剩下的节点都在环上，拓扑排序不存在。</p>
@@ -97,5 +110,44 @@ public boolean canFinish(int n, int[][] prerequisites) {
 <div class="pager"><a href="k1-dfs-bfs.html">← 上一篇：DFS 与 BFS 遍历</a><a class="mid" href="../../18-graph-extra.html">返回「图论知识补充」列表</a><a href="k3-union-find.html">下一篇：并查集 →</a></div>
 </div>
 <footer>LeetCode 热题100 题解手册 · Java</footer>
+
+<script>
+(function(){
+  var KEY='hot100-marks';
+  function load(){ try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){return{}} }
+  function save(m){ localStorage.setItem(KEY, JSON.stringify(m)); }
+  function get(n){ var m=load(); return m[n]||{done:false,level:''}; }
+  function set(n,done,level){ var m=load(); m[n]={done:done,level:level}; save(m); }
+  window.HOT100={load:load,get:get,set:set};
+
+  window.renderMark=function(el,n){
+    var st=get(n);
+    el.innerHTML='';
+    var lab=document.createElement('label'); lab.className='mk';
+    var cb=document.createElement('input'); cb.type='checkbox'; cb.checked=!!st.done;
+    cb.addEventListener('change',function(e){ e.stopPropagation(); var s=get(n); set(n,cb.checked,s.level); });
+    lab.appendChild(cb); lab.appendChild(document.createTextNode(' 学过'));
+    el.appendChild(lab);
+    var sep=document.createElement('span'); sep.className='sep'; sep.textContent='|'; el.appendChild(sep);
+    el.appendChild(document.createTextNode('熟练度 '));
+    [['high','高'],['mid','中'],['low','低']].forEach(function(pair){
+      var b=document.createElement('button'); b.className='lv'+(st.level===pair[0]?' on-'+pair[0]:'');
+      b.textContent=pair[1];
+      b.addEventListener('click',function(e){
+        e.preventDefault(); e.stopPropagation();
+        var s=get(n);
+        set(n, s.done, s.level===pair[0]?'':pair[0]);
+        renderMark(el,n);
+        if(window.onMarkChange) window.onMarkChange();
+      });
+      el.appendChild(b);
+    });
+  };
+})();
+</script>
+
+<script>
+document.querySelectorAll('.mkbox').forEach(function(el){ renderMark(el, el.dataset.n); });
+</script>
 </body>
 </html>

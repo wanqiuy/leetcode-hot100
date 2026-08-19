@@ -23,17 +23,69 @@ header p{opacity:.85;font-size:13px;margin-top:4px}
 .card .sub{font-size:12px;color:#9ca3af;padding:0 18px 12px 70px}
 .card .go{font-size:12px;color:#c0c4cc}
 footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
+
+/* 标记控件 v2 */
+.mk{display:inline-flex;align-items:center;gap:6px;cursor:pointer;user-select:none}
+.mk input[type=checkbox]{width:17px;height:17px;cursor:pointer;accent-color:#16a34a;margin:0}
+.lv{border:1.5px solid #d1d5db;background:#fff;border-radius:999px;padding:3px 14px;font-size:12px;cursor:pointer;color:#6b7280;transition:all .15s}
+.lv:hover{transform:translateY(-1px)}
+.lv.on-high{background:#dcfce7;border-color:#16a34a;color:#16a34a;font-weight:600}
+.lv.on-mid{background:#fef3c7;border-color:#d97706;color:#d97706;font-weight:600}
+.lv.on-low{background:#fee2e2;border-color:#dc2626;color:#dc2626;font-weight:600}
+.markbar{display:flex;align-items:center;gap:12px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:12px 16px;margin:14px 0;font-size:14px;flex-wrap:wrap}
+.markbar .lab{color:#6b7280;font-size:13px}
+.card .row2{display:flex;align-items:center;gap:10px;padding:0 18px 12px 70px;font-size:13px;color:#6b7280;flex-wrap:wrap}
+.card .sep{color:#e5e7eb}
 </style>
 </head>
 <body>
 <header><div class="wrap"><a class="back" href="index.html">← 返回目录</a><h1>图论知识补充</h1><p>共 5 个知识点 · 模板 + 图解 · 代码语言：Java</p></div></header>
 <div class="wrap">
-<div class="card"><div class="row1" onclick="location.href='pages/18-graph-extra/k1-dfs-bfs.html'"><span class="no">K1</span><span class="ti">DFS 与 BFS 遍历</span><span class="badge know">知识点</span><span class="go">查看 →</span></div><div class="sub">图论地基：连通性用 DFS，最短路径用 BFS · 关联 200 / 994</div></div>
-<div class="card"><div class="row1" onclick="location.href='pages/18-graph-extra/k2-topo.html'"><span class="no">K2</span><span class="ti">拓扑排序（Kahn 算法）</span><span class="badge know">知识点</span><span class="go">查看 →</span></div><div class="sub">DAG 依赖排序与判环 · 关联 207 课程表</div></div>
-<div class="card"><div class="row1" onclick="location.href='pages/18-graph-extra/k3-union-find.html'"><span class="no">K3</span><span class="ti">并查集（Union-Find）</span><span class="badge know">知识点</span><span class="go">查看 →</span></div><div class="sub">连通性问题神器：路径压缩 + 合并 · 推荐 547 / 684</div></div>
-<div class="card"><div class="row1" onclick="location.href='pages/18-graph-extra/k4-dijkstra.html'"><span class="no">K4</span><span class="ti">Dijkstra 最短路径</span><span class="badge know">知识点</span><span class="go">查看 →</span></div><div class="sub">非负权最短路：堆优化贪心 · 推荐 743 / 1631</div></div>
-<div class="card"><div class="row1" onclick="location.href='pages/18-graph-extra/k5-trie.html'"><span class="no">K5</span><span class="ti">Trie 前缀树</span><span class="badge know">知识点</span><span class="go">查看 →</span></div><div class="sub">字符串集合快速检索 · 关联 208，进阶 212</div></div>
+<div class="card"><div class="row1" onclick="location.href='pages/18-graph-extra/k1-dfs-bfs.html'"><span class="no">K1</span><span class="ti">DFS 与 BFS 遍历</span><span class="badge know">知识点</span><span class="go">查看 →</span></div><div class="sub">图论地基：连通性用 DFS，最短路径用 BFS · 关联 200 / 994</div><div class="row2"><span class="mkbox" data-n="k1"></span></div></div>
+<div class="card"><div class="row1" onclick="location.href='pages/18-graph-extra/k2-topo.html'"><span class="no">K2</span><span class="ti">拓扑排序（Kahn 算法）</span><span class="badge know">知识点</span><span class="go">查看 →</span></div><div class="sub">DAG 依赖排序与判环 · 关联 207 课程表</div><div class="row2"><span class="mkbox" data-n="k2"></span></div></div>
+<div class="card"><div class="row1" onclick="location.href='pages/18-graph-extra/k3-union-find.html'"><span class="no">K3</span><span class="ti">并查集（Union-Find）</span><span class="badge know">知识点</span><span class="go">查看 →</span></div><div class="sub">连通性问题神器：路径压缩 + 合并 · 推荐 547 / 684</div><div class="row2"><span class="mkbox" data-n="k3"></span></div></div>
+<div class="card"><div class="row1" onclick="location.href='pages/18-graph-extra/k4-dijkstra.html'"><span class="no">K4</span><span class="ti">Dijkstra 最短路径</span><span class="badge know">知识点</span><span class="go">查看 →</span></div><div class="sub">非负权最短路：堆优化贪心 · 推荐 743 / 1631</div><div class="row2"><span class="mkbox" data-n="k4"></span></div></div>
+<div class="card"><div class="row1" onclick="location.href='pages/18-graph-extra/k5-trie.html'"><span class="no">K5</span><span class="ti">Trie 前缀树</span><span class="badge know">知识点</span><span class="go">查看 →</span></div><div class="sub">字符串集合快速检索 · 关联 208，进阶 212</div><div class="row2"><span class="mkbox" data-n="k5"></span></div></div>
 </div>
 <footer>LeetCode 热题100 题解手册 · Java</footer>
+
+<script>
+(function(){
+  var KEY='hot100-marks';
+  function load(){ try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){return{}} }
+  function save(m){ localStorage.setItem(KEY, JSON.stringify(m)); }
+  function get(n){ var m=load(); return m[n]||{done:false,level:''}; }
+  function set(n,done,level){ var m=load(); m[n]={done:done,level:level}; save(m); }
+  window.HOT100={load:load,get:get,set:set};
+
+  window.renderMark=function(el,n){
+    var st=get(n);
+    el.innerHTML='';
+    var lab=document.createElement('label'); lab.className='mk';
+    var cb=document.createElement('input'); cb.type='checkbox'; cb.checked=!!st.done;
+    cb.addEventListener('change',function(e){ e.stopPropagation(); var s=get(n); set(n,cb.checked,s.level); });
+    lab.appendChild(cb); lab.appendChild(document.createTextNode(' 学过'));
+    el.appendChild(lab);
+    var sep=document.createElement('span'); sep.className='sep'; sep.textContent='|'; el.appendChild(sep);
+    el.appendChild(document.createTextNode('熟练度 '));
+    [['high','高'],['mid','中'],['low','低']].forEach(function(pair){
+      var b=document.createElement('button'); b.className='lv'+(st.level===pair[0]?' on-'+pair[0]:'');
+      b.textContent=pair[1];
+      b.addEventListener('click',function(e){
+        e.preventDefault(); e.stopPropagation();
+        var s=get(n);
+        set(n, s.done, s.level===pair[0]?'':pair[0]);
+        renderMark(el,n);
+        if(window.onMarkChange) window.onMarkChange();
+      });
+      el.appendChild(b);
+    });
+  };
+})();
+</script>
+
+<script>
+document.querySelectorAll('.mkbox').forEach(function(el){ renderMark(el, el.dataset.n); });
+</script>
 </body>
 </html>
