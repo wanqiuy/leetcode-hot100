@@ -72,11 +72,12 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 <div class="desc">网格中 2 表示腐烂橘子、1 表示新鲜橘子、0 表示空格。每分钟腐烂会向上下左右扩散，求所有橘子腐烂的最少分钟数；若有橘子永远不会腐烂则返回 -1。<div class="ex">输入：[[2,1,1],[1,1,0],[0,1,1]]
 输出：4</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：多源 BFS（所有腐烂橘子同时入队，按层扩散）。</p>
 <p><b>先想清楚两个问题：</b></p>
 <p><b>Q1：多个腐烂源同时扩散，怎么模拟「每分钟」？</b>多源 BFS：开局把所有腐烂橘子一起入队，然后按层处理——每处理完队列中当前这一层（size 个节点），就代表过去了一分钟，minutes++。</p>
 <p><b>Q2：怎么判断有橘子永远烂不掉？</b>先统计新鲜橘子数 fresh，每感染一个就 fresh--；BFS 结束后 fresh&gt;0 说明有被空格隔开的孤岛，返回 -1。</p>
 <p><b>照着写的 4 步：</b></p>
-<p>① 扫全图：腐烂橘子坐标入队，新鲜橘子计数 fresh；<br>② 当队列非空且 fresh&gt;0 时，取 size=q.size()，只处理这一层；<br>③ 弹出层内每个橘子，向四方向找新鲜橘子：置 2、fresh--、入队；<br>④ 一层处理完 minutes++；循环结束后 fresh==0 返回 minutes，否则返回 -1。</p>
+<p>① 扫全图：腐烂橘子坐标入队，新鲜橘子计数 fresh；<br>② 当队列非空且 fresh&gt;0 时，取 size=queue.size()，只处理这一层；<br>③ 弹出层内每个橘子，向四方向找新鲜橘子：置 2、fresh--、入队；<br>④ 一层处理完 minutes++；循环结束后 fresh==0 返回 minutes，否则返回 -1。</p>
 <p>易错点：层数统计是先固定 size 再循环弹出不是边弹边判断（否则同一分钟的新橘子会被当成下一层）；循环条件要带 fresh&gt;0 不是只判队列非空（避免全部腐烂后空转一分钟）。</p>
 <pre class="diagram">逐步推演：[[2,1,1],[1,1,0],[0,1,1]]，初始 fresh=6
 第1分钟（处理第0层 (0,0)）：感染 (0,1)(1,0)
@@ -90,31 +91,35 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 第3分钟：感染 (2,1) → fresh=1
 第4分钟：感染 (2,2) → fresh=0，循环结束
 返回 4</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
+    // 四方向偏移：上、左、下、右
+    private static final int[] dr = {-1, 0, 1, 0};
+    private static final int[] dc = {0, -1, 0, 1};
+
     public int orangesRotting(int[][] grid) {
-        int m = grid.length, n = grid[0].length;
-        Queue&lt;int[]&gt; q = new ArrayDeque&lt;&gt;();
+        int R = grid.length, C = grid[0].length;
+        Queue&lt;int[]&gt; queue = new ArrayDeque&lt;&gt;();
         int fresh = 0;
         // ① 所有腐烂源入队，统计新鲜橘子数
-        for (int i = 0; i &lt; m; i++)
-            for (int j = 0; j &lt; n; j++) {
-                if (grid[i][j] == 2) q.offer(new int[]{i, j});
-                else if (grid[i][j] == 1) fresh++;
+        for (int r = 0; r &lt; R; r++)
+            for (int c = 0; c &lt; C; c++) {
+                if (grid[r][c] == 2) queue.offer(new int[]{r, c});
+                else if (grid[r][c] == 1) fresh++;
             }
-        int[][] dirs = {{1,0},{-1,0},{0,1},{0,-1}};
         int minutes = 0;
         // ② 按层扩散，一层 = 一分钟
-        while (!q.isEmpty() &amp;&amp; fresh &gt; 0) {
-            int size = q.size();
+        while (!queue.isEmpty() &amp;&amp; fresh &gt; 0) {
+            int size = queue.size();
             // ③ 处理当前层：感染四方向的新鲜橘子
             for (int s = 0; s &lt; size; s++) {
-                int[] cur = q.poll();
-                for (int[] d : dirs) {
-                    int x = cur[0] + d[0], y = cur[1] + d[1];
-                    if (x &gt;= 0 &amp;&amp; y &gt;= 0 &amp;&amp; x &lt; m &amp;&amp; y &lt; n &amp;&amp; grid[x][y] == 1) {
-                        grid[x][y] = 2; fresh--;
-                        q.offer(new int[]{x, y});
+                int[] cur = queue.poll();
+                for (int k = 0; k &lt; 4; k++) {
+                    int nr = cur[0] + dr[k], nc = cur[1] + dc[k];
+                    if (nr &gt;= 0 &amp;&amp; nc &gt;= 0 &amp;&amp; nr &lt; R &amp;&amp; nc &lt; C &amp;&amp; grid[nr][nc] == 1) {
+                        grid[nr][nc] = 2;
+                        fresh--;
+                        queue.offer(new int[]{nr, nc});
                     }
                 }
             }

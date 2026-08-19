@@ -72,11 +72,12 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 <div class="desc">矩阵每行从左到右升序、每列从上到下升序，在其中搜索目标值 target。<div class="ex">输入：matrix=[[1,4,7,11,15],[2,5,8,12,19],[3,6,9,16,22],[10,13,14,17,24],[18,21,23,26,30]], target=5
 输出：true</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：从右上角出发的排除法（Z 字形查找）。</p>
 <p><b>先想清楚两个问题：</b></p>
 <p><b>Q1：从哪个角出发才能每步都排除一整行或一整列？</b>从右上角（或左下角）：站在右上角时，左边全比它小、下边全比它大，比较一次就能确定排除方向；若从左上角出发，右边和下边都更大，无法二选一。</p>
-<p><b>Q2：每步怎么移动？</b>当前值等于 target 直接返回 true；比 target 大说明这一列（下方更大）都不可能，j-- 左移；比 target 小说明这一行（左方更小）都不可能，i++ 下移。</p>
+<p><b>Q2：每步怎么移动？</b>当前值等于 target 直接返回 true；比 target 大说明这一列（下方更大）都不可能，y-- 左移；比 target 小说明这一行（左方更小）都不可能，x++ 下移。</p>
 <p><b>照着写的 3 步：</b></p>
-<p>① 初始化 i=0、j=n-1，即站在右上角；<br>② 循环条件 i&lt;m 且 j&gt;=0：相等返回 true，matrix[i][j]&gt;target 则 j--，否则 i++；<br>③ 越界退出循环说明不存在，返回 false。</p>
+<p>① 初始化 x=0、y=n-1，即站在右上角；<br>② 循环条件 x&lt;m 且 y&gt;=0：相等返回 true，matrix[x][y]&gt;target 则 y--，否则 x++；<br>③ 越界退出循环说明不存在，返回 false。</p>
 <p>易错点：起点是右上角不是左上角；「大则左移、小则下移」的方向不要记反（可记：大了往小的方向走——左，小了往大的方向走——下）。</p>
 <pre class="diagram">逐步推演：5×5 矩阵中找 target=5
  1  4  7 11 15
@@ -84,21 +85,21 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
  3  6  9 16 22
 10 13 14 17 24
 18 21 23 26 30
-① 站 (0,4)=15：15&gt;5 → j-- 到 (0,3)=11
-② 11&gt;5 → j-- 到 (0,2)=7；7&gt;5 → j-- 到 (0,1)=4
-③ 4&lt;5 → i++ 到 (1,1)=5，相等，返回 true
+① 站 (0,4)=15：15&gt;5 → y-- 到 (0,3)=11
+② 11&gt;5 → y-- 到 (0,2)=7；7&gt;5 → y-- 到 (0,1)=4
+③ 4&lt;5 → x++ 到 (1,1)=5，相等，返回 true
 共 5 步，每步排除一行或一列。</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
     public boolean searchMatrix(int[][] matrix, int target) {
         int m = matrix.length, n = matrix[0].length;
         // ① 站在右上角
-        int i = 0, j = n - 1;
+        int x = 0, y = n - 1;
         // ② 相等命中；大了左移排除列；小了下移排除行
-        while (i &lt; m &amp;&amp; j &gt;= 0) {
-            if (matrix[i][j] == target) return true;
-            else if (matrix[i][j] &gt; target) j--;
-            else i++;
+        while (x &lt; m &amp;&amp; y &gt;= 0) {
+            if (matrix[x][y] == target) return true;
+            if (matrix[x][y] &gt; target) y--;
+            else x++;
         }
         // ③ 走出边界仍未命中
         return false;

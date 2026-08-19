@@ -72,41 +72,42 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 <div class="desc">给定仅含数字 2-9 的字符串，按电话按键映射返回所有可能的字母组合。<div class="ex">输入："23"
 输出：["ad","ae","af","bd","be","bf","cd","ce","cf"]</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：回溯逐位拼字母（映射表可用数组代替官方的 HashMap，更简洁）。</p>
 <p><b>先想清楚两个问题：</b></p>
-<p><b>Q1：第 i 层递归干什么？</b>第 i 层只负责第 i 个数字：查映射表拿到它对应的字母串，逐个字母尝试拼到当前串末尾，然后交给第 i+1 层处理下一个数字。</p>
-<p><b>Q2：什么时候收集、怎么回溯？</b>i 走到 digits.length() 说明每位都选好了，收集当前串；用 StringBuilder 做路径，递归返回后 deleteCharAt 删掉刚拼的字母即完成撤销。</p>
+<p><b>Q1：第 index 层递归干什么？</b>第 index 层只负责第 index 个数字：查映射表拿到它对应的字母串，逐个字母尝试拼到当前串末尾，然后交给第 index+1 层处理下一个数字。</p>
+<p><b>Q2：什么时候收集、怎么回溯？</b>index 走到 digits.length() 说明每位都选好了，收集当前串；用 StringBuilder 做路径，递归返回后 deleteCharAt 删掉刚拼的字母即完成撤销。</p>
 <p><b>照着写的 4 步：</b></p>
-<p>① 建映射表 MAP（下标即数字），空串直接返回空答案；<br>② 终止条件：i==digits.length()，把 sb.toString() 加入答案并 return；<br>③ 做选择：枚举 MAP[digits[i]] 的每个字母 c，sb.append(c)，递归 backtrack(i+1)；<br>④ 撤销选择：sb.deleteCharAt(末尾)。</p>
-<p>易错点：入口要特判空串不是直接递归（否则会得到 [""]）；撤销是 deleteCharAt(length-1) 不是清空 sb；每层只处理一个数字不是一次处理完所有数字。</p>
+<p>① 建映射表 MAP（下标即数字），空串直接返回空答案；<br>② 终止条件：index==digits.length()，把 combination.toString() 加入答案并 return；<br>③ 做选择：枚举 MAP[digits[index]] 的每个字母 c，combination.append(c)，递归 backtrack(index+1)；<br>④ 撤销选择：combination.deleteCharAt(末尾)。</p>
+<p>易错点：入口要特判空串不是直接递归（否则会得到 [""]）；撤销是 deleteCharAt(length-1) 不是清空 combination；每层只处理一个数字不是一次处理完所有数字。</p>
 <pre class="diagram">逐步推演：digits="23"（2→abc，3→def）
-sb="" → 第0层处理 '2'：
-  选a → sb="a" → 第1层处理 '3'：
-    选d → sb="ad"，i=2 到底，收集 "ad"；撤销d → sb="a"
+combination="" → 第0层处理 '2'：
+  选a → combination="a" → 第1层处理 '3'：
+    选d → combination="ad"，index=2 到底，收集 "ad"；撤销d → "a"
     选e → 收集 "ae"；撤销e
     选f → 收集 "af"；撤销f
-  撤销a → sb=""
-  选b → sb="b" → 依次收集 "bd","be","bf"；撤销b
+  撤销a → combination=""
+  选b → combination="b" → 依次收集 "bd","be","bf"；撤销b
   选c → 依次收集 "cd","ce","cf"
 共 9 个组合</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
-    // ① 数字到字母的映射表
+    // ① 数字到字母的映射表（下标即数字，代替官方的 HashMap）
     private static final String[] MAP = {"", "", "abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz"};
     public List&lt;String&gt; letterCombinations(String digits) {
-        List&lt;String&gt; ans = new ArrayList&lt;&gt;();
-        if (digits.isEmpty()) return ans; // ① 特判空串
-        backtrack(digits, 0, new StringBuilder(), ans);
-        return ans;
+        List&lt;String&gt; combinations = new ArrayList&lt;&gt;();
+        if (digits.isEmpty()) return combinations; // ① 特判空串
+        backtrack(digits, 0, new StringBuilder(), combinations);
+        return combinations;
     }
-    private void backtrack(String digits, int i, StringBuilder sb, List&lt;String&gt; ans) {
+    private void backtrack(String digits, int index, StringBuilder combination, List&lt;String&gt; combinations) {
         // ② 每位都选完，收集
-        if (i == digits.length()) { ans.add(sb.toString()); return; }
+        if (index == digits.length()) { combinations.add(combination.toString()); return; }
         // ③ 做选择：枚举当前数字对应的每个字母，递归下一位
-        for (char c : MAP[digits.charAt(i) - '0'].toCharArray()) {
-            sb.append(c);
-            backtrack(digits, i + 1, sb, ans);
+        for (char c : MAP[digits.charAt(index) - '0'].toCharArray()) {
+            combination.append(c);
+            backtrack(digits, index + 1, combination, combinations);
             // ④ 撤销选择（回溯）
-            sb.deleteCharAt(sb.length() - 1);
+            combination.deleteCharAt(combination.length() - 1);
         }
     }
 }</code></pre>

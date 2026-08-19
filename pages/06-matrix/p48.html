@@ -72,11 +72,12 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 <div class="desc">给定 n×n 矩阵表示的图像，将其顺时针旋转 90 度，要求原地修改。<div class="ex">输入：[[1,2,3],[4,5,6],[7,8,9]]
 输出：[[7,4,1],[8,5,2],[9,6,3]]</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：先转置（transpose）、再每行反转（reflect）。</p>
 <p><b>先想清楚两个问题：</b></p>
 <p><b>Q1：不想做四个格子的环形交换，有没有更简单的等价变换？</b>顺时针旋转 90° = 先沿主对角线转置（行列互换），再把每一行左右翻转，两步都是简单的原地交换。</p>
 <p><b>Q2：转置时遍历哪些格子？</b>只遍历主对角线一侧（j 从 i+1 开始），把 matrix[i][j] 与 matrix[j][i] 互换；若整个方阵都扫会交换两次等于没动。</p>
 <p><b>照着写的 3 步：</b></p>
-<p>① 双重循环 i&lt;j，交换 matrix[i][j] 和 matrix[j][i]，完成转置；<br>② 对每一行，j 从 0 到 n/2-1，交换 matrix[i][j] 和 matrix[i][n-1-j]，完成左右翻转；<br>③ 两步结束即得旋转结果，无需返回值（原地修改）。</p>
+<p>① transpose：双重循环 i&lt;j，交换 matrix[i][j] 和 matrix[j][i]，完成转置；<br>② reflect：对每一行，j 从 0 到 n/2-1，交换 matrix[i][j] 和 matrix[i][n-1-j]，完成左右翻转；<br>③ rotate 里依次调用两步即得结果，无需返回值（原地修改）。</p>
 <p>易错点：转置内层循环是 j=i+1 不是 j=0（否则交换两次复原）；行翻转只循环到 n/2 不是 n（否则又翻回去）。</p>
 <pre class="diagram">逐步推演：[[1,2,3],[4,5,6],[7,8,9]]
 ① 转置（交换 (0,1)↔(1,0)、(0,2)↔(2,0)、(1,2)↔(2,1)）：
@@ -88,25 +89,32 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
    8 5 2
    9 6 3
 即顺时针旋转 90° 的结果。</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
+    // ③ 两步组合完成顺时针旋转 90°
     public void rotate(int[][] matrix) {
+        transpose(matrix);
+        reflect(matrix);
+    }
+    // ① 沿主对角线转置：只扫 j&gt;i 的上三角
+    private void transpose(int[][] matrix) {
         int n = matrix.length;
-        // ① 沿主对角线转置：只扫 j&gt;i 的上三角
         for (int i = 0; i &lt; n; i++)
             for (int j = i + 1; j &lt; n; j++) {
-                int t = matrix[i][j];
+                int tmp = matrix[i][j];
                 matrix[i][j] = matrix[j][i];
-                matrix[j][i] = t;
+                matrix[j][i] = tmp;
             }
-        // ② 每行左右翻转：只扫左半行
+    }
+    // ② 每行左右翻转：只扫左半行
+    private void reflect(int[][] matrix) {
+        int n = matrix.length;
         for (int i = 0; i &lt; n; i++)
             for (int j = 0; j &lt; n / 2; j++) {
-                int t = matrix[i][j];
+                int tmp = matrix[i][j];
                 matrix[i][j] = matrix[i][n - 1 - j];
-                matrix[i][n - 1 - j] = t;
+                matrix[i][n - 1 - j] = tmp;
             }
-        // ③ 原地完成，直接返回
     }
 }</code></pre>
 <p class="cx">时间复杂度 O(n²) · 空间复杂度 O(1)</p>

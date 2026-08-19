@@ -72,14 +72,15 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 <div class="desc">给定 m×n 矩阵，若某个元素为 0，则将其所在的整行和整列全部置为 0，要求原地修改。<div class="ex">输入：[[1,1,1],[1,0,1],[1,1,1]]
 输出：[[1,0,1],[0,0,0],[1,0,1]]</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：用首行首列做标记（O(1) 空间）。</p>
 <p><b>先想清楚两个问题：</b></p>
 <p><b>Q1：不开辟额外数组，怎么记住哪些行、哪些列要置零？</b>直接拿矩阵自己的第一行和第一列当「标记数组」：matrix[i][j]=0 就把 matrix[i][0] 和 matrix[0][j] 置 0，相当于在第 i 行、第 j 列的「表头」上盖章。</p>
-<p><b>Q2：首行首列自己含 0 怎么办？</b>它们被征用做标记后，自身是否该置零就说不清了，所以先用两个布尔变量 row0、col0 单独记下来，最后再处理首行首列。</p>
+<p><b>Q2：首行首列自己含 0 怎么办？</b>它们被征用做标记后，自身是否该置零就说不清了，所以先用两个布尔变量 flagRow0、flagCol0 单独记下来，最后再处理首行首列。</p>
 <p><b>照着写的 4 步：</b></p>
-<p>① 扫首行首列，用 row0、col0 记录它们自身是否含 0；<br>② 扫内部区域（下标从 1 开始），遇到 0 就把该行表头 matrix[i][0] 和该列表头 matrix[0][j] 置 0；<br>③ 再扫内部区域，只要自己的行表头或列表头是 0，就把当前格置 0；<br>④ 最后根据 row0、col0 决定要不要把首行、首列整体置零。</p>
+<p>① 先扫首列、再扫首行，用 flagCol0、flagRow0 记录它们自身是否含 0；<br>② 扫内部区域（下标从 1 开始），遇到 0 就把该行表头 matrix[i][0] 和该列表头 matrix[0][j] 置 0；<br>③ 再扫内部区域，只要自己的行表头或列表头是 0，就把当前格置 0；<br>④ 最后根据 flagRow0、flagCol0 决定要不要把首行、首列整体置零。</p>
 <p>易错点：②③ 的循环下标是从 1 开始不是从 0 开始（否则会污染标记本身）；首行首列是最后处理不是最先处理（否则标记会被提前覆盖）。</p>
 <pre class="diagram">逐步推演：[[1,1,1],[1,0,1],[1,1,1]]
-① 首行无0 row0=false；首列无0 col0=false
+① 首列无0 flagCol0=false；首行无0 flagRow0=false
 ② 扫内部：matrix[1][1]=0 → 行表头 matrix[1][0]=0，列表头 matrix[0][1]=0
    矩阵变为：
    1 0 1
@@ -88,16 +89,16 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 ③ 回填内部：看每个格的表头
    (1,1):行表头0 → 置0   (1,2):行表头0 → 置0
    (2,1):列表头0 → 置0   (2,2):表头都非0 → 保留1
-④ row0=col0=false，首行首列不动
+④ flagRow0=flagCol0=false，首行首列不动
 结果：[[1,0,1],[0,0,0],[1,0,1]]</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
     public void setZeroes(int[][] matrix) {
         int m = matrix.length, n = matrix[0].length;
-        boolean row0 = false, col0 = false;
-        // ① 记录首行、首列自身是否含 0
-        for (int j = 0; j &lt; n; j++) if (matrix[0][j] == 0) row0 = true;
-        for (int i = 0; i &lt; m; i++) if (matrix[i][0] == 0) col0 = true;
+        boolean flagRow0 = false, flagCol0 = false;
+        // ① 先记录首列、首行自身是否含 0
+        for (int i = 0; i &lt; m; i++) if (matrix[i][0] == 0) flagCol0 = true;
+        for (int j = 0; j &lt; n; j++) if (matrix[0][j] == 0) flagRow0 = true;
         // ② 内部区域发现 0，就在首行首列打标记
         for (int i = 1; i &lt; m; i++)
             for (int j = 1; j &lt; n; j++)
@@ -106,9 +107,9 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
         for (int i = 1; i &lt; m; i++)
             for (int j = 1; j &lt; n; j++)
                 if (matrix[i][0] == 0 || matrix[0][j] == 0) matrix[i][j] = 0;
-        // ④ 最后处理首行首列
-        if (row0) for (int j = 0; j &lt; n; j++) matrix[0][j] = 0;
-        if (col0) for (int i = 0; i &lt; m; i++) matrix[i][0] = 0;
+        // ④ 最后处理首行、首列
+        if (flagRow0) for (int j = 0; j &lt; n; j++) matrix[0][j] = 0;
+        if (flagCol0) for (int i = 0; i &lt; m; i++) matrix[i][0] = 0;
     }
 }</code></pre>
 <p class="cx">时间复杂度 O(mn) · 空间复杂度 O(1)</p>

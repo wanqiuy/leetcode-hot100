@@ -71,8 +71,9 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 <h2>208. 实现 Trie (前缀树) <span class="badge medium">中等</span></h2><div class="markbar"><span class="lab">标记本题：</span><span class="mkbox" data-n="208"></span></div>
 <div class="desc">实现前缀树的三个方法：insert(word) 插入单词、search(word) 查询完整单词是否存在、startsWith(prefix) 查询是否存在以 prefix 开头的单词。<div class="ex">insert("apple"); search("apple") → true; search("app") → false; startsWith("app") → true</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：每个节点存 26 个子槽位 + isEnd 结束标记。</p>
 <p><b>先想清楚两个问题：</b></p>
-<p><b>Q1：Trie 节点里存什么？</b>每个节点只存两样东西：26 个子节点槽位 children[26]（下标 c-'a' 对应字母）和一个布尔 isEnd 标记「是否有单词恰好在这里结束」。字符本身由「从父节点走哪条边过来」隐含表示。</p>
+<p><b>Q1：Trie 节点里存什么？</b>每个节点只存两样东西：26 个子节点槽位 children[26]（下标 ch-'a' 对应字母）和一个布尔 isEnd 标记「是否有单词恰好在这里结束」。字符本身由「从父节点走哪条边过来」隐含表示。</p>
 <p><b>Q2：search 和 startsWith 的区别在哪？</b>两者都先沿字符路径逐层走到底；区别只在终点判断——search 要求末节点 isEnd 为 true（存在完整单词），startsWith 只要能走到底（末节点非空）就行。</p>
 <p><b>照着写的 4 步：</b></p>
 <p>① 定义节点结构：Trie[] children = new Trie[26]，boolean isEnd；<br>② insert：从根出发逐字符走，槽位为空就新建节点，走完把末节点 isEnd 置 true；<br>③ 抽公共方法 searchPrefix：逐字符走，途中槽位为空返回 null，走完返回末节点；<br>④ search 返回 node!=null 且 node.isEnd；startsWith 返回 node!=null。</p>
@@ -91,28 +92,34 @@ root
 search("app")：走到第二个 p，isEnd=true → true
 search("ap")：走到第一个 p，isEnd=false → false
 startsWith("ap")：能走到底 → true</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Trie {
     // ① 节点结构：26 个槽位 + 结束标记
-    private Trie[] children = new Trie[26];
-    private boolean isEnd = false;
+    private Trie[] children;
+    private boolean isEnd;
+
+    public Trie() {
+        children = new Trie[26];
+        isEnd = false;
+    }
 
     // ② 插入：逐字符走，缺节点就建，末尾打标记
     public void insert(String word) {
         Trie node = this;
-        for (char c : word.toCharArray()) {
-            int idx = c - 'a';
-            if (node.children[idx] == null) node.children[idx] = new Trie();
-            node = node.children[idx];
+        for (int i = 0; i &lt; word.length(); i++) {
+            int index = word.charAt(i) - 'a';
+            if (node.children[index] == null) node.children[index] = new Trie();
+            node = node.children[index];
         }
         node.isEnd = true;
     }
     // ③ 公共方法：沿路径走到底，返回末节点（走不通返回 null）
     private Trie searchPrefix(String prefix) {
         Trie node = this;
-        for (char c : prefix.toCharArray()) {
-            node = node.children[c - 'a'];
-            if (node == null) return null;
+        for (int i = 0; i &lt; prefix.length(); i++) {
+            int index = prefix.charAt(i) - 'a';
+            if (node.children[index] == null) return null;
+            node = node.children[index];
         }
         return node;
     }

@@ -72,6 +72,7 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 <div class="desc">在 m×n 字符网格中搜索单词 word，相邻字符须上下左右相连，同一格子不可重复使用。<div class="ex">输入：board=[["A","B","C","E"],["S","F","C","S"],["A","D","E","E"]], word="ABCCED"
 输出：true</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：回溯 + 原地标记（走过的格子临时改为 '#'，回溯时恢复）。</p>
 <p><b>先想清楚两个问题：</b></p>
 <p><b>Q1：整体策略是什么？</b>以每个格子为起点做 DFS 回溯：当前格匹配 word[k] 后，向四方向递归匹配 word[k+1]；只要某条路径把 k 推到 word.length() 就成功。</p>
 <p><b>Q2：「同一格子不能重复使用」怎么落地？</b>走过的格子先存下原字符再临时改成 '#'（做选择），四个方向都递归完后改回原字符（撤销选择/恢复现场），这样同一条路径内不会回头踩自己，换条路径又能正常使用。</p>
@@ -89,7 +90,7 @@ A D E E
      → 下 (2,2) E ✓ 置'#'
        → 左 (2,1) D ✓，k=6=len，返回 true
 沿途每层把 '#' 恢复回原字符，最终返回 true</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
     public boolean exist(char[][] board, String word) {
         // ① 每个格子都当起点试一次

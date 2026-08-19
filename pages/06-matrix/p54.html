@@ -72,46 +72,45 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 <div class="desc">给定 m×n 矩阵，按从外到内的顺时针螺旋顺序返回所有元素。<div class="ex">输入：[[1,2,3],[4,5,6],[7,8,9]]
 输出：[1,2,3,6,9,8,7,4,5]</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：按层模拟，四条边界围成一圈逐层剥离。</p>
 <p><b>先想清楚两个问题：</b></p>
-<p><b>Q1：整体策略是什么？</b>把矩阵看成一层层同心圈，每圈按「上边左→右、右边上→下、下边右→左、左边下→上」四条边顺序剥下来，剥完一圈四条边界各向内缩一格，直到边界交错。</p>
-<p><b>Q2：怎么保证不重复遍历？</b>每走完一条边立刻收缩对应边界；走后两条边（下边、左边）之前要先检查边界还有效，否则只剩单行或单列时会把同一行/列再扫一遍。</p>
+<p><b>Q1：整体策略是什么？</b>把矩阵看成一层层同心圈，每圈按「上边左→右、右边上→下、下边右→左、左边下→上」四条边顺序剥下来；剥完一整圈，left/right/top/bottom 四条边界统一向内各缩一格，直到边界交错。</p>
+<p><b>Q2：怎么保证角上不重复、单行单列时不多走？</b>顶行和右列每圈完整走，但右列从 top+1 开始（左上角已被顶行覆盖）；底行只走到 left+1、左列只走到 top+1（左下角、右下角已被右列/底行覆盖）；并且底行和左列只在 left&lt;right 且 top&lt;bottom 时才走——只剩单行或单列时，顶行+右列已经把它走完，底行左列必须跳过。</p>
 <p><b>照着写的 4 步：</b></p>
-<p>① 初始化 top=0、bottom=m-1、left=0、right=n-1，循环条件 top&lt;=bottom 且 left&lt;=right；<br>② 沿顶行 left→right 收集，top++；再沿右列 top→bottom 收集，right--；<br>③ 若 top&lt;=bottom 仍成立，沿底行 right→left 收集，bottom--；<br>④ 若 left&lt;=right 仍成立，沿左列 bottom→top 收集，left++。</p>
-<p>易错点：③④ 前的边界检查是「收缩完前两条边之后再判断」不是用循环入口的旧值；每条边走完是立刻收缩对应边界不是四条走完一起收缩。</p>
+<p>① 初始化 order，特判空矩阵；left=0、right=columns-1、top=0、bottom=rows-1，循环条件 left&lt;=right 且 top&lt;=bottom；<br>② 顶行 column 从 left→right 收集；右列 row 从 top+1→bottom 收集；<br>③ 若 left&lt;right 且 top&lt;bottom：底行 column 从 right-1→left+1 收集，左列 row 从 bottom→top+1 收集；<br>④ 一圈结束，left++、right--、top++、bottom--，进入下一圈。</p>
+<p>易错点：右列从 top+1 开始不是从 top 开始（左上角顶行走过）；底行不走到 left、左列不走到 top（角上不重复）；③ 的保护条件用的是收缩前的 left/right/top/bottom，四条边界在 ④ 才统一收缩；入口要特判空矩阵。</p>
 <pre class="diagram">逐步推演：[[1,2,3],[4,5,6],[7,8,9]]
-第1圈：top=0,bottom=2,left=0,right=2
- ② 顶行 1→2→3，top=1；右列 6→9，right=1
- ③ 底行 8→7，bottom=1
- ④ 左列 4，left=1
-第2圈：top=1,bottom=1,left=1,right=1
- ② 顶行 5，top=2；右列无（top&gt;bottom），right=0
- ③ top&gt;bottom 跳过；④ left&gt;right 跳过
-循环结束。结果：[1,2,3,6,9,8,7,4,5]</pre>
-<h3>代码（Java）</h3>
+第1圈：left=0,right=2,top=0,bottom=2
+ ② 顶行 1→2→3；右列 6(row=1)→9(row=2)
+ ③ left&lt;right 且 top&lt;bottom：底行 8(column=1，止于 left+1)；左列 7(row=2)→4(row=1，止于 top+1)
+ ④ 收缩：left=1,right=1,top=1,bottom=1
+第2圈：顶行 5；右列无；left==right 跳过 ③
+ ④ 收缩后 left=2&gt;right=0，退出
+结果：[1,2,3,6,9,8,7,4,5]</pre>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
     public List&lt;Integer&gt; spiralOrder(int[][] matrix) {
-        List&lt;Integer&gt; ans = new ArrayList&lt;&gt;();
-        // ① 初始化四条边界
-        int top = 0, bottom = matrix.length - 1;
-        int left = 0, right = matrix[0].length - 1;
-        while (top &lt;= bottom &amp;&amp; left &lt;= right) {
-            // ② 顶行左→右，收缩 top；右列上→下，收缩 right
-            for (int j = left; j &lt;= right; j++) ans.add(matrix[top][j]);
-            top++;
-            for (int i = top; i &lt;= bottom; i++) ans.add(matrix[i][right]);
+        List&lt;Integer&gt; order = new ArrayList&lt;&gt;();
+        // ① 特判空矩阵
+        if (matrix == null || matrix.length == 0 || matrix[0].length == 0) return order;
+        int rows = matrix.length, columns = matrix[0].length;
+        int left = 0, right = columns - 1, top = 0, bottom = rows - 1;
+        while (left &lt;= right &amp;&amp; top &lt;= bottom) {
+            // ② 顶行左→右；右列上→下（从 top+1 起，避开左上角）
+            for (int column = left; column &lt;= right; column++) order.add(matrix[top][column]);
+            for (int row = top + 1; row &lt;= bottom; row++) order.add(matrix[row][right]);
+            // ③ 还有完整的底行和左列才走（端点均不重复覆盖）
+            if (left &lt; right &amp;&amp; top &lt; bottom) {
+                for (int column = right - 1; column &gt; left; column--) order.add(matrix[bottom][column]);
+                for (int row = bottom; row &gt; top; row--) order.add(matrix[row][left]);
+            }
+            // ④ 一圈剥完，四条边界统一内缩
+            left++;
             right--;
-            // ③ 检查有效后，底行右→左，收缩 bottom
-            if (top &lt;= bottom) {
-                for (int j = right; j &gt;= left; j--) ans.add(matrix[bottom][j]);
-                bottom--;
-            }
-            // ④ 检查有效后，左列下→上，收缩 left
-            if (left &lt;= right) {
-                for (int i = bottom; i &gt;= top; i--) ans.add(matrix[i][left]);
-                left++;
-            }
+            top++;
+            bottom--;
         }
-        return ans;
+        return order;
     }
 }</code></pre>
 <p class="cx">时间复杂度 O(mn) · 空间复杂度 O(1)（不计输出数组）</p>

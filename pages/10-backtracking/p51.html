@@ -72,26 +72,27 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 <div class="desc">在 n×n 棋盘上放置 n 个皇后，使其互不攻击（不同行、不同列、不同对角线），返回所有摆法。<div class="ex">输入：n=4
 输出：[[".Q..","...Q","Q...","..Q."],["..Q.","Q...","...Q",".Q.."]]</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：逐行回溯 + 列/对角线布尔数组判冲突。</p>
 <p><b>先想清楚两个问题：</b></p>
 <p><b>Q1：怎么组织回溯？</b>逐行放皇后：第 r 层递归只负责第 r 行，枚举每一列 c 尝试放置。每行必放且只放一个，天然去掉行冲突，只需检查列和两条对角线。</p>
-<p><b>Q2：怎么用 O(1) 判断冲突？</b>用三个布尔数组：col[c] 记列占用；主对角线上 r+c 是定值，用 d1[r+c]；副对角线上 r-c 是定值，加偏移 n-1 避免负数下标，用 d2[r-c+n-1]。</p>
+<p><b>Q2：怎么用 O(1) 判断冲突？</b>用三个布尔数组：cols[c] 记列占用；主对角线上 r+c 是定值，用 d1[r+c]；副对角线上 r-c 是定值，加偏移 n-1 避免负数下标，用 d2[r-c+n-1]。</p>
 <p><b>照着写的 4 步：</b></p>
-<p>① 初始化 n×n 棋盘全为 '.'，开 col[n]、d1[2n-1]、d2[2n-1] 三个标记数组，从第 0 行开始回溯；<br>② 终止条件：r==n，把棋盘每行拼成字符串收集；<br>③ 枚举列 c：若 col[c]、d1[r+c]、d2[r-c+n-1] 任一为 true 则 continue；否则做选择——b[r][c]='Q' 且三个标记置 true，递归 backtrack(r+1)；<br>④ 撤销选择——b[r][c]='.' 且三个标记复位 false。</p>
+<p>① 初始化 n×n 棋盘全为 '.'，开 cols[n]、d1[2n-1]、d2[2n-1] 三个标记数组，从第 0 行开始回溯；<br>② 终止条件：r==n，把棋盘每行拼成字符串收集；<br>③ 枚举列 c：若 cols[c]、d1[r+c]、d2[r-c+n-1] 任一为 true 则 continue；否则做选择——b[r][c]='Q' 且三个标记置 true，递归 backtrack(r+1)；<br>④ 撤销选择——b[r][c]='.' 且三个标记复位 false。</p>
 <p>易错点：副对角线下标是 r-c+n-1 不是 r-c（会越界）；撤销时三个标记和棋盘格是全部复位不是只复位棋盘；标记数组长度是 2n-1 不是 n。</p>
 <pre class="diagram">逐步推演：n=4，跟踪第一条成功路径
-r=0：c=0 无冲突 → 放Q，col[0]=d1[0]=d2[3]=T
-r=1：c=0 列冲突；c=1 d2[1-1+3=3]冲突；c=2 可放 → col[2]=d1[3]=d2[2]=T
+r=0：c=0 无冲突 → 放Q，cols[0]=d1[0]=d2[3]=T
+r=1：c=0 列冲突；c=1 d2[1-1+3=3]冲突；c=2 可放 → cols[2]=d1[3]=d2[2]=T
 r=2：c=0 列冲突；c=1 d1[3]冲突；c=2 列冲突；c=3 d1[5]/d2[2]…均冲突
-  → 本行无解，回溯：撤销 r=1 的 Q（col[2]=d1[3]=d2[2]=F）
-r=1 改放 c=3：col[3]=d1[4]=d2[1]=T
-r=2：c=1 可放（col[1]、d1[3]、d2[4] 均空闲）→ 放Q
+  → 本行无解，回溯：撤销 r=1 的 Q（cols[2]=d1[3]=d2[2]=F）
+r=1 改放 c=3：cols[3]=d1[4]=d2[1]=T
+r=2：c=1 可放（cols[1]、d1[3]、d2[4] 均空闲）→ 放Q
 r=3：c=2 可放 → 放Q，r=4=n，收集：
 . Q . .
 . . . Q
 Q . . .
 . . Q .
 随后逐层撤销，继续找第二组解</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
     List&lt;List&lt;String&gt;&gt; ans = new ArrayList&lt;&gt;();
     public List&lt;List&lt;String&gt;&gt; solveNQueens(int n) {
@@ -101,7 +102,7 @@ Q . . .
         backtrack(board, 0, new boolean[n], new boolean[2*n-1], new boolean[2*n-1]);
         return ans;
     }
-    private void backtrack(char[][] b, int r, boolean[] col, boolean[] d1, boolean[] d2) {
+    private void backtrack(char[][] b, int r, boolean[] cols, boolean[] d1, boolean[] d2) {
         int n = b.length;
         // ② n 行都摆满，收集方案
         if (r == n) {
@@ -112,14 +113,14 @@ Q . . .
         }
         // ③ 枚举第 r 行的每一列，跳过冲突位置
         for (int c = 0; c &lt; n; c++) {
-            if (col[c] || d1[r+c] || d2[r-c+n-1]) continue;
+            if (cols[c] || d1[r+c] || d2[r-c+n-1]) continue;
             // 做选择：放皇后并占领列和两条对角线
             b[r][c] = 'Q';
-            col[c] = d1[r+c] = d2[r-c+n-1] = true;
-            backtrack(b, r + 1, col, d1, d2);
+            cols[c] = d1[r+c] = d2[r-c+n-1] = true;
+            backtrack(b, r + 1, cols, d1, d2);
             // ④ 撤销选择：全部复位
             b[r][c] = '.';
-            col[c] = d1[r+c] = d2[r-c+n-1] = false;
+            cols[c] = d1[r+c] = d2[r-c+n-1] = false;
         }
     }
 }</code></pre>

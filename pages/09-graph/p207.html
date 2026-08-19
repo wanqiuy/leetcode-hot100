@@ -72,44 +72,45 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 <div class="desc">共 numCourses 门课，prerequisites[i]=[a,b] 表示学 a 前必须先修 b，判断能否完成所有课程（等价于判断有向图是否有环）。<div class="ex">输入：numCourses=2, prerequisites=[[1,0]]
 输出：true</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：Kahn 拓扑排序（BFS 入度表）。</p>
 <p><b>先想清楚两个问题：</b></p>
 <p><b>Q1：「能否完成所有课程」等价于什么图论问题？</b>等价于判断有向图是否有环：有环则互相依赖永远学不完。用 Kahn 拓扑排序——不断摘掉「没有先修要求」（入度为 0）的课。</p>
-<p><b>Q2：怎么判断有环？</b>统计成功弹出的课程数 done：若 done==numCourses 说明所有课都被摘掉、无环；若队列提前空了但还有课没弹出，说明剩下的课互相成环。</p>
+<p><b>Q2：怎么判断有环？</b>每弹出一门课就把 numCourses 减 1：若最后 numCourses==0 说明所有课都被摘掉、无环；若队列提前空了但还有课没弹出，说明剩下的课互相成环。</p>
 <p><b>照着写的 4 步：</b></p>
-<p>① 建邻接表 adj 和入度数组 indeg：对每条 [a,b] 加边 b→a 且 indeg[a]++；<br>② 把所有 indeg 为 0 的课入队；<br>③ 循环弹出课程 cur（done++），把它的每个后继 next 的入度减 1，减到 0 就入队；<br>④ 返回 done==numCourses。</p>
+<p>① 建邻接表 adjacency 和入度数组 indegrees：对每条 [a,b] 加边 b→a 且 indegrees[a]++；<br>② 把所有 indegrees 为 0 的课入队；<br>③ 循环弹出课程 pre（numCourses--），把它的每个后继 cur 的入度减 1，减到 0 就入队；<br>④ 返回 numCourses==0。</p>
 <p>易错点：边的方向是 b→a（先修课指向后修课）不是 a→b；入队时机是入度减到 0 的那一刻不是发现入度为 0 就重复入队。</p>
 <pre class="diagram">逐步推演：numCourses=2, prerequisites=[[1,0]]
-① 建图：0→1，indeg=[0,1]
-② 入度0的课入队：q=[0]
-③ 弹出 0（done=1），后继 1 的入度 1→0，入队 q=[1]
-   弹出 1（done=2），无后继
-④ done=2=numCourses → 返回 true
-反例：若 prerequisites=[[1,0],[0,1]]，indeg=[1,1]，
-② 没有入度0的课，队列空，done=0≠2 → 返回 false</pre>
-<h3>代码（Java）</h3>
+① 建图：0→1，indegrees=[0,1]
+② 入度0的课入队：queue=[0]
+③ 弹出 0（numCourses 2→1），后继 1 的入度 1→0，入队 queue=[1]
+   弹出 1（numCourses 1→0），无后继
+④ numCourses=0 → 返回 true
+反例：若 prerequisites=[[1,0],[0,1]]，indegrees=[1,1]，
+② 没有入度0的课，队列空，numCourses=2≠0 → 返回 false</pre>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
     public boolean canFinish(int numCourses, int[][] prerequisites) {
-        List&lt;List&lt;Integer&gt;&gt; adj = new ArrayList&lt;&gt;();
-        int[] indeg = new int[numCourses];
-        for (int i = 0; i &lt; numCourses; i++) adj.add(new ArrayList&lt;&gt;());
+        List&lt;List&lt;Integer&gt;&gt; adjacency = new ArrayList&lt;&gt;();
+        int[] indegrees = new int[numCourses];
+        for (int i = 0; i &lt; numCourses; i++) adjacency.add(new ArrayList&lt;&gt;());
         // ① 建图：边 b→a，a 的入度+1
-        for (int[] p : prerequisites) {
-            adj.get(p[1]).add(p[0]);
-            indeg[p[0]]++;
+        for (int[] cp : prerequisites) {
+            indegrees[cp[0]]++;
+            adjacency.get(cp[1]).add(cp[0]);
         }
-        Queue&lt;Integer&gt; q = new ArrayDeque&lt;&gt;();
+        Queue&lt;Integer&gt; queue = new ArrayDeque&lt;&gt;();
         // ② 入度为 0 的课先入队
         for (int i = 0; i &lt; numCourses; i++)
-            if (indeg[i] == 0) q.offer(i);
-        int done = 0;
+            if (indegrees[i] == 0) queue.offer(i);
         // ③ 弹出课程，后继入度减 1，减到 0 再入队
-        while (!q.isEmpty()) {
-            int cur = q.poll(); done++;
-            for (int next : adj.get(cur))
-                if (--indeg[next] == 0) q.offer(next);
+        while (!queue.isEmpty()) {
+            int pre = queue.poll();
+            numCourses--;
+            for (int cur : adjacency.get(pre))
+                if (--indegrees[cur] == 0) queue.offer(cur);
         }
         // ④ 全部弹出 = 无环
-        return done == numCourses;
+        return numCourses == 0;
     }
 }</code></pre>
 <p class="cx">时间复杂度 O(V+E) · 空间复杂度 O(V+E)</p>

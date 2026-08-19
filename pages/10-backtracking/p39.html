@@ -72,6 +72,7 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 <div class="desc">给定无重复元素的候选数组（每个数字可以无限次使用），求所有和为 target 的组合。<div class="ex">输入：candidates=[2,3,6,7], target=7
 输出：[[2,2,3],[7]]</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：回溯 + start（传 i 允许重复选当前数，排序后剪枝）。</p>
 <p><b>先想清楚两个问题：</b></p>
 <p><b>Q1：「每个数字可无限次用」和「组合不重复」怎么同时满足？</b>递归时传 i 而不是 i+1（当前数还能再选），同时循环从 start 开始（不回头选更小的数），这样既允许重复又不会产生 [2,3] 和 [3,2] 两种顺序。</p>
 <p><b>Q2：怎么剪枝？</b>先排序，循环中若 nums[i]&gt;remain 直接 break——数组有序，后面的数更大，都不可能凑出 remain。</p>
@@ -95,7 +96,7 @@ path=[], remain=7：
   选6 → path=[6], remain=1：6&gt;1 break；撤销6
   选7 → path=[7], remain=0 → 收集 [7]
 答案：[[2,2,3],[7]]</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
     List&lt;List&lt;Integer&gt;&gt; ans = new ArrayList&lt;&gt;();
     public List&lt;List&lt;Integer&gt;&gt; combinationSum(int[] candidates, int target) {

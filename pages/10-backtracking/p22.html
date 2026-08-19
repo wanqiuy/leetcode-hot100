@@ -72,47 +72,48 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 <div class="desc">给定 n 对括号，生成所有合法（正确匹配）的括号组合。<div class="ex">输入：n=3
 输出：["((()))","(()())","(())()","()(())","()()()"]</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：回溯 + 左右括号计数约束。</p>
 <p><b>先想清楚两个问题：</b></p>
-<p><b>Q1：怎么保证生成的括号串一定合法？</b>逐位放置时守住两条规则：左括号只要还有剩余（open&lt;n）就能放；右括号只有当 close&lt;open 时才能放——这样任意前缀里右括号都不多于左括号，天然合法，无需事后校验。</p>
-<p><b>Q2：什么时候收集？</b>串长达到 2n 时收集。状态只需 open、close 两个计数器加一个 StringBuilder 路径。</p>
+<p><b>Q1：怎么保证生成的括号串一定合法？</b>逐位放置时守住两条规则：左括号只要还有剩余（open&lt;max）就能放；右括号只有当 close&lt;open 时才能放——这样任意前缀里右括号都不多于左括号，天然合法，无需事后校验。</p>
+<p><b>Q2：什么时候收集？</b>串长达到 2·max 时收集。状态只需 open、close 两个计数器加一个 StringBuilder 路径。</p>
 <p><b>照着写的 4 步：</b></p>
-<p>① 终止条件：sb.length()==2n，收集 sb.toString() 并 return；<br>② 若 open&lt;n：做选择 append('(')，递归 backtrack(open+1, close)，撤销 deleteCharAt；<br>③ 若 close&lt;open：做选择 append(')')，递归 backtrack(open, close+1)，撤销 deleteCharAt；<br>④ 入口调用 backtrack(n, 0, 0, sb, ans)。</p>
-<p>易错点：放右括号的条件是 close&lt;open 不是 close&lt;n（否则会出现 ")(" 这类非法前缀）；两个 if 是并列不是 if-else（同一层可能两种都能放）；每次递归后都要 deleteCharAt 撤销不是只撤销一次。</p>
+<p>① 终止条件：cur.length()==2·max，收集 cur.toString() 并 return；<br>② 若 open&lt;max：做选择 append('(')，递归 backtrack(open+1, close)，撤销 deleteCharAt；<br>③ 若 close&lt;open：做选择 append(')')，递归 backtrack(open, close+1)，撤销 deleteCharAt；<br>④ 入口调用 backtrack(ans, cur, 0, 0, max)。</p>
+<p>易错点：放右括号的条件是 close&lt;open 不是 close&lt;max（否则会出现 ")(" 这类非法前缀）；两个 if 是并列不是 if-else（同一层可能两种都能放）；每次递归后都要 deleteCharAt 撤销不是只撤销一次。</p>
 <pre class="diagram">逐步推演：n=2
-sb="", open=0, close=0：只能放左 → sb="(", open=1
-  open&lt;2 → 放左 → sb="((", open=2
-    open=2 不能放左；close&lt;open → 放右 → sb="(()", close=1
-      只能放右 → sb="(())", 长度=4，收集 "(())"；撤销 → sb="(()"
-    撤销 → sb="("
-  close=0&lt;open=1 → 放右 → sb="()", close=1
-    放左 → sb="()(", open=2
-      放右 → sb="()()", 收集；撤销
+cur="", open=0, close=0：只能放左 → cur="(", open=1
+  open&lt;2 → 放左 → cur="((", open=2
+    open=2 不能放左；close&lt;open → 放右 → cur="(()", close=1
+      只能放右 → cur="(())", 长度=4，收集 "(())"；撤销 → "(()"
+    撤销 → cur="("
+  close=0&lt;open=1 → 放右 → cur="()", close=1
+    放左 → cur="()(", open=2
+      放右 → cur="()()", 收集；撤销
     撤销左；close=1 不小于 open=1，不能放右
-    撤销右 → sb="("
-  撤销 → sb=""
+    撤销右 → cur="("
+  撤销 → cur=""
 共收集 ["(())","()()"]</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
     public List&lt;String&gt; generateParenthesis(int n) {
         List&lt;String&gt; ans = new ArrayList&lt;&gt;();
         // ④ 从 open=0, close=0 开始
-        backtrack(n, 0, 0, new StringBuilder(), ans);
+        backtrack(ans, new StringBuilder(), 0, 0, n);
         return ans;
     }
-    private void backtrack(int n, int open, int close, StringBuilder sb, List&lt;String&gt; ans) {
-        // ① 长度够 2n，收集
-        if (sb.length() == 2 * n) { ans.add(sb.toString()); return; }
+    private void backtrack(List&lt;String&gt; ans, StringBuilder cur, int open, int close, int max) {
+        // ① 长度够 2·max，收集
+        if (cur.length() == max * 2) { ans.add(cur.toString()); return; }
         // ② 左括号有剩余就能放：做选择 → 递归 → 撤销
-        if (open &lt; n) {
-            sb.append('(');
-            backtrack(n, open + 1, close, sb, ans);
-            sb.deleteCharAt(sb.length() - 1);
+        if (open &lt; max) {
+            cur.append('(');
+            backtrack(ans, cur, open + 1, close, max);
+            cur.deleteCharAt(cur.length() - 1);
         }
         // ③ 右括号不超过左括号才能放：做选择 → 递归 → 撤销
         if (close &lt; open) {
-            sb.append(')');
-            backtrack(n, open, close + 1, sb, ans);
-            sb.deleteCharAt(sb.length() - 1);
+            cur.append(')');
+            backtrack(ans, cur, open, close + 1, max);
+            cur.deleteCharAt(cur.length() - 1);
         }
     }
 }</code></pre>
