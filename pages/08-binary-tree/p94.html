@@ -72,12 +72,13 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 <div class="desc">给定二叉树的根节点 root，返回它的中序遍历结果（左 → 根 → 右）。<div class="ex">输入：root = [1,null,2,3]
 输出：[1,3,2]</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：递归中序遍历。</p>
 <p><b>先想清楚两个问题：</b></p>
-<p><b>Q1：不用递归，怎么模拟中序遍历（左 → 根 → 右）？</b>用栈模拟系统调用栈：指针 cur 表示「当前待处理的子树根」，栈里存的是「已路过、还没访问」的节点。</p>
-<p><b>Q2：什么时候访问（记录）一个节点？</b>向左走到空时，栈顶就是中序的下一个节点，弹出并记录，再转去它的右子树重复同样过程。</p>
-<p><b>照着写的 5 步：</b></p>
-<p>① 建结果列表和空栈，cur 指向 root；<br>② 当「cur 不为空 或 栈不空」时循环；<br>③ 内层把 cur 一路向左压栈直到为空；<br>④ 弹出栈顶并记录值（即中序下一个）；<br>⑤ cur 跳到弹出节点的右孩子，回到②。</p>
-<p>易错点：外层循环条件是「或」不是「且」（cur 为空但栈不空时还要继续）；访问时机是「弹出时」不是「压栈时」；弹出后 cur 走向右孩子，不是重新从 root 开始。</p>
+<p><b>Q1：递归函数 inorder(root, res) 的定义是什么？</b>把「以 root 为根的子树」按左 → 根 → 右的顺序，把节点值依次追加进结果列表 res。写代码时只信这个定义即可。</p>
+<p><b>Q2：「左 → 根 → 右」的顺序怎么保证？</b>就靠函数体三行的书写顺序：先递归左子树、再 add 当前节点、最后递归右子树。递归天然用系统栈保存现场，不需要自己开栈。</p>
+<p><b>照着写的 4 步：</b></p>
+<p>① 建结果列表 res，调 inorder(root, res) 后返回 res；<br>② 空节点直接 return（什么都不收集）；<br>③ 递归左子树；<br>④ 把根值 add 进 res，再递归右子树。</p>
+<p>易错点：add 必须夹在两次递归「之间」——写在最前面是前序、写在最后是后序，位置决定遍历序；res 作为参数一路传下去，不是每层新建；空节点是 return 不是 add。</p>
 <pre class="diagram">逐步推演：root = [1,null,2,3]，即
       1
        \
@@ -85,31 +86,28 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
        /
       3
 
-cur=1：1 压栈，cur=null                栈=[1]
-弹出 1 → 记录 1，cur=1.right=2         栈=[]
-cur=2：2 压栈；cur=3：3 压栈，cur=null 栈=[2,3]
-弹出 3 → 记录 3，cur=3.right=null      栈=[2]
-弹出 2 → 记录 2，cur=2.right=null      栈=[]
-栈空且 cur=null，结束。结果 [1,3,2]</pre>
-<h3>代码（Java）</h3>
+inorder(1)：左子树为空 → add 1 → 递归右子树 inorder(2)
+inorder(2)：递归左子树 inorder(3) → add 2 → 右子树为空
+inorder(3)：左空 → add 3 → 右空
+收集顺序 1, 3, 2，结果 [1,3,2]</pre>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
     public List&lt;Integer&gt; inorderTraversal(TreeNode root) {
-        List&lt;Integer&gt; res = new ArrayList&lt;&gt;();       // ① 结果列表 + 空栈，cur 指向 root
-        Deque&lt;TreeNode&gt; stack = new ArrayDeque&lt;&gt;();
-        TreeNode cur = root;
-        while (cur != null || !stack.isEmpty()) {    // ② cur 不空或栈不空就继续
-            while (cur != null) {                    // ③ 一路向左，沿途全部压栈
-                stack.push(cur);
-                cur = cur.left;
-            }
-            cur = stack.pop();                       // ④ 弹栈顶：中序下一个节点
-            res.add(cur.val);                        // ④ 记录值
-            cur = cur.right;                         // ⑤ 转向右子树，回到②
-        }
+        List&lt;Integer&gt; res = new ArrayList&lt;&gt;();   // ① 结果列表
+        inorder(root, res);
         return res;
     }
+
+    private void inorder(TreeNode root, List&lt;Integer&gt; res) {
+        if (root == null) {
+            return;                              // ② 空节点直接返回
+        }
+        inorder(root.left, res);                 // ③ 先递归左子树
+        res.add(root.val);                       // ④ 再访问根节点
+        inorder(root.right, res);                // ④ 最后递归右子树
+    }
 }</code></pre>
-<p class="cx">时间复杂度 O(n) · 空间复杂度 O(n)</p>
+<p class="cx">时间复杂度 O(n) · 空间复杂度 O(h)（递归栈，h 为树高）。进阶写法：迭代（显式栈模拟递归）与 Morris 遍历（O(1) 空间），见官方题解方法二、三。</p>
 </section>
 <div class="pager"><a style="visibility:hidden"></a><a class="mid" href="../../08-binary-tree.html">返回「二叉树」列表</a><a href="p104.html">下一题：104. 二叉树的最大深度 →</a></div>
 </div>

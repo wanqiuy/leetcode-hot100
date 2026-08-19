@@ -72,12 +72,13 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 <div class="desc">二叉树中的路径定义为节点序列中相邻节点间存在边，且同一节点至多出现一次。路径至少含一个节点，不一定经过根。给定根节点 root，返回最大路径和。<div class="ex">输入：root = [-10,9,20,null,null,15,7]
 输出：42（路径 15 → 20 → 7）</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：递归计算每个节点的最大贡献值（maxGain），顺带更新全局最大路径和。</p>
 <p><b>先想清楚两个问题：</b></p>
-<p><b>Q1：递归函数 gain(node) 返回什么？</b>「以 node 为起点、向父方向延伸」的单边最大增益 = node.val + max(左增益, 右增益)；子树增益为负时按 0 舍弃（不如不走那边）。</p>
-<p><b>Q2：最大路径和在哪里更新？</b>完整路径以 node 为「拐点」：node.val + 左增益 + 右增益，每个节点处更新一次全局 ans。这个值不返回给上层——路径在父节点处不能再分叉。</p>
+<p><b>Q1：递归函数 maxGain(node) 返回什么？</b>「以 node 为起点、向父方向延伸」的单边最大贡献值 = node.val + max(leftGain, rightGain)；子树贡献值为负时按 0 舍弃（不如不走那边）。</p>
+<p><b>Q2：最大路径和在哪里更新？</b>完整路径以 node 为「拐点」：priceNewpath = node.val + leftGain + rightGain，每个节点处更新一次全局 maxSum。这个值不返回给上层——路径在父节点处不能再分叉。</p>
 <p><b>照着写的 4 步：</b></p>
-<p>① 空节点返回 0；<br>② 递归求左右增益，分别与 0 取 max（负的舍弃）；<br>③ ans = max(ans, node.val + left + right)；<br>④ 返回 node.val + max(left, right)。</p>
-<p>易错点：返回给父节点的是「单边」val + max(l, r) 不是 val + l + r（路径不能分叉）；负增益是舍弃（取 0）不是照加；ans 初值是 Integer.MIN_VALUE 不是 0（全负数树答案为负）。</p>
+<p>① 空节点返回 0；<br>② 递归求左右贡献值，分别与 0 取 max（负的舍弃）；<br>③ maxSum = max(maxSum, node.val + leftGain + rightGain)；<br>④ 返回 node.val + max(leftGain, rightGain)。</p>
+<p>易错点：返回给父节点的是「单边」val + max(leftGain, rightGain) 不是 val + leftGain + rightGain（路径不能分叉）；负贡献值是舍弃（取 0）不是照加；maxSum 初值是 Integer.MIN_VALUE 不是 0（全负数树答案为负）。</p>
 <pre class="diagram">逐步推演：root = [-10,9,20,null,null,15,7]
     -10
     / \
@@ -85,30 +86,33 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
      /  \
     15   7
 
-gain(15)=15，gain(7)=7
-节点 20：拐点路径 20+15+7=42 → ans=42；gain(20)=20+max(15,7)=35
-节点 9：拐点路径 9+0+0=9 → ans 不变；gain(9)=9
-节点 -10：拐点路径 -10+9+35=34 → ans 不变；gain(-10)=-10+35=25
+maxGain(15)=15，maxGain(7)=7
+节点 20：拐点路径 20+15+7=42 → maxSum=42；maxGain(20)=20+max(15,7)=35
+节点 9：拐点路径 9+0+0=9 → maxSum 不变；maxGain(9)=9
+节点 -10：拐点路径 -10+9+35=34 → maxSum 不变；maxGain(-10)=-10+35=25
 答案 42（路径 15 → 20 → 7）</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
-    private int ans = Integer.MIN_VALUE;
+    private int maxSum = Integer.MIN_VALUE;
     public int maxPathSum(TreeNode root) {
-        gain(root);
-        return ans;
+        maxGain(root);
+        return maxSum;
     }
-    // 返回以 node 为起点、向父方向延伸的单边最大增益
-    private int gain(TreeNode node) {
-        if (node == null) return 0;                     // ① 空节点增益为 0
-        int left = Math.max(0, gain(node.left));        // ② 负增益舍弃，取 0
-        int right = Math.max(0, gain(node.right));      // ②
+    // 返回以 node 为起点、向父方向延伸的单边最大贡献值
+    private int maxGain(TreeNode node) {
+        if (node == null) {
+            return 0;                                   // ① 空节点贡献值为 0
+        }
+        int leftGain = Math.max(maxGain(node.left), 0); // ② 负贡献值舍弃，取 0
+        int rightGain = Math.max(maxGain(node.right), 0);
         // ③ 以本节点为拐点的完整路径，更新全局最大
-        ans = Math.max(ans, node.val + left + right);
+        int priceNewpath = node.val + leftGain + rightGain;
+        maxSum = Math.max(maxSum, priceNewpath);
         // ④ 作为父路径的一段只能选一侧向上延伸
-        return node.val + Math.max(left, right);
+        return node.val + Math.max(leftGain, rightGain);
     }
 }</code></pre>
-<p class="cx">时间复杂度 O(n) · 空间复杂度 O(h)</p>
+<p class="cx">时间复杂度 O(n) · 空间复杂度 O(h)（递归栈，h 为树高）</p>
 </section>
 <div class="pager"><a href="p236.html">← 上一题：236. 二叉树的最近公共祖先</a><a class="mid" href="../../08-binary-tree.html">返回「二叉树」列表</a><a style="visibility:hidden"></a></div>
 </div>

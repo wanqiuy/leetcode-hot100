@@ -72,12 +72,13 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 <div class="desc">给你二叉树的根节点 root，请你将它展开为一个单链表：展开后的「链表」仍使用 TreeNode，每个节点左孩子为空，右孩子指向下一个节点，顺序与先序遍历相同。要求原地展开。<div class="ex">输入：root = [1,2,5,3,4,null,6]
 输出：[1,null,2,null,3,null,4,null,5,null,6]</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：寻找前驱节点（原地展开，O(1) 空间）。</p>
 <p><b>先想清楚两个问题：</b></p>
-<p><b>Q1：为什么按「右 → 左 → 根」的反先序遍历？</b>展开要求每个节点的 right 指向先序的下一个节点；倒序处理时，那个「下一个节点」一定已展开成链头、就存在 prev 里，直接接上即可。</p>
-<p><b>Q2：处理一个节点时做哪三件事？</b>right 接 prev、left 置空、prev 更新为自己（成为新的链头，供上一个节点使用）。</p>
+<p><b>Q1：不借递归栈和额外数组，怎么原地展开？</b>先序序列里左子树紧挨着根：把左子树整体「挪」到 curr 与 curr.right 之间——左子树接到 curr 的右孩子位置，原来的右子树接到左子树末尾之后，左指针置空。</p>
+<p><b>Q2：「左子树末尾」是哪个节点、怎么找？</b>是先序中左子树的最后一个节点，即左子树的最右节点 predecessor：从 curr.left 出发一路向右走到头。把 curr.right 接在它后面即可。</p>
 <p><b>照着写的 4 步：</b></p>
-<p>① 空节点直接返回；<br>② 递归展开右子树；<br>③ 递归展开左子树；<br>④ root.right = prev、root.left = null，prev = root。</p>
-<p>易错点：递归顺序是先右后左不是先左后右（否则接链时后继还没展开）；prev 是成员变量不是局部变量，要在递归调用间传递；left 置空这步不能漏（题目要求所有左孩子为空）。</p>
+<p>① curr 从 root 出发，不为空就循环；<br>② curr 无左孩子 → 直接 curr = curr.right 看下一个；<br>③ 有左孩子：记 next = curr.left，从 next 一路向右找到 predecessor；<br>④ predecessor.right = curr.right，curr.left = null，curr.right = next，然后 curr 右移继续。</p>
+<p>易错点：predecessor 要从 next（curr.left）出发找，不是从 curr 出发；接链顺序是先 predecessor.right = curr.right（把原右子树寄存到左子树末尾），再改 curr 的两个指针；curr.left 置空不能漏（题目要求所有左孩子为空）；每个节点只处理一次——左子树挪到右侧后，curr 右移会自然再次走到它。</p>
 <pre class="diagram">逐步推演：root = [1,2,5,3,4,null,6]
      1
     / \
@@ -85,27 +86,32 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
   / \   \
  3   4   6
 
-处理顺序 6 → 5 → 4 → 3 → 2 → 1（右-左-根），prev 初始 null：
-6：right=null，prev=6
-5：right=6，prev=5
-4：right=5，prev=4
-3：right=4，prev=3
-2：right=3，left=null，prev=2
-1：right=2，left=null，prev=1
+curr=1：左孩子 2 存在，next=2，predecessor=4（2 一路向右到底）
+  4.right=5，1.left=null，1.right=2 → 链雏形 1→2，右子树挂在 4 后
+curr=2：左孩子 3 存在，next=3，predecessor=3（3 无右孩子）
+  3.right=4，2.left=null，2.right=3 → 1→2→3→4→5→6
+curr=3/4/5/6：左孩子皆空，curr 一路右移到 null，结束
 最终链：1 → 2 → 3 → 4 → 5 → 6（全是右指针）</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
-    private TreeNode prev = null;
     public void flatten(TreeNode root) {
-        if (root == null) return;     // ① 空节点返回
-        flatten(root.right);          // ② 先展开右子树（后继先就位）
-        flatten(root.left);           // ③ 再展开左子树
-        root.right = prev;            // ④ 右指针接上已展开的链头
-        root.left = null;             // ④ 左指针置空
-        prev = root;                  // ④ 当前节点成为新链头
+        TreeNode curr = root;                       // ① 从根开始逐个处理
+        while (curr != null) {
+            if (curr.left != null) {                // ③ 有左孩子才需要挪
+                TreeNode next = curr.left;          // ③ 左子树是先序的紧接段
+                TreeNode predecessor = next;
+                while (predecessor.right != null) {
+                    predecessor = predecessor.right;// ③ 左子树的最右节点
+                }
+                predecessor.right = curr.right;     // ④ 原右子树接到左子树末尾
+                curr.left = null;                   // ④ 左指针置空
+                curr.right = next;                  // ④ 左子树挪到右侧
+            }
+            curr = curr.right;                      // ② 处理下一个节点
+        }
     }
 }</code></pre>
-<p class="cx">时间复杂度 O(n) · 空间复杂度 O(h)</p>
+<p class="cx">时间复杂度 O(n) · 空间复杂度 O(1)（原地）。另有「前序遍历收集后重接」（O(n) 空间）与「迭代前序同步展开」两种写法，见官方题解方法一、二。</p>
 </section>
 <div class="pager"><a href="p199.html">← 上一题：199. 二叉树的右视图</a><a class="mid" href="../../08-binary-tree.html">返回「二叉树」列表</a><a href="p105.html">下一题：105. 从前序与中序遍历序列构造二叉树 →</a></div>
 </div>

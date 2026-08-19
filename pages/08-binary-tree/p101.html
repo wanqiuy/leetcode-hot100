@@ -72,12 +72,13 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 <div class="desc">给你一个二叉树的根节点 root，检查它是否轴对称（即左右子树互为镜像）。<div class="ex">输入：root = [1,2,2,3,4,4,3]
 输出：true</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：递归，check(p, q) 判断两棵树是否互为镜像。</p>
 <p><b>先想清楚两个问题：</b></p>
-<p><b>Q1：「一棵树轴对称」怎么转化成递归子问题？</b>定义 check(p, q)：判断以 p、q 为根的两棵树是否互为镜像。原问题 = check(root.left, root.right)。</p>
-<p><b>Q2：p、q 互为镜像的判定规则？</b>都空 → true；一空一不空或值不等 → false；否则要求 p.left 与 q.right 镜像 且 p.right 与 q.left 镜像（交叉配对）。</p>
+<p><b>Q1：「一棵树轴对称」怎么转化成递归子问题？</b>定义 check(p, q)：判断以 p、q 为根的两棵树是否互为镜像。原问题 = check(root, root)——自己跟自己比，递归展开后自然变成左右子树的交叉比较。</p>
+<p><b>Q2：p、q 互为镜像的判定规则？</b>都空 → true；一空一不空 → false；否则要求值相等，且 p.left 与 q.right 镜像、p.right 与 q.left 镜像（交叉配对）。</p>
 <p><b>照着写的 4 步：</b></p>
-<p>① 入口对 root 的左右孩子调 check；<br>② p、q 都为空返回 true；<br>③ 只有一个为空或值不等返回 false；<br>④ 返回 check(p.left, q.right) &amp;&amp; check(p.right, q.left)。</p>
-<p>易错点：递归配对是「左对右、右对左」的交叉配对不是同侧配对；入口传的是 root 的左右孩子不是 root 本身；三种失败判断（一空一不空、值不等）要写在递归之前。</p>
+<p>① 入口调 check(root, root)；<br>② p、q 都为空返回 true；<br>③ 只有一个为空返回 false；<br>④ 返回「值相等 &amp;&amp; check(p.left, q.right) &amp;&amp; check(p.right, q.left)」。</p>
+<p>易错点：递归配对是「左对右、右对左」的交叉配对不是同侧配对；官方入口传 (root, root)（同一节点必等值，等价于直接比左右孩子）；两种失败（一空一不空、值不等）都要在递归前拦下。</p>
 <pre class="diagram">逐步推演：root = [1,2,2,3,4,4,3]
       1
      / \
@@ -85,27 +86,32 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
    / \ / \
   3  4 4  3
 
-check(2左, 2右)：值相等 → check(3, 3) &amp;&amp; check(4, 4)
+check(1, 1)：同一节点，值必等 → 交叉递归得 check(2左, 2右)
+check(2, 2)：值相等 → check(3, 3) &amp;&amp; check(4, 4)
 check(3, 3)：叶子，左右皆空、值相等 → true
 check(4, 4)：同理 true → 整体 true
 
 反例 [1,2,2,null,3,null,3]：
 check(2, 2) → check(2左.left=null, 2右.right=3)
 一空一不空 → false</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
     public boolean isSymmetric(TreeNode root) {
-        return check(root.left, root.right);         // ① 从根的左右孩子开始比
+        return check(root, root);                      // ① 从根与根自身开始比
     }
+
     private boolean check(TreeNode p, TreeNode q) {
-        if (p == null &amp;&amp; q == null) return true;     // ② 都为空 → 镜像
-        if (p == null || q == null) return false;    // ③ 一空一不空 → 否
-        if (p.val != q.val) return false;            // ③ 值不等 → 否
-        // ④ 交叉递归：左的左对右的右，左的右对右的左
-        return check(p.left, q.right) &amp;&amp; check(p.right, q.left);
+        if (p == null &amp;&amp; q == null) {
+            return true;                               // ② 都为空 → 镜像
+        }
+        if (p == null || q == null) {
+            return false;                              // ③ 一空一不空 → 否
+        }
+        // ④ 值相等，且交叉递归：左的左对右的右，左的右对右的左
+        return p.val == q.val &amp;&amp; check(p.left, q.right) &amp;&amp; check(p.right, q.left);
     }
 }</code></pre>
-<p class="cx">时间复杂度 O(n) · 空间复杂度 O(h)</p>
+<p class="cx">时间复杂度 O(n) · 空间复杂度 O(h)（递归栈，h 为树高）。另有迭代（队列成对比较）写法，见官方题解方法二。</p>
 </section>
 <div class="pager"><a href="p226.html">← 上一题：226. 翻转二叉树</a><a class="mid" href="../../08-binary-tree.html">返回「二叉树」列表</a><a href="p543.html">下一题：543. 二叉树的直径 →</a></div>
 </div>

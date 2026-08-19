@@ -72,16 +72,17 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 <div class="desc">给你一个升序整数数组 nums，将其转换为一棵高度平衡的二叉搜索树（每个节点的左右子树高度差不超过 1）。<div class="ex">输入：nums = [-10,-3,0,5,9]
 输出：[0,-3,9,-10,null,5]</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：中点作根、分治递归（总是选中间位置左边的数字作为根节点）。</p>
 <p><b>先想清楚两个问题：</b></p>
-<p><b>Q1：递归函数 build(nums, l, r) 的定义是什么？</b>把闭区间 nums[l..r] 构造成一棵高度平衡 BST，返回这棵子树的根节点。</p>
+<p><b>Q1：递归函数 helper(nums, left, right) 的定义是什么？</b>把闭区间 nums[left..right] 构造成一棵高度平衡 BST，返回这棵子树的根节点。</p>
 <p><b>Q2：根选谁、为什么这样就平衡？</b>选区间中点 mid 为根，左右各分一半递归——两侧节点数最多差 1，高度差自然不超过 1。</p>
 <p><b>照着写的 4 步：</b></p>
-<p>① l &gt; r 返回 null；<br>② mid = (l+r)/2，用 nums[mid] 建新节点；<br>③ build(l, mid-1) 接成左子树；<br>④ build(mid+1, r) 接成右子树，返回新节点。</p>
-<p>易错点：区间是闭区间，base case 是 l &gt; r 不是 l == r（l==r 时还剩一个元素要建节点）；左右子区间都要把 mid 本身排除在外，否则会死循环或重复建点。</p>
+<p>① left &gt; right 返回 null；<br>② mid = (left+right)/2，用 nums[mid] 建新节点；<br>③ helper(left, mid-1) 接成左子树；<br>④ helper(mid+1, right) 接成右子树，返回新节点。</p>
+<p>易错点：区间是闭区间，base case 是 left &gt; right 不是 left == right（left==right 时还剩一个元素要建节点）；左右子区间都要把 mid 本身排除在外，否则会死循环或重复建点。</p>
 <pre class="diagram">逐步推演：nums = [-10,-3,0,5,9]（下标 0..4）
-build(0,4)：mid=2 → 根 0
-  左 build(0,1)：mid=0 → 根 -10，右孩子 build(1,1) → -3
-  右 build(3,4)：mid=3 → 根 5，右孩子 build(4,4) → 9
+helper(0,4)：mid=2 → 根 0
+  左 helper(0,1)：mid=0 → 根 -10，右孩子 helper(1,1) → -3
+  右 helper(3,4)：mid=3 → 根 5，右孩子 helper(4,4) → 9
 
       0
      / \
@@ -89,18 +90,21 @@ build(0,4)：mid=2 → 根 0
      \   \
      -3   9
 （中点分割 → 左右子树规模差 ≤1，天然平衡）</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
     public TreeNode sortedArrayToBST(int[] nums) {
-        return build(nums, 0, nums.length - 1);
+        return helper(nums, 0, nums.length - 1);
     }
-    private TreeNode build(int[] nums, int l, int r) {
-        if (l &gt; r) return null;                     // ① 空区间
-        int mid = (l + r) / 2;                      // ② 中点作根，保证平衡
-        TreeNode node = new TreeNode(nums[mid]);
-        node.left = build(nums, l, mid - 1);        // ③ 左半区间建左子树
-        node.right = build(nums, mid + 1, r);       // ④ 右半区间建右子树
-        return node;                                // ④ 返回子树根
+
+    private TreeNode helper(int[] nums, int left, int right) {
+        if (left &gt; right) {
+            return null;                            // ① 空区间
+        }
+        int mid = (left + right) / 2;               // ② 中点作根，保证平衡
+        TreeNode root = new TreeNode(nums[mid]);
+        root.left = helper(nums, left, mid - 1);    // ③ 左半区间建左子树
+        root.right = helper(nums, mid + 1, right);  // ④ 右半区间建右子树
+        return root;                                // ④ 返回子树根
     }
 }</code></pre>
 <p class="cx">时间复杂度 O(n) · 空间复杂度 O(log n)（递归栈，树高）</p>

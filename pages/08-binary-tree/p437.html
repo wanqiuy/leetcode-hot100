@@ -72,13 +72,14 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 <div class="desc">给定一个二叉树的根节点 root 和一个整数 targetSum，求该树中「节点值之和等于 targetSum」的路径条数。路径不需要从根开始或到叶子结束，但必须从上往下。<div class="ex">输入：root = [10,5,-3,3,2,null,11,3,-2,null,1], targetSum = 8
 输出：3（路径 5→3、5→2→1、-3→11）</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：前缀和 + 哈希表 + DFS 回溯。</p>
 <p><b>先想清楚两个问题：</b></p>
-<p><b>Q1：「路径可从任意节点开始」怎么破？</b>前缀和。从根向下维护路径和 cur；若历史链上某处前缀和 = cur - target，则该处到当前节点的路径和恰为 target，出现过几次就有几条。</p>
-<p><b>Q2：哈希表什么时候加、什么时候删？</b>进入子树前把 cur 计入哈希表；左右子树递归完后减一（回溯）——保证表里只有「根到当前节点这条链上」的前缀和。</p>
+<p><b>Q1：「路径可从任意节点开始」怎么破？</b>前缀和。从根向下维护路径和 prefixSum；若历史链上某处前缀和 = prefixSum - targetSum，则该处到当前节点的路径和恰为 targetSum，出现过几次就有几条。</p>
+<p><b>Q2：哈希表 prefixSumCount 什么时候加、什么时候删？</b>进入子树前把 prefixSum 计入表中；左右子树递归完后减一（回溯）——保证表里只有「根到当前节点这条链上」的前缀和。</p>
 <p><b>照着写的 6 步：</b></p>
-<p>① 哈希表预放 (0, 1)：空前缀和 0 出现 1 次；<br>② 空节点返回 0；<br>③ cur 累加当前节点值；<br>④ 答案 += 表中 cur - target 的出现次数；<br>⑤ cur 入表；<br>⑥ 递归左右子树累加答案，返回前把 cur 次数减一。</p>
-<p>易错点：预放 (0,1) 不能省（否则漏掉「从根开始」的合法路径）；回溯减一在递归「之后」不是之前，顺序反了会污染兄弟子树；路径和用 long 不是 int（节点值 ±10⁹，链长上千会溢出）。</p>
-<pre class="diagram">逐步推演：root = [10,5,-3,3,2,null,11,3,-2,null,1]，target = 8
+<p>① 哈希表预放 (0, 1)：空前缀和 0 出现 1 次；<br>② 空节点返回 0；<br>③ prefixSum 累加当前节点值；<br>④ 答案 += 表中 prefixSum - targetSum 的出现次数；<br>⑤ prefixSum 入表；<br>⑥ 递归左右子树累加答案，返回前把 prefixSum 次数减一。</p>
+<p>易错点：预放 (0,1) 不能省（否则漏掉「从根开始」的合法路径）；回溯减一在递归「之后」不是之前，顺序反了会污染兄弟子树；前缀和用 long 不是 int（节点值 ±10⁹，链长上千会溢出）。</p>
+<pre class="diagram">逐步推演：root = [10,5,-3,3,2,null,11,3,-2,null,1]，targetSum = 8
         10
        /  \
       5    -3
@@ -87,33 +88,38 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
    / \   \
   3  -2   1
 
-到 5：cur=15，15-8=7 不在表 {0,10} → 0 条
-到左下 3：cur=18，18-8=10 在表 1 次 → 路径 5→3 ✓
-到 2：cur=17，17-8=9 不在 → 0 条
-到 1：cur=18，18-8=10 → 路径 5→2→1 ✓
-（5 这条链回溯后，表只剩 {0,10,7}）
-到 11：cur=10-3+11=18，18-8=10 → 路径 -3→11 ✓
+到 5：prefixSum=15，15-8=7 不在表 {0,10} → 0 条
+到左下 3：prefixSum=18，18-8=10 在表 1 次 → 路径 5→3 ✓
+到 2：prefixSum=17，17-8=9 不在 → 0 条
+到 1：prefixSum=18，18-8=10 → 路径 5→2→1 ✓
+（5 这条链回溯后，表只剩 {0,10,-3 链前缀}）
+到 11：prefixSum=10-3+11=18，18-8=10 → 路径 -3→11 ✓
 合计 3 条</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
     public int pathSum(TreeNode root, int targetSum) {
-        Map&lt;Long, Integer&gt; prefix = new HashMap&lt;&gt;();
-        prefix.put(0L, 1);   // ① 空前缀和 0 出现 1 次（覆盖从根开始的路径）
-        return dfs(root, 0, targetSum, prefix);
+        // key 是前缀和，value 是该前缀和出现的次数
+        Map&lt;Long, Integer&gt; prefixSumCount = new HashMap&lt;&gt;();
+        prefixSumCount.put(0L, 1);   // ① 空前缀和 0 出现 1 次（覆盖从根开始的路径）
+        return recursionPathSum(root, prefixSumCount, 0, targetSum);
     }
-    private int dfs(TreeNode node, long cur, int target, Map&lt;Long, Integer&gt; prefix) {
-        if (node == null) return 0;                        // ② 空节点无贡献
-        cur += node.val;                                   // ③ 累加当前路径和
-        // ④ 历史前缀和中 cur-target 出现几次，就有几条合法路径
-        int res = prefix.getOrDefault(cur - target, 0);
-        prefix.put(cur, prefix.getOrDefault(cur, 0) + 1);  // ⑤ 进入子树前记录
-        res += dfs(node.left, cur, target, prefix);        // ⑥ 递归左右子树
-        res += dfs(node.right, cur, target, prefix);
-        prefix.put(cur, prefix.get(cur) - 1);              // ⑥ 回溯，恢复现场
+
+    private int recursionPathSum(TreeNode node, Map&lt;Long, Integer&gt; prefixSumCount,
+                                 long prefixSum, int targetSum) {
+        if (node == null) {
+            return 0;                                        // ② 空节点无贡献
+        }
+        prefixSum += node.val;                               // ③ 累加当前路径和
+        // ④ 历史前缀和中 prefixSum-targetSum 出现几次，就有几条合法路径
+        int res = prefixSumCount.getOrDefault(prefixSum - targetSum, 0);
+        prefixSumCount.put(prefixSum, prefixSumCount.getOrDefault(prefixSum, 0) + 1); // ⑤ 进入子树前记录
+        res += recursionPathSum(node.left, prefixSumCount, prefixSum, targetSum);     // ⑥ 递归左右子树
+        res += recursionPathSum(node.right, prefixSumCount, prefixSum, targetSum);
+        prefixSumCount.put(prefixSum, prefixSumCount.get(prefixSum) - 1);             // ⑥ 回溯，恢复现场
         return res;
     }
 }</code></pre>
-<p class="cx">时间复杂度 O(n) · 空间复杂度 O(n)</p>
+<p class="cx">时间复杂度 O(n) · 空间复杂度 O(n)。另有「每个节点为起点各做一次 DFS」的双重递归写法（O(n²)），见官方题解方法一。</p>
 </section>
 <div class="pager"><a href="p105.html">← 上一题：105. 从前序与中序遍历序列构造二叉树</a><a class="mid" href="../../08-binary-tree.html">返回「二叉树」列表</a><a href="p236.html">下一题：236. 二叉树的最近公共祖先 →</a></div>
 </div>

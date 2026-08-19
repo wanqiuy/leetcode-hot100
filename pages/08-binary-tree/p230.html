@@ -72,12 +72,13 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 <div class="desc">给定一个二叉搜索树的根节点 root 和一个整数 k，返回其中第 k 小的元素（从 1 开始计数）。<div class="ex">输入：root = [5,3,6,2,4,null,null,1], k = 3
 输出：3</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：中序遍历收集成升序数组，直接按下标取第 k 个。</p>
 <p><b>先想清楚两个问题：</b></p>
-<p><b>Q1：BST 的哪条性质直接给出第 k 小？</b>中序遍历结果就是升序序列——第 k 个被访问的节点就是答案，不需要排序也不用存全量。</p>
-<p><b>Q2：怎么计数、怎么提前结束？</b>成员变量 count 记录已访问节点数，在「中序位置」（左递归之后、右递归之前）+1，数到 k 就存答案并 return，靠调用链逐级退出。</p>
+<p><b>Q1：BST 的哪条性质直接给出第 k 小？</b>中序遍历结果就是升序序列——把它完整收集进数组，下标 k-1 处的元素就是第 k 小，不需要排序。</p>
+<p><b>Q2：递归函数 inorder(root, arr) 的定义是什么？</b>把以 root 为根的子树按中序（左 → 根 → 右）把值追加进 arr 并返回 arr；三行代码的顺序就是遍历顺序。</p>
 <p><b>照着写的 4 步：</b></p>
-<p>① 空节点直接返回；<br>② 递归左子树（更小的一半先访问）；<br>③ count+1，若等于 k 则记录 ans 并返回；<br>④ 递归右子树。</p>
-<p>易错点：计数发生在左右递归「之间」（中序位置）不是进函数就数；count 和 ans 是成员变量不是局部变量，否则递归调用间共享不了；找到答案后的 return 只阻断本层后续，靠各层不再深入自然收尾。</p>
+<p>① 建空数组，调 inorder(root, arr) 收集中序序列；<br>② 递归：空节点直接返回 arr；<br>③ 依次递归左子树、add 根值、递归右子树；<br>④ 返回 nums.get(k - 1)。</p>
+<p>易错点：取下标是 k - 1 不是 k（k 从 1 开始计数，数组下标从 0 开始）；递归顺序必须先左后右（反了收集到的是降序）；add 夹在两次递归之间才是中序。</p>
 <pre class="diagram">逐步推演：root = [5,3,6,2,4,null,null,1]，k = 3
       5
      / \
@@ -88,28 +89,29 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 1
 
 中序展开：inorder(5) → inorder(3) → inorder(2) → inorder(1)
-访问 1：count=1
-访问 2：count=2
-访问 3：count=3 == k → ans=3，return 阻断
-4、5、6 不再处理，答案 3</pre>
-<h3>代码（Java）</h3>
+依次收集：1, 2, 3, 4, 5, 6
+nums = [1,2,3,4,5,6]
+第 k 小 = nums.get(k-1) = nums.get(2) = 3</pre>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
-    private int count = 0, ans = 0;
     public int kthSmallest(TreeNode root, int k) {
-        inorder(root, k);
-        return ans;
+        // ① 中序遍历，收集完整升序序列
+        ArrayList&lt;Integer&gt; nums = inorder(root, new ArrayList&lt;Integer&gt;());
+        // ④ 第 k 小即下标 k-1 处的元素
+        return nums.get(k - 1);
     }
-    private void inorder(TreeNode node, int k) {
-        if (node == null) return;             // ① 空节点返回
-        inorder(node.left, k);                // ② 先遍历左子树（更小的一半）
-        if (++count == k) {                   // ③ 中序位置计数：第 k 个即答案
-            ans = node.val;
-            return;                           // ③ 找到后阻断后续遍历
+
+    private ArrayList&lt;Integer&gt; inorder(TreeNode root, ArrayList&lt;Integer&gt; arr) {
+        if (root == null) {
+            return arr;             // ② 空节点直接返回
         }
-        inorder(node.right, k);               // ④ 再遍历右子树
+        inorder(root.left, arr);    // ③ 先递归左子树（更小的一半）
+        arr.add(root.val);          // ③ 再收集根值
+        inorder(root.right, arr);   // ③ 最后递归右子树
+        return arr;
     }
 }</code></pre>
-<p class="cx">时间复杂度 O(h + k) · 空间复杂度 O(h)</p>
+<p class="cx">时间复杂度 O(n) · 空间复杂度 O(n)。想提前结束可用计数器在中序位置数到 k 即返回（O(h+k)）；进阶还有迭代中序与「记录子树节点数」的频繁增删优化，见官方题解方法二、三。</p>
 </section>
 <div class="pager"><a href="p98.html">← 上一题：98. 验证二叉搜索树</a><a class="mid" href="../../08-binary-tree.html">返回「二叉树」列表</a><a href="p199.html">下一题：199. 二叉树的右视图 →</a></div>
 </div>

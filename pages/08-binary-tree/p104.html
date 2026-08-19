@@ -72,6 +72,7 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 <div class="desc">给定二叉树，找出其最大深度。最大深度是从根节点到最远叶子节点的路径上的节点数。<div class="ex">输入：root = [3,9,20,null,null,15,7]
 输出：3</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：递归（深度优先）。</p>
 <p><b>先想清楚两个问题：</b></p>
 <p><b>Q1：递归函数 maxDepth(root) 返回值的含义是什么？</b>返回「以 root 为根的子树的最大深度」（root 到最远叶子路径上的节点数）。写代码时只信这个定义，不要去脑补整棵树。</p>
 <p><b>Q2：base case 和合并规则是什么？</b>空节点深度为 0；非空节点深度 = 1 + max(左子树深度, 右子树深度)，左右深度交给递归。</p>
@@ -87,15 +88,18 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
            maxDepth(15) = maxDepth(7) = 1
            maxDepth(20) = 1 + max(1,1) = 2
            maxDepth(3)  = 1 + max(1,2) = 3  → 答案 3</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
     public int maxDepth(TreeNode root) {
-        if (root == null) return 0;   // ① base case：空树深度为 0
-        // ② 递归求左右子树深度，③ 当前深度 = 1 + 较大者
-        return 1 + Math.max(maxDepth(root.left), maxDepth(root.right));
+        if (root == null) {
+            return 0;                                   // ① base case：空树深度为 0
+        }
+        int leftHeight = maxDepth(root.left);           // ② 递归求左子树深度
+        int rightHeight = maxDepth(root.right);         // ② 递归求右子树深度
+        return Math.max(leftHeight, rightHeight) + 1;   // ③ 当前深度 = 1 + 较大者
     }
 }</code></pre>
-<p class="cx">时间复杂度 O(n) · 空间复杂度 O(h)，h 为树高（递归栈）</p>
+<p class="cx">时间复杂度 O(n) · 空间复杂度 O(h)，h 为树高（递归栈）。另一种写法是 BFS 逐层计数，思路等价，见官方题解方法二。</p>
 </section>
 <div class="pager"><a href="p94.html">← 上一题：94. 二叉树的中序遍历</a><a class="mid" href="../../08-binary-tree.html">返回「二叉树」列表</a><a href="p226.html">下一题：226. 翻转二叉树 →</a></div>
 </div>
