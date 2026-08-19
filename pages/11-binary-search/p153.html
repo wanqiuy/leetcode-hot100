@@ -73,43 +73,45 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 <div class="ex">示例：输入 nums = [3,4,5,1,2] → 输出 1
 输入 nums = [4,5,6,7,0,1,2] → 输出 0</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：二分查找（与右端点 nums[high] 比较定位断点）。</p>
 <p><b>先想清楚两个问题：</b></p>
-<p><b>Q1：最小值有什么特征，和谁比较？</b>最小值是旋转的「断点」，它右侧到末尾是一段有序，且它严格小于右端点 nums[r]。所以每轮拿 nums[mid] 和 nums[r] 比较即可定位断点方向。</p>
-<p><b>Q2：区间怎么收缩才不会丢掉答案？</b>若 nums[mid] ＞ nums[r]，说明 mid 在左段、断点必在其右侧，l = mid + 1；否则 mid 已在右段有序区（或本身就是最小值），r = mid（不能 mid - 1，否则把候选丢掉）。循环条件用 l ＜ r，收敛到单元素即答案。</p>
+<p><b>Q1：最小值有什么特征，和谁比较？</b>最小值是旋转的「断点」，它右侧到末尾是一段有序，且它不大于右端点 nums[high]。所以每轮拿 nums[mid] 和 nums[high] 比较即可定位断点方向。</p>
+<p><b>Q2：区间怎么收缩才不会丢掉答案？</b>若 nums[mid] ＜ nums[high]，说明 mid 已在右段有序区（或本身就是最小值），high = mid（不能 mid - 1，否则把候选丢掉）；否则 mid 在左段、断点必在其右侧，low = mid + 1。循环条件用 low ＜ high，收敛到单元素即答案。</p>
 <p><b>照着写的 4 步：</b></p>
-<p>① 初始化 l = 0，r = nums.length - 1；<br>② while (l ＜ r) 循环：取 mid = l + (r - l) / 2；<br>③ 若 nums[mid] ＞ nums[r] 则 l = mid + 1（断点在右半），否则 r = mid（mid 保留为候选）；<br>④ 循环结束返回 nums[l]。</p>
-<p>易错点：循环条件是 l &lt; r 不是 l &lt;= r（收敛到单元素即停，取等会死循环）；收缩写 r = mid 不是 r = mid - 1（mid 可能就是最小值）；比较对象是 nums[r] 不是 nums[l]（与左端点比无法判断断点方向）。</p>
+<p>① 初始化 low = 0，high = nums.length - 1；<br>② while (low ＜ high) 循环：取 mid = low + (high - low) / 2；<br>③ 若 nums[mid] ＜ nums[high] 则 high = mid（mid 保留为候选），否则 low = mid + 1（断点在右半）；<br>④ 循环结束返回 nums[low]。</p>
+<p>易错点：循环条件是 low &lt; high 不是 low &lt;= high（收敛到单元素即停，取等会死循环）；收缩写 high = mid 不是 high = mid - 1（mid 可能就是最小值）；比较对象是 nums[high] 不是 nums[low]（与左端点比无法判断断点方向）。</p>
 <pre class="diagram">nums = [3, 4, 5, 1, 2]
 下标:    0  1  2  3  4
 
-初始: L=0, R=4
+初始: low=0, high=4
 
 第1轮: mid = 2 → nums[2] = 5
        [3, 4, 5, 1, 2]
         L     M     R
-       操作: nums[M]=5 ＞ nums[R]=2 → 断点在 M 右侧，L = mid+1 = 3
+       操作: nums[M]=5 ＜ nums[R]=2 不成立 → 断点在 M 右侧，low = mid+1 = 3
 
-第2轮: L=3, R=4，mid = 3 → nums[3] = 1
+第2轮: low=3, high=4，mid = 3 → nums[3] = 1
        [3, 4, 5, 1, 2]
                  M  R
                  L
-       操作: nums[M]=1 ≤ nums[R]=2 → M 可能是答案，R = mid = 3
+       操作: nums[M]=1 ＜ nums[R]=2 → M 可能是答案，high = mid = 3
 
-循环结束（L == R == 3）→ 返回 nums[3] = 1</pre>
-<h3>代码（Java）</h3>
+循环结束（low == high == 3）→ 返回 nums[3] = 1</pre>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
     public int findMin(int[] nums) {
-        // ① 区间 [l, r]，收敛到单元素即答案
-        int l = 0, r = nums.length - 1;
-        while (l &lt; r) {                    // ② 注意是 &lt; 不是 &lt;=
-            int mid = l + (r - l) / 2;
-            if (nums[mid] &gt; nums[r]) {
-                l = mid + 1;               // ③ 断点必在 mid 右侧
+        // ① 区间 [low, high]，收敛到单元素即答案
+        int low = 0;
+        int high = nums.length - 1;
+        while (low &lt; high) {              // ② 注意是 &lt; 不是 &lt;=
+            int mid = low + (high - low) / 2;
+            if (nums[mid] &lt; nums[high]) {
+                high = mid;                // ③ mid 保留为候选，不能 mid-1
             } else {
-                r = mid;                   // ③ mid 保留为候选，不能 mid-1
+                low = mid + 1;             // ③ 断点必在 mid 右侧
             }
         }
-        return nums[l];                    // ④ l == r 即最小值位置
+        return nums[low];                  // ④ low == high 即最小值位置
     }
 }</code></pre>
 <p class="cx">时间复杂度 O(log n) · 空间复杂度 O(1)</p>

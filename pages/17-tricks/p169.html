@@ -73,6 +73,7 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 <div class="ex">示例：输入 nums = [3,2,3] → 输出 3
 输入 nums = [2,2,1,1,1,2,2] → 输出 2</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：Boyer-Moore 摩尔投票法。</p>
 <p><b>先想清楚两个问题：</b></p>
 <p><b>Q1：不统计次数，怎么找出过半的元素？</b>摩尔投票法（Boyer-Moore）：多数元素超过一半，意味着它跟其余所有元素「一换一抵消」后仍有剩余。所以只维护候选人 candidate 和计数 count，让不同元素互相抵消。</p>
 <p><b>Q2：抵消规则怎么定？</b>遍历时：count 为 0 说明之前的候选人已被全部抵消，换当前数当新候选人；当前数等于候选人 count + 1，不同则 count - 1（抵消一票）。遍历结束时候选人必是多数元素（题目保证存在，无需二次校验）。</p>
@@ -92,7 +93,7 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 
 最终候选人 = 2 → 即多数元素 ✓
 （2 出现 4 次 ＞ 7/2，抵消所有对手后仍有盈余）</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
     public int majorityElement(int[] nums) {
         // ① 候选人 + 剩余票数

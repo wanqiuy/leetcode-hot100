@@ -73,12 +73,13 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 <div class="ex">示例：输入 matrix = [[1,3,5,7],[10,11,16,20],[23,30,34,60]], target = 3 → 输出 true
 输入 target = 13 → 输出 false</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：一次二分查找（按行拉平成虚拟升序数组）。</p>
 <p><b>先想清楚两个问题：</b></p>
 <p><b>Q1：二维矩阵怎么做二分？</b>题目保证「每行升序且每行首元素大于上一行末元素」，所以按行拉平就是一条长度为 m×n 的升序数组，直接对拉平后的虚拟下标做一次二分即可，不需要先行后列两次二分。</p>
 <p><b>Q2：一维下标怎么映射回二维坐标？</b>对 mid ∈ [0, m×n-1]：行 = mid / n，列 = mid % n（n 是列数）。取值后按普通二分规则收缩区间。</p>
 <p><b>照着写的 4 步：</b></p>
-<p>① 读出 m、n，令 l = 0，r = m × n - 1；<br>② while (l ≤ r) 循环：取 mid = l + (r - l) / 2；<br>③ 用 val = matrix[mid / n][mid % n] 取中点值：等于 target 返回 true；偏小则 l = mid + 1；偏大则 r = mid - 1；<br>④ 循环结束返回 false。</p>
-<p>易错点：映射时除和取模的都是列数 n 不是行数 m；右端点初始值是 m × n - 1 不是 m × n；循环条件是 l &lt;= r 不是 l &lt; r。</p>
+<p>① 读出 m、n，令 low = 0，high = m × n - 1；<br>② while (low ≤ high) 循环：取 mid = (high - low) / 2 + low；<br>③ 用 x = matrix[mid / n][mid % n] 取中点值：等于 target 返回 true；偏小则 low = mid + 1；偏大则 high = mid - 1；<br>④ 循环结束返回 false。</p>
+<p>易错点：映射时除和取模的都是列数 n 不是行数 m；右端点初始值是 m × n - 1 不是 m × n；循环条件是 low &lt;= high 不是 low &lt; high。</p>
 <pre class="diagram">matrix = [[ 1,  3,  5,  7],
           [10, 11, 16, 20],
           [23, 30, 34, 60]]   m=3, n=4，target = 3
@@ -98,21 +99,21 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
        操作: 1 ＜ 3 → 砍左半，L = 1
 
 第4轮: L=R=1，mid = 1 → matrix[0][1] = 3 = target → 返回 true</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
     public boolean searchMatrix(int[][] matrix, int target) {
         // ① 把矩阵按行拉平成升序数组，对虚拟下标二分
         int m = matrix.length, n = matrix[0].length;
-        int l = 0, r = m * n - 1;
-        while (l &lt;= r) {
-            int mid = l + (r - l) / 2;         // ② 取中点
-            int val = matrix[mid / n][mid % n]; // ③ 一维下标映射回二维
-            if (val == target) {
-                return true;                   // ③ 命中
-            } else if (val &lt; target) {
-                l = mid + 1;                   // ③ 偏小砍左半
+        int low = 0, high = m * n - 1;
+        while (low &lt;= high) {
+            int mid = (high - low) / 2 + low;  // ② 取中点
+            int x = matrix[mid / n][mid % n];   // ③ 一维下标映射回二维
+            if (x &lt; target) {
+                low = mid + 1;                 // ③ 偏小砍左半
+            } else if (x &gt; target) {
+                high = mid - 1;                // ③ 偏大砍右半
             } else {
-                r = mid - 1;                   // ③ 偏大砍右半
+                return true;                   // ③ 命中
             }
         }
         return false;                          // ④ 不存在

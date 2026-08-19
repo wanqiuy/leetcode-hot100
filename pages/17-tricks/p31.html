@@ -74,6 +74,7 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 输入 nums = [3,2,1] → 输出 [1,2,3]
 输入 nums = [1,1,5] → 输出 [1,5,1]</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：两遍扫描（找下降点 → 交换 → 反转后缀）。</p>
 <p><b>先想清楚两个问题：</b></p>
 <p><b>Q1：「下一个更大」该改动哪个位置？</b>要改动尽可能靠右、增幅尽可能小的位置。从右往左找第一个下降点 i（nums[i] ＜ nums[i+1]）：i 右侧的后缀是降序的，内部重排不出更大的排列，只能换掉 nums[i] 本身。找不到 i 说明整体降序（已是最大排列），整体反转即最小排列。</p>
 <p><b>Q2：换成谁、换完怎么收尾？</b>后缀是降序，从右往左找第一个 ＞ nums[i] 的数 j——它就是「恰好比 nums[i] 大的最小者」，交换 i、j 保证前缀增幅最小；交换后后缀仍是降序，把它反转成升序，让后缀取到最小值，整体即为「恰好大一点点」的排列。</p>
@@ -99,7 +100,7 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 特殊情况 nums = [3, 2, 1]：
 ① 一路找到 i = -1（整体降序，已是最大排列）
 → 直接整体反转 → [1, 2, 3]（最小排列）</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
     public void nextPermutation(int[] nums) {
         int n = nums.length;

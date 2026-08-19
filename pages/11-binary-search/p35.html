@@ -73,43 +73,44 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 <div class="ex">示例：输入 nums = [1,3,5,6], target = 5 → 输出 2
 输入 nums = [1,3,5,6], target = 2 → 输出 1（应插入到下标 1）</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：二分查找（求 lower_bound，全程用 ans 记录候选）。</p>
 <p><b>先想清楚两个问题：</b></p>
 <p><b>Q1：用什么技巧？</b>标准二分查找，本质是求 lower_bound：第一个大于等于 target 的位置。数组升序且无重复，二分天然满足 O(log n) 要求。</p>
-<p><b>Q2：区间怎么定义、未命中时返回什么？</b>用闭区间 [l, r]，循环条件 l ≤ r；nums[mid] 偏小就砍左半（l = mid + 1），偏大就砍右半（r = mid - 1）。循环结束时 l 恰好停在「第一个比 target 大的位置」，直接返回 l 即插入点，无需特判。</p>
+<p><b>Q2：未命中时答案从哪来？</b>官方写法不在命中时提前返回，而是全程维护候选 ans（初值 n）：只要 target ≤ nums[mid] 就先记 ans = mid 再砍右半（right = mid - 1），否则砍左半（left = mid + 1）。循环结束时 ans 就是「第一个 ≥ target 的位置」——命中即其下标，未命中即插入点，无需特判。</p>
 <p><b>照着写的 4 步：</b></p>
-<p>① 初始化 l = 0，r = nums.length - 1；<br>② while (l ≤ r) 循环：取中点 mid = l + (r - l) / 2；<br>③ 比较 nums[mid] 与 target：相等直接返回 mid；偏小则 l = mid + 1；偏大则 r = mid - 1；<br>④ 循环结束返回 l（未命中时 l 就是插入位置）。</p>
-<p>易错点：循环条件是 l &lt;= r 不是 l &lt; r（闭区间必须取等）；未命中返回 l 不是 r；中点写 l + (r - l) / 2 不是 (l + r) / 2（防溢出）。</p>
+<p>① 初始化 left = 0，right = n - 1，ans = n（默认插到末尾）；<br>② while (left ≤ right) 循环：取中点 mid = ((right - left) &gt;&gt; 1) + left；<br>③ 若 target ≤ nums[mid]：ans = mid 且 right = mid - 1（继续往左找更靠前的）；否则 left = mid + 1；<br>④ 循环结束返回 ans。</p>
+<p>易错点：ans 初值是 n 不是 0（target 比所有元素都大时应插到末尾）；记 ans 的条件是 target &lt;= nums[mid] 带等号（命中也要继续往左压，保证拿到第一个）；循环条件是 left &lt;= right 不是 left &lt; right（闭区间必须取等）。</p>
 <pre class="diagram">nums = [1, 3, 5, 6]   target = 2
 
-初始: L=0, R=3，搜索区间 [1, 3, 5, 6]
+初始: left=0, right=3, ans=4（默认插到末尾），搜索区间 [1, 3, 5, 6]
 
-第1轮: mid = 0+(3-0)/2 = 1 → nums[1] = 3
+第1轮: mid = ((3-0)&gt;&gt;1)+0 = 1 → nums[1] = 3
        [1, 3, 5, 6]
         L  M     R
-       操作: 3 ＞ 2 → 砍右半，R = mid - 1 = 0
+       操作: 2 ≤ 3 → 记 ans = 1，砍右半 right = mid - 1 = 0
 
-第2轮: L=0, R=0，mid = 0 → nums[0] = 1
+第2轮: left=0, right=0，mid = 0 → nums[0] = 1
        [1, 3, 5, 6]
-        M（L=M=R）
-       操作: 1 ＜ 2 → 砍左半，L = mid + 1 = 1
+        M（left=mid=right）
+       操作: 2 ＞ 1 → 砍左半 left = mid + 1 = 1
 
-循环结束（L=1 ＞ R=0）→ 返回 L = 1（2 应插在下标 1）</pre>
-<h3>代码（Java）</h3>
+循环结束（left=1 ＞ right=0）→ 返回 ans = 1（2 应插在下标 1）</pre>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
     public int searchInsert(int[] nums, int target) {
-        // ① 闭区间 [l, r]
-        int l = 0, r = nums.length - 1;
-        while (l &lt;= r) {                 // ② 闭区间必须取等
-            int mid = l + (r - l) / 2;   // ② 防溢出的中点写法
-            if (nums[mid] == target) {
-                return mid;              // ③ 命中直接返回
-            } else if (nums[mid] &lt; target) {
-                l = mid + 1;             // ③ 偏小，砍左半
+        // ① 闭区间 [left, right]，ans 记录「第一个 ≥ target 的位置」
+        int n = nums.length;
+        int left = 0, right = n - 1, ans = n;
+        while (left &lt;= right) {                 // ② 闭区间必须取等
+            int mid = ((right - left) &gt;&gt; 1) + left;   // ② 防溢出的中点写法
+            if (target &lt;= nums[mid]) {
+                ans = mid;                 // ③ 命中/偏大都先记候选
+                right = mid - 1;           // ③ 继续往左找更靠前的
             } else {
-                r = mid - 1;             // ③ 偏大，砍右半
+                left = mid + 1;            // ③ 偏小，砍左半
             }
         }
-        return l;                        // ④ 未命中时 l 即插入位置
+        return ans;                        // ④ 命中即下标，未命中即插入位置
     }
 }</code></pre>
 <p class="cx">时间复杂度 O(log n) · 空间复杂度 O(1)</p>

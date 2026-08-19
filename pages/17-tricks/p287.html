@@ -73,6 +73,7 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 <div class="ex">示例：输入 nums = [1,3,4,2,2] → 输出 2
 输入 nums = [3,1,3,4,2] → 输出 3</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：Floyd 快慢指针（把数组看成隐式链表找环入口）。</p>
 <p><b>先想清楚两个问题：</b></p>
 <p><b>Q1：不能改数组、O(1) 空间，怎么定位重复数？</b>把数组看成隐式链表：下标 i 的 next 就是 nums[i]。值域 [1,n] 共 n+1 个数，从 0 出发沿 next 走必成环；而重复数恰是环的入口——有两个不同下标指向它。问题等价于「找链表环入口」。</p>
 <p><b>Q2：Floyd 快慢指针两个阶段各干什么？</b>第一阶段：fast 每次两步、slow 每次一步，二者必在环内相遇；第二阶段：slow 放回起点 0，与 fast 改为同速各走一步，再次相遇的位置就是环入口。数学依据：起点到入口的距离 = 相遇点到入口绕环的剩余距离。</p>
@@ -101,7 +102,7 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
      3       2       2      相遇 ✓
 
 ④ 返回 2 → 即重复数 ✓</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
     public int findDuplicate(int[] nums) {
         // ① 先各走一步：slow 一步、fast 两步

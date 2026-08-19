@@ -73,6 +73,7 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 <div class="ex">示例：输入 nums = [4,1,2,1,2] → 输出 4
 输入 nums = [2,2,1] → 输出 1</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：位运算（全部元素异或，成对抵消）。</p>
 <p><b>先想清楚两个问题：</b></p>
 <p><b>Q1：不用额外空间，怎么把成对的数「消掉」？</b>用异或（XOR）。三条性质够用：a ⊕ a = 0（相同抵消）、a ⊕ 0 = a（与 0 异或不变）、异或满足交换律和结合律（顺序无所谓）。</p>
 <p><b>Q2：为什么全部异或一遍结果就是答案？</b>把数组所有元素依次异或：出现两次的数两两配对抵消为 0，0 再与只出现一次的那个数异或，留下的就是它本身。一趟扫描、一个变量，正好满足 O(n) 时间和 O(1) 空间。</p>
@@ -98,7 +99,7 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 ⊕ 01
 ----
   00  → 相同位全抵消为 0</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
     public int singleNumber(int[] nums) {
         // ① 0 是异或单位元：0 ⊕ x = x

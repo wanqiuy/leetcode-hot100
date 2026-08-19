@@ -74,18 +74,19 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 输入 s = "(]" → 输出 false
 输入 s = "([)]" → 输出 false</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：栈 + 哈希映射（右括号查表配对栈顶）。</p>
 <p><b>先想清楚两个问题：</b></p>
 <p><b>Q1：为什么用栈？</b>括号配对是「最近未闭合的左括号先被匹配」的后进先出关系，栈是天然结构。用哈希表存「右括号 → 对应左括号」的映射，配对判断一行搞定。</p>
-<p><b>Q2：什么情况立即判无效、什么情况看最后结果？</b>遍历时遇左括号入栈；遇右括号立刻检查：栈空（没人跟它配）或栈顶不是对应左括号，当场返回 false。遍历结束后还要看栈是否为空——非空说明有左括号没被闭合，也是 false。</p>
+<p><b>Q2：什么情况立即判无效、什么情况看最后结果？</b>遍历时遇左括号入栈；遇右括号立刻检查：栈空（没人跟它配）或栈顶不是对应左括号，当场返回 false；匹配则弹出栈顶完成配对。遍历结束后还要看栈是否为空——非空说明有左括号没被闭合，也是 false。</p>
 <p><b>照着写的 5 步：</b></p>
-<p>① 长度为奇数直接返回 false（必无法两两配对）；<br>② 建映射表：')'→'('、']'→'['、'}'→'{'，再建一个空栈；<br>③ 遍历每个字符 c：c 在映射表里（是右括号）→ 若栈空或弹出的栈顶 ≠ 对应左括号，返回 false；<br>④ 否则 c 是左括号，入栈；<br>⑤ 遍历结束返回 stack.isEmpty()。</p>
-<p>易错点：弹栈前必须先判栈空（是 stack.isEmpty() 检查在前，不是先 pop 再判断）；最后返回栈是否为空不是直接 return true（如 "(((" 会漏判）；映射表存的是右括号到左括号，不是左到右（这样才能用 containsKey 区分左右括号）。</p>
+<p>① 长度为奇数直接返回 false（必无法两两配对）；<br>② 建映射表 pairs：')'→'('、']'→'['、'}'→'{'，再建一个空栈；<br>③ 遍历每个字符 ch：ch 在映射表里（是右括号）→ 若栈空或栈顶 ≠ 对应左括号，返回 false；否则弹出栈顶完成配对；<br>④ 否则 ch 是左括号，入栈；<br>⑤ 遍历结束返回 stack.isEmpty()。</p>
+<p>易错点：弹栈前必须先判栈空（是 stack.isEmpty() 检查在前，不是先 pop 再判断）；匹配时先看栈顶（peek）再弹出（pop），不匹配时栈不能动；最后返回栈是否为空不是直接 return true（如 "(((" 会漏判）；映射表存的是右括号到左括号，不是左到右（这样才能用 containsKey 区分左右括号）。</p>
 <pre class="diagram">s = "([)]"
 
 操作         栈（右侧为栈顶）   结果
 读 '('  → 入栈      [(]
 读 '['  → 入栈      [(, []
-读 ')'  → 查表需 '('，弹栈得到 '['
+读 ')'  → 查表需 '('，栈顶是 '['
           '[' ≠ '(' → 返回 false ✗
 
 ---------------------------------
@@ -94,37 +95,43 @@ s = "()[]{}" 的完整过程：
 
 操作         栈（右侧为栈顶）   结果
 读 '('  → 入栈      [(]
-读 ')'  → 弹出 '(' 配对成功    []
+读 ')'  → 栈顶 '(' 匹配，弹出   []
 读 '['  → 入栈      [[]
-读 ']'  → 弹出 '[' 配对成功    []
+读 ']'  → 栈顶 '[' 匹配，弹出   []
 读 '{'  → 入栈      [{]
-读 '}'  → 弹出 '{' 配对成功    []
+读 '}'  → 栈顶 '{' 匹配，弹出   []
 遍历结束，栈空 → 返回 true ✓</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
     public boolean isValid(String s) {
         // ① 奇数长度必然无效，提前剪枝
-        if (s.length() % 2 == 1) return false;
+        int n = s.length();
+        if (n % 2 == 1) {
+            return false;
+        }
         // ② 映射表：右括号 → 对应左括号；栈存等待配对的左括号
-        Map&lt;Character, Character&gt; pair = new HashMap&lt;&gt;();
-        pair.put(')', '(');
-        pair.put(']', '[');
-        pair.put('}', '{');
-        Deque&lt;Character&gt; stack = new ArrayDeque&lt;&gt;();
-        for (char c : s.toCharArray()) {
-            if (pair.containsKey(c)) {
+        Map&lt;Character, Character&gt; pairs = new HashMap&lt;Character, Character&gt;() {{
+            put(')', '(');
+            put(']', '[');
+            put('}', '{');
+        }};
+        Deque&lt;Character&gt; stack = new LinkedList&lt;Character&gt;();
+        for (int i = 0; i &lt; n; i++) {
+            char ch = s.charAt(i);
+            if (pairs.containsKey(ch)) {
                 // ③ 右括号：栈空或栈顶不匹配都立即判无效
-                if (stack.isEmpty() || stack.pop() != pair.get(c)) {
+                if (stack.isEmpty() || stack.peek() != pairs.get(ch)) {
                     return false;
                 }
+                stack.pop();             // ③ 匹配成功，弹出栈顶
             } else {
-                stack.push(c);           // ④ 左括号入栈等待配对
+                stack.push(ch);          // ④ 左括号入栈等待配对
             }
         }
         return stack.isEmpty();          // ⑤ 栈空才说明全部配对
     }
 }</code></pre>
-<p class="cx">时间复杂度 O(n) · 空间复杂度 O(n)</p>
+<p class="cx">时间复杂度 O(n) · 空间复杂度 O(n + 6)（n 为字符串长度，哈希表固定存 3 对括号共 6 个字符）</p>
 </section>
 <div class="pager"><a style="visibility:hidden"></a><a class="mid" href="../../12-stack.html">返回「栈」列表</a><a href="p155.html">下一题：155. 最小栈 →</a></div>
 </div>

@@ -73,6 +73,7 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 <div class="ex">示例：输入 nums = [2,3,1,1,4] → 输出 2（下标 0 → 1 → 4）
 输入 nums = [2,3,0,1,4] → 输出 2</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：贪心（正向遍历，维护当前跳跃边界 end 与最远位置 farthest）。</p>
 <p><b>先想清楚两个问题：</b></p>
 <p><b>Q1：怎么把「最少跳几步」转化为逐层扩张？</b>把跳跃看成贪心版 BFS：当前这一步能到达的范围是一「层」。维护两个边界——end（本层覆盖的右边界）和 farthest（扫描本层时下一步能到的最远位置）。每一步都贪心地选「能让下一跳跳得最远」的落点，总步数自然最少。</p>
 <p><b>Q2：什么时候步数加一？</b>遍历 i 时先用 i + nums[i] 刷新 farthest；当 i 走到 end（本层探完），说明必须再跳一步：steps + 1，同时把 end 推进到 farthest 进入下一层。循环只需跑到 i = n-2：最后一次扩张边界已含终点，不必对终点本身再计步。</p>
@@ -95,7 +96,7 @@ i=2: farthest = max(4, 2+1) = 4
 i=3: farthest = max(4, 3+1) = 4，i ≠ end，不动
 
 返回 steps = 2 ✓（下标 0 → 1 → 4）</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
     public int jump(int[] nums) {
         // ① steps 步数；end 本跳覆盖的右边界；farthest 下一跳最远处

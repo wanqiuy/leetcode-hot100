@@ -73,11 +73,12 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 <div class="ex">示例：输入 temperatures = [73,74,75,71,69,72,76,73]
 输出 [1,1,4,2,1,1,0,0]</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：单调栈（栈存下标，对应温度单调递减）。</p>
 <p><b>先想清楚两个问题：</b></p>
 <p><b>Q1：怎么避免对每一天都向后扫描？</b>用单调递减栈：栈里存「还没等到更高温度的那些天」的下标，对应温度从栈底到栈顶单调递减。新一天的温度一出现，就是它之前所有比它低的天的「第一个更高温」。</p>
-<p><b>Q2：什么时候结算、怎么算答案？</b>遍历到第 i 天温度 t 时，循环比较栈顶：只要栈非空且 t ＞ 栈顶那天的温度，栈顶那天就等到了答案，弹出并记 ans[栈顶下标] = i - 栈顶下标；比不动了就把 i 自己入栈等待。每个下标只进出栈一次，均摊 O(n)。</p>
+<p><b>Q2：什么时候结算、怎么算答案？</b>遍历到第 i 天温度 temperature 时，循环比较栈顶：只要栈非空且 temperature ＞ 栈顶那天的温度，栈顶那天就等到了答案，弹出并记 ans[栈顶下标] = i - 栈顶下标；比不动了就把 i 自己入栈等待。每个下标只进出栈一次，均摊 O(n)。</p>
 <p><b>照着写的 4 步：</b></p>
-<p>① 建答案数组 ans（默认全 0）和空栈 stack（存下标）；<br>② 从左到右遍历 i = 0..n-1；<br>③ while 栈非空且 temperatures[i] ＞ temperatures[栈顶]：弹出 prev，令 ans[prev] = i - prev；<br>④ 把 i 入栈，继续下一天；遍历完直接返回 ans（栈中剩余天数的答案就是初始值 0）。</p>
+<p>① 建答案数组 ans（默认全 0）和空栈 stack（存下标）；<br>② 从左到右遍历 i = 0..length-1；<br>③ while 栈非空且 temperatures[i] ＞ temperatures[栈顶]：弹出 prevIndex，令 ans[prevIndex] = i - prevIndex；<br>④ 把 i 入栈，继续下一天；遍历完直接返回 ans（栈中剩余天数的答案就是初始值 0）。</p>
 <p>易错点：栈里存的是下标不是温度（答案要用下标算间隔）；比较对象是 temperatures[stack.peek()] 不是 stack.peek() 本身；while 循环弹栈不是 if 只弹一次（一天的高温可能同时结算多天）。</p>
 <pre class="diagram">温度:  [73, 74, 75, 71, 69, 72, 76, 73]
 下标:    0   1   2   3   4   5   6   7
@@ -98,19 +99,20 @@ i=7 (73): 73＜76 → 直接入栈        栈 [6, 7]
 
 栈中残留的 6、7 等不到更高温 → ans 保持 0
 结果: [1, 1, 4, 2, 1, 1, 0, 0] ✓</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
     public int[] dailyTemperatures(int[] temperatures) {
-        int n = temperatures.length;
+        int length = temperatures.length;
         // ① 答案数组默认全 0，栈存「还没等到更高温的天」的下标
-        int[] ans = new int[n];
-        Deque&lt;Integer&gt; stack = new ArrayDeque&lt;&gt;();
+        int[] ans = new int[length];
+        Deque&lt;Integer&gt; stack = new LinkedList&lt;Integer&gt;();
         // ② 从左到右扫描每一天
-        for (int i = 0; i &lt; n; i++) {
+        for (int i = 0; i &lt; length; i++) {
+            int temperature = temperatures[i];
             // ③ 当前温度更高：结算栈中所有比它低的等待者
-            while (!stack.isEmpty() &amp;&amp; temperatures[i] &gt; temperatures[stack.peek()]) {
-                int prev = stack.pop();
-                ans[prev] = i - prev;             // 等待天数 = 下标差
+            while (!stack.isEmpty() &amp;&amp; temperature &gt; temperatures[stack.peek()]) {
+                int prevIndex = stack.pop();
+                ans[prevIndex] = i - prevIndex;   // 等待天数 = 下标差
             }
             stack.push(i);                        // ④ 自己也入栈等待
         }

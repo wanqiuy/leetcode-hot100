@@ -73,6 +73,7 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 <div class="ex">示例：输入 s = "ababcbacadefegdehijhklij"
 输出 [9,7,8]（划分为 "ababcbaca" / "defegde" / "hijhklij"）</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：贪心 + 两次遍历（记录字母最后出现位置，扫描收割片段）。</p>
 <p><b>先想清楚两个问题：</b></p>
 <p><b>Q1：一个片段的边界由什么决定？</b>由片段内所有字母的「最后出现位置」决定：只要片段包含某字母，片段就至少要延伸到它的最后一次出现处，否则同一字母会出现在两段。所以先扫一遍记录 last[c] = 字母 c 最后出现的下标。</p>
 <p><b>Q2：什么时候可以收割一段？</b>第二遍扫描维护 end = 本段必须延伸到的最远位置：到 i 时 end = max(end, last[s[i]])。当 i == end，说明段内所有字母都已在段内收尾，贪心收割（长度 = i - start + 1）并从 i+1 开新段。每段尽早结束，段数自然最多。</p>
@@ -98,7 +99,7 @@ i=16 'h': end = 19 → ... → i=23 'j': i == end=23
          → 收割 [16..23]，长度 8
 
 答案 = [9, 7, 8] ✓</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
     public List&lt;Integer&gt; partitionLabels(String s) {
         // ① 第一遍：记录每个字母最后出现的下标

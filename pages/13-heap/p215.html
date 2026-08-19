@@ -73,6 +73,7 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 <div class="ex">示例：输入 nums = [3,2,1,5,6,4], k = 2 → 输出 5
 输入 nums = [3,2,3,1,2,4,5,5,6], k = 4 → 输出 4</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：堆（容量 k 的小顶堆，保留最大的 k 个数）。</p>
 <p><b>先想清楚两个问题：</b></p>
 <p><b>Q1：要「第 k 大」，用大顶堆还是小顶堆、容量多大？</b>用容量固定为 k 的小顶堆：堆里始终只留「目前见过的最大的 k 个数」，堆顶是这 k 个里最小的——它正好就是第 k 大的候选。容量超过 k 就弹堆顶，保证堆顶门槛越来越高。</p>
 <p><b>Q2：遍历时每个数怎么处理？</b>堆未满 k 个直接放；满了以后，只有当前值比堆顶大才有资格进堆（先 poll 堆顶再 offer），否则直接跳过。遍历结束堆顶即答案。O(n log k)，k 小时远优于全排序；快速选择可平均 O(n)，但堆写法通用、还能应付数据流。</p>
@@ -90,7 +91,7 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 读 4: 4 ＜ 堆顶 5 → 跳过 堆 [5, 6]
 
 遍历结束，堆顶 = 5 → 第 2 大元素 ✓</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
     public int findKthLargest(int[] nums, int k) {
         // ① 小顶堆，容量保持为 k，存「目前最大的 k 个数」

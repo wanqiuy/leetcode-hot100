@@ -73,6 +73,7 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 <div class="ex">示例：输入 nums = [1,1,1,2,2,3], k = 2 → 输出 [1,2]
 输入 nums = [1], k = 1 → 输出 [1]</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：哈希表统计频率 + 容量 k 的小顶堆。</p>
 <p><b>先想清楚两个问题：</b></p>
 <p><b>Q1：按什么筛选、用什么容器？</b>先 HashMap 统计每个数的频率；再用容量 k 的小顶堆按频率筛选——堆里始终留「频率最高的 k 个」，堆顶是其中频率最低的门槛。</p>
 <p><b>Q2：堆里放什么、比较器怎么写？</b>堆元素用 Map.Entry（键是数字、值是频率），比较器按 entry.getValue()（频率）升序，PriorityQueue 默认小顶。遍历频率表：堆未满直接放；满了后当前频率高于堆顶频率才替换（先 poll 后 offer）。这样只对 m 个不同元素维护大小 k 的堆，O(m log k) 优于全排序 O(m log m)。</p>
@@ -91,7 +92,7 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 ④ 堆中剩余 {1(3), 2(2)} → 取出 key
 
 答案 = [1, 2] ✓</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
     public int[] topKFrequent(int[] nums, int k) {
         // ① 统计每个数的出现频率

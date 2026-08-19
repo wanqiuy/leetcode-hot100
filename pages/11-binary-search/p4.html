@@ -73,58 +73,70 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 <div class="ex">示例：输入 nums1 = [1,3], nums2 = [2] → 输出 2.0
 输入 nums1 = [1,2], nums2 = [3,4] → 输出 2.5（(2+3)/2）</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：划分数组（在较短数组上二分切点，median1/median2 记录中位数候选）。</p>
 <p><b>先想清楚两个问题：</b></p>
-<p><b>Q1：怎么把「找中位数」转化成可二分的问题？</b>在两个数组中各切一刀：nums1 左半取 i 个、nums2 左半取 j 个，让左半元素总数 = (m+n+1)/2，且满足「左半最大值 ≤ 右半最小值」。满足时中位数直接由切点两侧得出：总长为奇数取左半最大值，偶数取（左半最大 + 右半最小）/2。i 定了 j 就被唯一确定为 (m+n+1)/2 - i，所以只需二分 i。</p>
-<p><b>Q2：二分 i 时怎么判断该往哪边移？</b>记 l1 = nums1[i-1]（nums1 左半最大）、r2 = nums2[j]（nums2 右半最小）等四个切点邻值。若 l1 ＞ r2 说明 nums1 左半取多了，i 左移；若 l2 ＞ r1 说明取少了，i 右移；两者都满足即为正确切分。在较短数组上二分，切点在两端时用 ±∞ 哨兵免特判。</p>
-<p><b>照着写的 6 步：</b></p>
-<p>① 保证 nums1 是较短数组（不够短就交换参数递归）；<br>② 在 i ∈ [0, m] 上二分：取 i = (l+r)/2，算 j = (m+n+1)/2 - i；<br>③ 取四个邻值 l1/r1/l2/r2，i 或 j 在边界时用 ∓∞ 哨兵代替；<br>④ 若 l1 ≤ r2 且 l2 ≤ r1：切分正确，按总长奇偶返回 max(l1,l2) 或 (max(l1,l2)+min(r1,r2))/2.0；<br>⑤ 否则 l1 ＞ r2 则 r = i - 1，否则 l = i + 1；<br>⑥ 循环兜底返回 0.0（不会走到）。</p>
-<p>易错点：二分区间的右端是 m 不是 m - 1（i 表示左半元素个数，可以取 0..m 共 m+1 个切点）；j 的公式是 (m+n+1)/2 - i 不是 (m+n)/2 - i（+1 让奇数时左半多一个）；哨兵是 MIN_VALUE/MAX_VALUE 成对使用，漏一个边界就错。</p>
+<p><b>Q1：怎么把「找中位数」转化成可二分的问题？</b>在两个数组中各切一刀：nums1 左半取 i 个、nums2 左半取 j 个，让左半元素总数 = (m+n+1)/2，且满足「左半最大值 ≤ 右半最小值」。满足时中位数直接由切点两侧得出：median1 = 左半最大值，median2 = 右半最小值；总长为奇数取 median1，偶数取 (median1+median2)/2。i 定了 j 就被唯一确定为 (m+n+1)/2 - i，所以只需二分 i。</p>
+<p><b>Q2：二分 i 时怎么判断该往哪边移？</b>官方写法每轮只校验一个不等式 nums1[i-1] ≤ nums2[j]：成立说明 i 还能更大——先记录当前切分的中位数候选 median1/median2，再 left = i + 1；不成立说明 nums1 左半取多了，right = i - 1。循环结束时候选就对应最大合法 i 的切分（另一个不等式 nums2[j-1] ≤ nums1[i] 对最大合法 i 自动成立，因为 j 随 i 增大而减小）。切点在两端时用 ±∞ 哨兵免特判。</p>
+<p><b>照着写的 5 步：</b></p>
+<p>① 保证 nums1 是较短数组（不够短就交换参数递归）；<br>② 在 i ∈ [0, m] 上二分：取 i = (left+right)/2，算 j = (m+n+1)/2 - i；<br>③ 取四个邻值 nums_im1/nums_i/nums_jm1/nums_j，i 或 j 在边界时用 ∓∞ 哨兵代替；<br>④ 若 nums_im1 ≤ nums_j：记录 median1 = max(nums_im1, nums_jm1)、median2 = min(nums_i, nums_j)，并 left = i + 1 继续找更大的 i；否则 right = i - 1；<br>⑤ 循环结束按总长奇偶返回 median1 或 (median1+median2)/2.0。</p>
+<p>易错点：二分区间的右端是 m 不是 m - 1（i 表示左半元素个数，可以取 0..m 共 m+1 个切点）；j 的公式是 (m+n+1)/2 - i 不是 (m+n)/2 - i（+1 让奇数时左半多一个）；满足条件后不能立即返回，要继续 left = i + 1 找最大合法 i（中位数候选在最后一次满足时刷新）；哨兵 MIN_VALUE/MAX_VALUE 成对使用，漏一个边界就错。</p>
 <pre class="diagram">nums1 = [1, 3]   nums2 = [2]   m=2, n=1
 目标：左半共 (2+1+1)/2 = 2 个元素，i ∈ [0, 2]
 
-第1轮: l=0, r=2 → i = 1（nums1 左半取 1 个）
+第1轮: left=0, right=2 → i = 1（nums1 左半取 1 个）
        j = 2 - 1 = 1（nums2 左半取 1 个）
-         nums1: [1 | 3]      l1=1,  r1=3
-         nums2: [2 | ─]      l2=2,  r2=+∞(哨兵)
-       校验: l1=1 ≤ r2=+∞ ✓ 且 l2=2 ≤ r1=3 ✓ → 切分正确
+         nums1: [1 | 3]      nums_im1=1, nums_i=3
+         nums2: [2 | ─]      nums_jm1=2, nums_j=+∞(哨兵)
+       校验: nums_im1=1 ≤ nums_j=+∞ ✓ → 切分可行
+       记录: median1 = max(1, 2) = 2，median2 = min(3, +∞) = 3
+       操作: left = i + 1 = 2（尝试更大的 i）
 
-总长 3 为奇数 → 中位数 = 左半最大值 = max(l1, l2) = max(1, 2) = 2.0
+第2轮: left=2, right=2 → i = 2（nums1 全取）
+       j = 2 - 2 = 0
+         nums1: [1, 3 | ─]   nums_im1=3, nums_i=+∞
+         nums2: [─ | 2]      nums_jm1=-∞, nums_j=2
+       校验: nums_im1=3 ＞ nums_j=2 ✗ → right = i - 1 = 1
 
-【对照：错误切分长什么样】
-若 i=0, j=2：nums1: [| 1, 3]   nums2: [2 | ─]（j=1 才对，j 超界说明 i 太小）
-若 i=2, j=0：nums1: [1, 3 |]   nums2: [| 2]
-       l1=3 ＞ r2=2 ✗ → i 太大，应左移</pre>
-<h3>代码（Java）</h3>
+循环结束（left=2 ＞ right=1）
+总长 3 为奇数 → 返回 median1 = 2.0 ✓</pre>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
     public double findMedianSortedArrays(int[] nums1, int[] nums2) {
         // ① 保证 nums1 是较短的数组，二分复杂度降为 O(log min(m,n))
         if (nums1.length &gt; nums2.length) {
             return findMedianSortedArrays(nums2, nums1);
         }
-        int m = nums1.length, n = nums2.length;
+
+        int m = nums1.length;
+        int n = nums2.length;
         // ② 在切点 i ∈ [0, m] 上二分（i 是 nums1 左半元素个数）
-        int l = 0, r = m;
-        while (l &lt;= r) {
-            int i = (l + r) / 2;
+        int left = 0, right = m;
+        // median1：前一部分的最大值；median2：后一部分的最小值
+        int median1 = 0, median2 = 0;
+
+        while (left &lt;= right) {
+            int i = (left + right) / 2;
             int j = (m + n + 1) / 2 - i;      // ② j 由 i 唯一确定
+
             // ③ 切点在两端时用哨兵值，免去越界特判
-            int l1 = (i == 0) ? Integer.MIN_VALUE : nums1[i - 1];
-            int r1 = (i == m) ? Integer.MAX_VALUE : nums1[i];
-            int l2 = (j == 0) ? Integer.MIN_VALUE : nums2[j - 1];
-            int r2 = (j == n) ? Integer.MAX_VALUE : nums2[j];
-            if (l1 &lt;= r2 &amp;&amp; l2 &lt;= r1) {
-                // ④ 找到正确切分：按总长奇偶取中位数
-                if ((m + n) % 2 == 1) {
-                    return Math.max(l1, l2);
-                }
-                return (Math.max(l1, l2) + Math.min(r1, r2)) / 2.0;
-            } else if (l1 &gt; r2) {
-                r = i - 1;                    // ⑤ nums1 左半取多了，i 左移
+            int nums_im1 = (i == 0 ? Integer.MIN_VALUE : nums1[i - 1]);
+            int nums_i = (i == m ? Integer.MAX_VALUE : nums1[i]);
+            int nums_jm1 = (j == 0 ? Integer.MIN_VALUE : nums2[j - 1]);
+            int nums_j = (j == n ? Integer.MAX_VALUE : nums2[j]);
+
+            if (nums_im1 &lt;= nums_j) {
+                // ④ 切分可行：记录中位数候选，继续找更大的 i
+                median1 = Math.max(nums_im1, nums_jm1);
+                median2 = Math.min(nums_i, nums_j);
+                left = i + 1;
             } else {
-                l = i + 1;                    // ⑤ nums1 左半取少了，i 右移
+                // ④ nums1 左半取多了，i 左移
+                right = i - 1;
             }
         }
-        return 0.0;                           // ⑥ 兜底，不会走到
+
+        // ⑤ 按总长奇偶取中位数
+        return (m + n) % 2 == 0 ? (median1 + median2) / 2.0 : median1;
     }
 }</code></pre>
 <p class="cx">时间复杂度 O(log min(m, n)) · 空间复杂度 O(1)</p>

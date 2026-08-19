@@ -73,6 +73,7 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 <div class="ex">示例：addNum(1), addNum(2), findMedian() → 1.5
 addNum(3), findMedian() → 2.0</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：两个堆（大顶堆存较小一半 + 小顶堆存较大一半）。</p>
 <p><b>先想清楚两个问题：</b></p>
 <p><b>Q1：数据流动态到达，怎么 O(1) 拿到中位数？</b>用两个堆把数据切成两半：大顶堆 left 存较小的一半（堆顶 = 左半最大值），小顶堆 right 存较大的一半（堆顶 = 右半最小值）。中位数只与这两个堆顶有关，findMedian 读堆顶即可。</p>
 <p><b>Q2：怎么维持「左半 ≤ 右半」且两堆大小差 ≤ 1？</b>addNum 固定三步：新数先全进 left；立刻把 left 堆顶挪给 right——保证 left 里所有元素 ≤ right；若此时 right 比 left 多，就把 right 堆顶回挪一个给 left。约定 left 可多存一个：总数为奇数时中位数 = left 堆顶，偶数 = 两堆顶平均。</p>
@@ -94,7 +95,7 @@ addNum(3), findMedian() → 2.0</div></div>
 
 findMedian: 共 3 个（奇数）→ left 堆顶 = 2 ✓
 若只加了 1 和 2（偶数）→ (1 + 2) / 2 = 1.5 ✓</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class MedianFinder {
     // ① left 大顶堆存较小一半（可多存一个），right 小顶堆存较大一半
     private PriorityQueue&lt;Integer&gt; left;

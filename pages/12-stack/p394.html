@@ -73,57 +73,59 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 <div class="ex">示例：输入 s = "3[a2[c]]" → 输出 "accaccacc"
 输入 s = "2[abc]3[cd]ef" → 输出 "abcabccdcdcdef"</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：辅助栈（倍数栈 + 外层字符串栈，逐字符解析）。</p>
 <p><b>先想清楚两个问题：</b></p>
-<p><b>Q1：嵌套括号怎么解析？</b>嵌套结构是「后进先出」：内层先解码完，再拼回外层。用两个栈：numStack 存各层的重复倍数，strStack 存进入本层之前外层已累计的字符串；再用 cur 和 num 记录「当前层正在解析的串」和「正在累计的倍数」。</p>
-<p><b>Q2：四种字符各触发什么动作？</b>数字 → num = num×10 + 数字（累计多位数）；'[' → 把当前 num 和 cur 分别压栈，然后 num 清零、cur 重置，开始解析内层；']' → 弹出外层倍数 k 和外层串，按「外层串 + 内层串重复 k 次」拼成新 cur；普通字母 → 直接 append 到 cur。</p>
-<p><b>照着写的 6 步：</b></p>
-<p>① 建 numStack、strStack 两个栈，cur = 空 StringBuilder，num = 0；<br>② 遇数字：num = num * 10 + (c - '0')；<br>③ 遇 '['：numStack.push(num)、strStack.push(cur)，然后 num = 0、cur = 新建空串；<br>④ 遇 ']'：弹出 k 和外层串 outer，把 cur 重复 append k 次到 outer 后面，令 cur = outer；<br>⑤ 遇字母：cur.append(c)；<br>⑥ 遍历结束返回 cur.toString()。</p>
-<p>易错点：数字可能是多位数（如 "12[a]"），必须 num×10 累加不是直接赋值；遇 '[' 压栈后要同时重置 num 和 cur，漏一个就会串层；']' 处拼接顺序是「外层串在前、内层串重复 k 次在后」，写反结果就反。</p>
+<p><b>Q1：嵌套括号怎么解析？</b>嵌套结构是「后进先出」：内层先解码完，再拼回外层。用两个栈：stack_multi 存各层的重复倍数，stack_res 存进入本层之前外层已累计的字符串；再用 res 和 multi 记录「当前层正在解析的串」和「正在累计的倍数」。</p>
+<p><b>Q2：四种字符各触发什么动作？</b>'[' → 把当前 multi 和 res 分别压栈，然后 multi 清零、res 重置，开始解析内层；']' → 弹出外层倍数 cur_multi 和外层串，按「外层串 + 内层串重复 cur_multi 次」拼成新 res；数字 → multi = multi×10 + 数字（累计多位数）；普通字母 → 直接 append 到 res。</p>
+<p><b>照着写的 5 步：</b></p>
+<p>① 建 stack_multi、stack_res 两个栈，res = 空 StringBuilder，multi = 0；<br>② 遇 '['：stack_multi、stack_res 分别压入 multi 和 res 的字符串，然后 multi = 0、res 新建空串；<br>③ 遇 ']'：弹出 cur_multi 和外层串，把 res 重复 append cur_multi 次拼到外层串后面，令 res = 拼接结果；<br>④ 遇数字：multi = multi * 10 + (c - '0')；<br>⑤ 遇字母：res.append(c)；遍历结束返回 res.toString()。</p>
+<p>易错点：数字可能是多位数（如 "12[a]"），必须 multi×10 累加不是直接赋值；遇 '[' 压栈后要同时重置 multi 和 res，漏一个就会串层；']' 处拼接顺序是「外层串在前、内层串重复 cur_multi 次在后」，写反结果就反。</p>
 <pre class="diagram">s = "3[a2[c]]"
 （栈内左侧为栈底，右侧为栈顶）
 
-操作          numStack   strStack      num   cur
-读 '3'        []         []            3     ""
-读 '['        [3]        [""]          0     ""      压栈后重置
-读 'a'        [3]        [""]          0     "a"
-读 '2'        [3]        [""]          2     "a"
-读 '['        [3, 2]     ["", "a"]     0     ""      再压一层
-读 'c'        [3, 2]     ["", "a"]     0     "c"
-读 ']'        [3]        [""]          0     "acc"   弹 k=2、外层"a"
-                                                    cur = "a" + "c"×2
-读 ']'        []         []            0     "accaccacc"
-                                             弹 k=3、外层""
-                                             cur = "" + "acc"×3
+操作          stack_multi   stack_res      multi   res
+读 '3'        []            []             3       ""
+读 '['        [3]           [""]           0       ""      压栈后重置
+读 'a'        [3]           [""]           0       "a"
+读 '2'        [3]           [""]           2       "a"
+读 '['        [3, 2]        ["", "a"]      0       ""      再压一层
+读 'c'        [3, 2]        ["", "a"]      0       "c"
+读 ']'        [3]           [""]           0       "acc"   弹 cur_multi=2、外层"a"
+                                                          res = "a" + "c"×2
+读 ']'        []            []             0       "accaccacc"
+                                                   弹 cur_multi=3、外层""
+                                                   res = "" + "acc"×3
 
 返回 "accaccacc" ✓</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
     public String decodeString(String s) {
+        // ① 当前层正在解析的串 res、正在累计的倍数 multi
+        StringBuilder res = new StringBuilder();
+        int multi = 0;
         // ① 两个栈：各层的重复倍数、进入本层前外层已累积的串
-        Deque&lt;Integer&gt; numStack = new ArrayDeque&lt;&gt;();
-        Deque&lt;StringBuilder&gt; strStack = new ArrayDeque&lt;&gt;();
-        StringBuilder cur = new StringBuilder();   // 当前层正在解析的串
-        int num = 0;                               // 正在累计的倍数
-        for (char c : s.toCharArray()) {
-            if (Character.isDigit(c)) {
-                num = num * 10 + (c - '0');     // ② 累计多位数
-            } else if (c == '[') {
-                numStack.push(num);             // ③ 保存本层倍数
-                strStack.push(cur);             // ③ 保存外层结果
-                num = 0;
-                cur = new StringBuilder();      // ③ 重置，开始解析内层
+        LinkedList&lt;Integer&gt; stack_multi = new LinkedList&lt;&gt;();
+        LinkedList&lt;String&gt; stack_res = new LinkedList&lt;&gt;();
+        for (Character c : s.toCharArray()) {
+            if (c == '[') {
+                stack_multi.addLast(multi);     // ② 保存本层倍数
+                stack_res.addLast(res.toString()); // ② 保存外层结果
+                multi = 0;
+                res = new StringBuilder();      // ② 重置，开始解析内层
             } else if (c == ']') {
-                int k = numStack.pop();         // ④ 本层重复次数
-                StringBuilder outer = strStack.pop();
-                for (int i = 0; i &lt; k; i++) {   // ④ 外层串 + 内层串×k
-                    outer.append(cur);
+                StringBuilder tmp = new StringBuilder();
+                int cur_multi = stack_multi.removeLast(); // ③ 本层重复次数
+                for (int i = 0; i &lt; cur_multi; i++) {
+                    tmp.append(res);            // ③ 内层串重复 cur_multi 次
                 }
-                cur = outer;                    // ④ 回到外层继续
+                res = new StringBuilder(stack_res.removeLast() + tmp); // ③ 外层串在前
+            } else if (c &gt;= '0' &amp;&amp; c &lt;= '9') {
+                multi = multi * 10 + Integer.parseInt(c + ""); // ④ 累计多位数
             } else {
-                cur.append(c);                  // ⑤ 普通字符直接累积
+                res.append(c);                  // ⑤ 普通字符直接累积
             }
         }
-        return cur.toString();                  // ⑥
+        return res.toString();                  // ⑤
     }
 }</code></pre>
 <p class="cx">时间复杂度 O(n × kmax)（解码后串长）· 空间复杂度 O(n)</p>

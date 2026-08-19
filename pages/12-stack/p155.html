@@ -73,51 +73,53 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 <div class="ex">示例：push(-2), push(0), push(-3), getMin() → -3
 pop(), top() → 0, getMin() → -2</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：辅助栈（最小栈与主栈同进同出，构造时预压 MAX_VALUE 哨兵）。</p>
 <p><b>先想清楚两个问题：</b></p>
-<p><b>Q1：为什么一个栈不够，怎么补救？</b>单栈弹出最小值后，无法知道「新的最小值是谁」。补救办法：加一个辅助栈（最小栈），与主栈同进同出，但它每层存的是「此时主栈中的最小值」。</p>
-<p><b>Q2：最小栈每层存什么？</b>push 时存 min（新值， 最小栈栈顶）——即新值与历史最小值取小。这样最小栈栈顶永远是当前最小值，getMin 读栈顶即可；pop 时两栈同步弹出，最小值自动「恢复」到上一层的状态。四个操作全部 O(1)。</p>
+<p><b>Q1：为什么一个栈不够，怎么补救？</b>单栈弹出最小值后，无法知道「新的最小值是谁」。补救办法：加一个辅助栈（最小栈 minStack），与主栈 xStack 同进同出，但它每层存的是「此时主栈中的最小值」。</p>
+<p><b>Q2：最小栈每层存什么？</b>push 时存 min（新值， 最小栈栈顶）——即新值与历史最小值取小。官方写法在构造时给最小栈预压一个 Integer.MAX_VALUE 哨兵，第一次 push 也能直接 peek，免去空栈特判。这样最小栈栈顶永远是当前最小值，getMin 读栈顶即可；pop 时两栈同步弹出，最小值自动「恢复」到上一层的状态。四个操作全部 O(1)。</p>
 <p><b>照着写的 5 步：</b></p>
-<p>① 声明两个栈：stack（主栈）、minStack（最小栈）；<br>② push(val)：val 入主栈；再把「val 与 minStack 栈顶的较小者」入 minStack（minStack 为空时直接入 val）；<br>③ pop()：两栈各弹一次，保持同步；<br>④ top()：返回 stack.peek()；<br>⑤ getMin()：返回 minStack.peek()。</p>
-<p>易错点：push 进最小栈的是「到当前层为止的最小值」不是 val 本身（否则 pop 后最小值无法恢复）；两栈必须同步弹出不是只弹主栈；最小栈为空时第一次 push 要直接存 val 不能去 peek（会空栈异常）。</p>
+<p>① 声明两个栈：xStack（主栈）、minStack（最小栈），构造时 minStack 预压 Integer.MAX_VALUE 哨兵；<br>② push(x)：x 入 xStack；再把「x 与 minStack 栈顶的较小者」入 minStack；<br>③ pop()：两栈各弹一次，保持同步；<br>④ top()：返回 xStack.peek()；<br>⑤ getMin()：返回 minStack.peek()。</p>
+<p>易错点：push 进最小栈的是「到当前层为止的最小值」不是 x 本身（否则 pop 后最小值无法恢复）；两栈必须同步弹出不是只弹主栈；哨兵是 Integer.MAX_VALUE 不是 null 占位（这样 min(x, 栈顶) 第一次也成立，无需 isEmpty 特判）。</p>
 <pre class="diagram">操作序列: push(-2) push(0) push(-3) → getMin() → pop() → top() → getMin()
 
-（栈内左侧为栈底，右侧为栈顶）
+（栈内左侧为栈底，右侧为栈顶；最小栈底部为 MAX_VALUE 哨兵）
 
-push(-2): 主栈 [-2]        最小栈 [-2]      存 min(-2, 空)=-2
-push(0):  主栈 [-2, 0]     最小栈 [-2, -2]  存 min(0, -2)=-2
-push(-3): 主栈 [-2, 0, -3] 最小栈 [-2, -2, -3]
-                                      ↑ 栈顶 = -3 = 当前最小值
+push(-2): 主栈 [-2]        最小栈 [MAX, -2]      存 min(-2, MAX)=-2
+push(0):  主栈 [-2, 0]     最小栈 [MAX, -2, -2]  存 min(0, -2)=-2
+push(-3): 主栈 [-2, 0, -3] 最小栈 [MAX, -2, -2, -3]
+                                          ↑ 栈顶 = -3 = 当前最小值
 
 getMin() → 最小栈栈顶 = -3 ✓
 
-pop():    主栈 [-2, 0]     最小栈 [-2, -2]  两栈同步弹
+pop():    主栈 [-2, 0]     最小栈 [MAX, -2, -2]  两栈同步弹
 top()     → 主栈栈顶 = 0 ✓
 getMin()  → 最小栈栈顶 = -2 ✓（最小值自动恢复，无需重算）</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class MinStack {
     // ① 主栈 + 最小栈（栈顶始终是当前最小值）
-    private Deque&lt;Integer&gt; stack;
-    private Deque&lt;Integer&gt; minStack;
+    Deque&lt;Integer&gt; xStack;
+    Deque&lt;Integer&gt; minStack;
 
     public MinStack() {
-        stack = new ArrayDeque&lt;&gt;();
-        minStack = new ArrayDeque&lt;&gt;();
+        xStack = new LinkedList&lt;Integer&gt;();
+        minStack = new LinkedList&lt;Integer&gt;();
+        // ① 预压哨兵：第一次 push 也能直接 peek
+        minStack.push(Integer.MAX_VALUE);
     }
 
-    public void push(int val) {
-        stack.push(val);
+    public void push(int x) {
+        xStack.push(x);
         // ② 最小栈存入「新值与历史最小值的较小者」
-        int curMin = minStack.isEmpty() ? val : Math.min(val, minStack.peek());
-        minStack.push(curMin);
+        minStack.push(Math.min(minStack.peek(), x));
     }
 
     public void pop() {
-        stack.pop();
+        xStack.pop();
         minStack.pop();               // ③ 两栈同步弹出，保持对应
     }
 
     public int top() {
-        return stack.peek();          // ④
+        return xStack.peek();         // ④
     }
 
     public int getMin() {

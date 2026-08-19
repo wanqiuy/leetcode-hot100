@@ -73,55 +73,58 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 <div class="ex">示例：输入 nums = [5,7,7,8,8,10], target = 8 → 输出 [3,4]
 输入 nums = [5,7,7,8,8,10], target = 6 → 输出 [-1,-1]</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：两次边界二分（统一用一个 lower 开关的 binarySearch）。</p>
 <p><b>先想清楚两个问题：</b></p>
-<p><b>Q1：普通二分命中就返回，怎么找「第一个」和「最后一个」？</b>写两次边界二分：找左边界时即使 nums[mid] == target 也继续向左压（r = mid - 1），最终 l 停在第一个 ≥ target 的位置；找右边界时等于也继续向右扩（l = mid + 1），最终 r 停在最后一个 ≤ target 的位置。</p>
-<p><b>Q2：怎么判断 target 不存在？</b>先跑左边界二分，若结果越界（left == n）或 nums[left] ≠ target，说明 target 不在数组里，直接返回 [-1, -1]，右边界就不用找了。</p>
-<p><b>照着写的 5 步：</b></p>
-<p>① 调用边界二分（findLeft=true）求左边界 left；<br>② 校验 left 越界或 nums[left] ≠ target 则返回 [-1, -1]；<br>③ 再调用边界二分（findLeft=false）求右边界 right；<br>④ 返回 [left, right]；<br>⑤ 边界二分内部：闭区间循环，findLeft 时 nums[mid] ≥ target 就 r = mid - 1 否则 l = mid + 1；findRight 时 nums[mid] ＞ target 才 r = mid - 1 否则 l = mid + 1；结束时左边界返回 l、右边界返回 r。</p>
-<p>易错点：两种边界的收缩条件差别只在「等于号归哪边」，写反会得到错误边界；左边界看 l 不是 r，右边界看 r 不是 l；找到左边界后必须先校验是否真等于 target 再求右边界。</p>
+<p><b>Q1：普通二分命中就返回，怎么找「第一个」和「最后一个」？</b>写一个带 lower 开关的边界二分：binarySearch(nums, target, true) 返回第一个 ≥ target 的下标，binarySearch(nums, target, false) 返回第一个 ＞ target 的下标。于是左边界 leftIdx 直接取前者，右边界 rightIdx 取后者再减 1（第一个 ＞ target 的位置退一格，就是最后一个 ≤ target 的位置）。</p>
+<p><b>Q2：怎么判断 target 不存在？</b>两次二分都跑完后统一校验：leftIdx ≤ rightIdx、rightIdx 不越界、且 nums[leftIdx] 与 nums[rightIdx] 都等于 target，才返回 [leftIdx, rightIdx]，否则返回 [-1, -1]。</p>
+<p><b>照着写的 4 步：</b></p>
+<p>① leftIdx = binarySearch(nums, target, true)（第一个 ≥ target 的下标）；<br>② rightIdx = binarySearch(nums, target, false) - 1（最后一个 ≤ target 的下标）；<br>③ 校验 leftIdx ≤ rightIdx 且两端都真等于 target：成立返回 [leftIdx, rightIdx]，否则返回 [-1, -1]；<br>④ 边界二分内部：闭区间循环 + ans 记录（初值 n），当 nums[mid] ＞ target 或（lower 且 nums[mid] ≥ target）时记 ans = mid 砍右半，否则砍左半。</p>
+<p>易错点：rightIdx 要再减 1（binarySearch 返回的是第一个 ＞ target 的位置，不是最后一个 ≤ target 的）；两种边界共用同一个函数，差别全在「等于号归哪边」，由 lower 开关决定，写反会得到错误边界；校验必须带上 rightIdx &lt; nums.length（target 不存在时 ans 保持初值 n，直接下标访问会越界）。</p>
 <pre class="diagram">nums = [5, 7, 7, 8, 8, 10]   target = 8
 下标:    0   1   2   3   4   5
 
-【找左边界：nums[mid] ≥ 8 → r = mid-1】
-第1轮: L=0, R=5, mid=2 → nums[2]=7 ＜ 8 → L=3
-第2轮: L=3, R=5, mid=4 → nums[4]=8 ≥ 8 → R=3
-第3轮: L=3, R=3, mid=3 → nums[3]=8 ≥ 8 → R=2
-结束: L=3 → 校验 nums[3]=8 ✓ → 左边界 = 3（第一个 8）
+【leftIdx = binarySearch(nums, 8, true)，ans 初值 6】
+第1轮: left=0, right=5, mid=2 → nums[2]=7：7＞8 否、7≥8 否 → left=3
+第2轮: left=3, right=5, mid=4 → nums[4]=8 ≥ 8 → ans=4, right=3
+第3轮: left=3, right=3, mid=3 → nums[3]=8 ≥ 8 → ans=3, right=2
+结束 → leftIdx = 3（第一个 8）
 
-【找右边界：nums[mid] ＞ 8 → r = mid-1，否则 l = mid+1】
-第1轮: L=0, R=5, mid=2 → nums[2]=7 ≤ 8 → L=3
-第2轮: L=3, R=5, mid=4 → nums[4]=8 ≤ 8 → L=5
-第3轮: L=5, R=5, mid=5 → nums[5]=10 ＞ 8 → R=4
-结束: R=4 → 右边界 = 4（最后一个 8）
+【rightIdx = binarySearch(nums, 8, false) - 1，ans 初值 6】
+第1轮: left=0, right=5, mid=2 → nums[2]=7：7＞8 否 → left=3
+第2轮: left=3, right=5, mid=4 → nums[4]=8：8＞8 否 → left=5
+第3轮: left=5, right=5, mid=5 → nums[5]=10 ＞ 8 → ans=5, right=4
+结束 → rightIdx = 5 - 1 = 4（最后一个 8）
 
-答案 = [3, 4]</pre>
-<h3>代码（Java）</h3>
+校验: 3 ≤ 4 且 nums[3]=nums[4]=8 ✓ → 答案 = [3, 4]</pre>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
     public int[] searchRange(int[] nums, int target) {
-        // ① 先找左边界（第一个 ≥ target 的下标）
-        int left = binarySearch(nums, target, true);
-        // ② 校验 target 是否真的存在
-        if (left == nums.length || nums[left] != target) {
-            return new int[]{-1, -1};
+        // ① 左边界：第一个 ≥ target 的下标
+        int leftIdx = binarySearch(nums, target, true);
+        // ② 右边界：第一个 ＞ target 的下标再退一格
+        int rightIdx = binarySearch(nums, target, false) - 1;
+        // ③ 统一校验 target 是否真的存在
+        if (leftIdx &lt;= rightIdx &amp;&amp; rightIdx &lt; nums.length
+                &amp;&amp; nums[leftIdx] == target &amp;&amp; nums[rightIdx] == target) {
+            return new int[]{leftIdx, rightIdx};
         }
-        // ③ 再找右边界（最后一个 ≤ target 的下标）
-        int right = binarySearch(nums, target, false);
-        return new int[]{left, right};                 // ④
+        return new int[]{-1, -1};
     }
 
-    // ⑤ findLeft=true 找第一个 ≥ target 的下标；false 找最后一个 ≤ target 的下标
-    private int binarySearch(int[] nums, int target, boolean findLeft) {
-        int l = 0, r = nums.length - 1;
-        while (l &lt;= r) {
-            int mid = l + (r - l) / 2;
-            // 关键差别：等于号归哪边，决定压向左边界还是右边界
-            if (findLeft ? nums[mid] &gt;= target : nums[mid] &gt; target) {
-                r = mid - 1;
+    // ④ lower=true 找第一个 ≥ target 的下标；false 找第一个 ＞ target 的下标
+    public int binarySearch(int[] nums, int target, boolean lower) {
+        int left = 0, right = nums.length - 1, ans = nums.length;
+        while (left &lt;= right) {
+            int mid = (left + right) / 2;
+            // 关键差别：等于号归哪边由 lower 决定
+            if (nums[mid] &gt; target || (lower &amp;&amp; nums[mid] &gt;= target)) {
+                right = mid - 1;
+                ans = mid;
             } else {
-                l = mid + 1;
+                left = mid + 1;
             }
         }
-        return findLeft ? l : r;           // 左边界看 l，右边界看 r
+        return ans;
     }
 }</code></pre>
 <p class="cx">时间复杂度 O(log n) · 空间复杂度 O(1)</p>
