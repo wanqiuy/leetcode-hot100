@@ -74,38 +74,39 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 输出：6
 解释：连续子数组 [4,-1,2,1] 的和最大，为 6</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：动态规划（Kadane），pre 维护「以当前元素结尾的最大子数组和」。</p>
 <p><b>先想清楚两个问题：</b></p>
-<p><b>Q1：为什么可以一遍扫描而不必枚举所有子数组？</b>定义 cur 为「以 i 结尾的最大子数组和」，它对前面只有一条路：要么续接前段，要么从 nums[i] 重启。若 cur + nums[i] 还不如 nums[i]，说明前段是负资产，果断抛弃。</p>
-<p><b>Q2：状态怎么维护？</b>两个变量：cur 每步更新为 max(nums[i], cur + nums[i])；ans（全局最大）每步用 cur 刷新。子数组起点不用记，因为只要最大和。</p>
+<p><b>Q1：为什么可以一遍扫描而不必枚举所有子数组？</b>定义 pre 为「以 i 结尾的最大子数组和」，它对前面只有一条路：要么续接前段，要么从 nums[i] 重启。若 pre + nums[i] 还不如 nums[i]，说明前段是负资产，果断抛弃。</p>
+<p><b>Q2：状态怎么维护？</b>两个变量：pre 每步更新为 max(nums[i], pre + nums[i])；maxAns（全局最大）每步用 pre 刷新。子数组起点不用记，因为只要最大和。</p>
 <p><b>照着写的三步：</b></p>
-<p>① cur 和 ans 都初始化为 nums[0]；<br>
-② 从 i = 1 起，cur = max(nums[i], cur + nums[i])，二选一：重启或续接；<br>
-③ 每步 ans = max(ans, cur)，遍历完返回 ans。</p>
-<p>易错点：初值是 nums[0] 不是 0（全负数组会错把「一个都不选」当答案）；比较的是 cur + nums[i] 与 nums[i]，不是 cur 与 0；本题必须至少选一个元素，不能返回 0。</p>
+<p>① pre 和 maxAns 都从 0 起步（pre = 0 表示「当前元素之前没有可续接的前段」）；<br>
+② 遍历每个元素 x，pre = max(pre + x, x)，二选一：续接或重启；<br>
+③ 每步 maxAns = max(maxAns, pre)，遍历完返回 maxAns。</p>
+<p>易错点：pre 初值是 0 没问题，因为每次比较都是 pre+x 与 x 二选一，前段为负时自然被丢弃；maxAns 初值必须是 nums[0] 而不是 0（全负数组会错把「一个都不选」当答案）；本题必须至少选一个元素，不能返回 0。</p>
 <pre class="diagram">nums = [-2, 1, -3, 4, -1, 2, 1, -5, 4]
 
- i   num   cur+num 与 num 比较 → cur   操作    ans
- 0   -2    初值 = -2                   启动    -2
- 1    1    -2+1=-1 &lt; 1   → 1          重启    1
- 2   -3    1-3=-2  ≥ -3  → -2         续接    1
- 3    4    -2+4=2  &lt; 4   → 4          重启    4
- 4   -1    4-1=3   ≥ -1  → 3          续接    4
- 5    2    3+2=5   ≥ 2   → 5          续接    5
- 6    1    5+1=6   ≥ 1   → 6          续接    6 ← 对应子数组 [4,-1,2,1]
- 7   -5    6-5=1   ≥ -5  → 1          续接    6
- 8    4    1+4=5   ≥ 4   → 5          续接    6
+ i   x     pre+x 与 x 比较 → pre   操作    maxAns
+ 0   -2    0-2=-2 ≥ -2  → -2        续接    -2
+ 1    1    -2+1=-1 &lt; 1 → 1          重启    1
+ 2   -3    1-3=-2 ≥ -3  → -2        续接    1
+ 3    4    -2+4=2 &lt; 4  → 4          重启    4
+ 4   -1    4-1=3  ≥ -1  → 3         续接    4
+ 5    2    3+2=5  ≥ 2   → 5         续接    5
+ 6    1    5+1=6  ≥ 1   → 6         续接    6 ← 对应子数组 [4,-1,2,1]
+ 7   -5    6-5=1  ≥ -5  → 1         续接    6
+ 8    4    1+4=5  ≥ 4   → 5         续接    6
 
-ans = 6</pre>
-<h3>代码（Java）</h3>
+maxAns = 6</pre>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
     public int maxSubArray(int[] nums) {
-        int cur = nums[0], ans = nums[0]; // ① 以首元素结尾的和 + 全局最大
-        for (int i = 1; i &lt; nums.length; i++) {
-            // ② 二选一：重启（只取自己）或续接（接在前段后面）
-            cur = Math.max(nums[i], cur + nums[i]);
-            ans = Math.max(ans, cur); // ③ 刷新全局最大
+        int pre = 0, maxAns = nums[0]; // ① 前段和 + 全局最大
+        for (int x : nums) {
+            // ② 二选一：续接前段（pre + x）或重启（只取 x 自己）
+            pre = Math.max(pre + x, x);
+            maxAns = Math.max(maxAns, pre); // ③ 刷新全局最大
         }
-        return ans;
+        return maxAns;
     }
 }</code></pre>
 <p class="cx">时间复杂度 O(n) · 空间复杂度 O(1)</p>

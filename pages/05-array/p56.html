@@ -74,6 +74,7 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 输出：[[1,6],[8,10],[15,18]]
 解释：[1,3] 和 [2,6] 重叠，合并为 [1,6]</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：按左端点排序后一次扫描，与结果末尾区间比较合并。</p>
 <p><b>先想清楚两个问题：</b></p>
 <p><b>Q1：为什么要先排序？</b>按左端点排序后，所有可能重叠的区间必然相邻，每个区间只需与「结果末尾的区间」比一次，不用两两比较。</p>
 <p><b>Q2：怎么判断重叠并合并？</b>当前区间左端点 ≤ 结果末尾区间的右端点即重叠，合并只需把末尾右端点更新为两者较大值（左端点不用动，因为已按左端点有序）；否则直接追加。</p>
@@ -81,7 +82,7 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 <p>① 按左端点升序排序；<br>
 ② 逐个扫描：与结果末尾区间不重叠（当前左端点 &gt; 末尾右端点）→ 直接追加；<br>
 ③ 重叠 → 合并：末尾右端点 = max(末尾右端点, 当前右端点)。</p>
-<p>易错点：合并时右端点是取 max，不是直接用当前区间的右端点（如 [1,4] 与 [2,3]，当前区间反而更短）；判不重叠的条件是 cur[0] &gt; last[1]，相等算重叠；第一个区间要先放入结果（或判 ans 为空）。</p>
+<p>易错点：合并时右端点是取 max，不是直接用当前区间的右端点（如 [1,4] 与 [2,3]，当前区间反而更短）；判不重叠的条件是当前左端点 &gt; 末尾右端点，相等算重叠；第一个区间要先放入结果（或判 merged 为空）。</p>
 <pre class="diagram">intervals = [[1,3],[2,6],[8,10],[15,18]]
 ① 按左端点排序后: [1,3] [2,6] [8,10] [15,18]
 
@@ -92,22 +93,30 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 [15,18]  [8,10]     15 &gt; 10 不重叠 → 追加     [1,6] [8,10] [15,18]
 
 结果: [[1,6],[8,10],[15,18]]</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
     public int[][] merge(int[][] intervals) {
-        Arrays.sort(intervals, (a, b) -&gt; a[0] - b[0]); // ① 按左端点排序
-        List&lt;int[]&gt; ans = new ArrayList&lt;&gt;();
-        for (int[] cur : intervals) {
+        if (intervals.length == 0) {
+            return new int[0][2];
+        }
+        // ① 按左端点升序排序
+        Arrays.sort(intervals, new Comparator&lt;int[]&gt;() {
+            public int compare(int[] interval1, int[] interval2) {
+                return interval1[0] - interval2[0];
+            }
+        });
+        List&lt;int[]&gt; merged = new ArrayList&lt;int[]&gt;();
+        for (int i = 0; i &lt; intervals.length; ++i) {
+            int L = intervals[i][0], R = intervals[i][1];
             // ② 与结果末尾区间不重叠 → 直接追加
-            if (ans.isEmpty() || cur[0] &gt; ans.get(ans.size() - 1)[1]) {
-                ans.add(cur);
+            if (merged.size() == 0 || merged.get(merged.size() - 1)[1] &lt; L) {
+                merged.add(new int[]{L, R});
             } else {
                 // ③ 重叠 → 合并：末尾右端点取两者最大
-                int[] last = ans.get(ans.size() - 1);
-                last[1] = Math.max(last[1], cur[1]);
+                merged.get(merged.size() - 1)[1] = Math.max(merged.get(merged.size() - 1)[1], R);
             }
         }
-        return ans.toArray(new int[0][]);
+        return merged.toArray(new int[merged.size()][]);
     }
 }</code></pre>
 <p class="cx">时间复杂度 O(n log n) · 空间复杂度 O(log n)（排序递归栈，不计输出）</p>

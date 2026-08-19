@@ -73,48 +73,64 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 输入：nums = [-1,0,1,2,-1,-4]
 输出：[[-1,-1,2],[-1,0,1]]</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：排序 + 双指针（含两层去重）。</p>
 <p><b>先想清楚两个问题：</b></p>
-<p><b>Q1：怎么把 O(n³) 的三重枚举降下来？</b>先排序，固定第一个数 nums[i]，问题退化为「在 i 右侧的有序区间找两数之和 = -nums[i]」，用对撞双指针 O(n) 解决，整体 O(n²)。</p>
-<p><b>Q2：答案不能含重复三元组，怎么去重？</b>排序让相同值相邻，做两层去重：固定的 i 与前一个值相同就跳过；命中答案后，l、r 各自跳过所有重复值再内移。</p>
+<p><b>Q1：怎么把 O(n³) 的三重枚举降下来？</b>先排序，固定第一个数 nums[first]，问题退化为「在 first 右侧的有序区间找两数之和 = -nums[first]」，用对撞双指针 O(n) 解决，整体 O(n²)。</p>
+<p><b>Q2：答案不能含重复三元组，怎么去重？</b>排序让相同值相邻，做两层去重：固定的 first 与前一个值相同就跳过；命中答案后，left、right 各自跳过所有重复值再内移。</p>
 <p><b>照着写的五步：</b></p>
-<p>① 排序，然后遍历固定数 i（只需到 n-3）；<br>
-② nums[i] 与前一个值相同 → continue，去重；<br>
-③ l = i+1、r = n-1 对撞：sum &lt; 0 则 l++，sum &gt; 0 则 r--；<br>
-④ sum == 0 记录三元组，l、r 各跳过重复值后再各内移一步；<br>
+<p>① 排序，然后遍历固定数 first（只需到 n-3）；<br>
+② nums[first] 与前一个值相同 → continue，去重；<br>
+③ left = first+1、right = n-1，目标 target = -nums[first]；<br>
+④ 对撞：和 &lt; target 则 left++，和 &gt; target 则 right--；命中记录三元组，left、right 各跳过重复值后再各内移一步；<br>
 ⑤ 遍历结束返回结果集。</p>
-<p>易错点：必须先排序，双指针的移动方向和去重都依赖有序；i 的去重判断是 i &gt; 0 且 nums[i] == nums[i-1]，不是与 nums[i+1] 比；命中后是先跳重复、再 l++/r--，少了最后的内移会死循环。</p>
+<p>易错点：必须先排序，双指针的移动方向和去重都依赖有序；first 的去重判断是 first &gt; 0 且 nums[first] == nums[first-1]，不是与 nums[first+1] 比；命中后是先跳重复、再 left++/right--，少了最后的内移会死循环。</p>
 <pre class="diagram">nums = [-1,0,1,2,-1,-4] → 排序后 [-4,-1,-1,0,1,2]
 
-i=0 (-4): 目标两数和 4，l=1(-1) r=5(2) sum=-3，l++ 到相遇，无解
-i=1 (-1): 目标两数和 1，区间下标 2~5 [-1,0,1,2]
-          l=2(-1) r=5(2): -1+2=1 ✓ 记录 [-1,-1,2]
-          跳重复后 l=3(0) r=4(1): 0+1=1 ✓ 记录 [-1,0,1]
-          再内移，l==r，本轮结束
-i=2 (-1): nums[2]==nums[1] → 跳过（去重）
-i=3 (0):  l=4(1) r=5(2)，sum=3 &gt; 0，r--，l==r，无解
+first=0 (-4): target=4，left=1(-1) right=5(2) 和=1 &lt; 4，left++ 到相遇，无解
+first=1 (-1): target=1，区间下标 2~5 [-1,0,1,2]
+              left=2(-1) right=5(2): -1+2=1 ✓ 记录 [-1,-1,2]
+              跳重复后 left=3(0) right=4(1): 0+1=1 ✓ 记录 [-1,0,1]
+              再内移，left==right，本轮结束
+first=2 (-1): nums[2]==nums[1] → 跳过（去重）
+first=3 (0):  left=4(1) right=5(2)，和=3 &gt; 1，right--，left==right，无解
 
 答案 = [[-1,-1,2], [-1,0,1]]</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
     public List&lt;List&lt;Integer&gt;&gt; threeSum(int[] nums) {
-        List&lt;List&lt;Integer&gt;&gt; ans = new ArrayList&lt;&gt;();
-        Arrays.sort(nums); // ① 先排序
         int n = nums.length;
-        for (int i = 0; i &lt; n - 2; i++) { // ① 固定第一个数
-            if (i &gt; 0 &amp;&amp; nums[i] == nums[i - 1]) continue; // ② 固定数去重
-            int l = i + 1, r = n - 1; // ③ 右侧区间对撞
-            while (l &lt; r) {
-                int sum = nums[i] + nums[l] + nums[r];
-                if (sum == 0) {
-                    // ④ 命中：记录后双指针各自跳重复再内移
-                    ans.add(Arrays.asList(nums[i], nums[l], nums[r]));
-                    while (l &lt; r &amp;&amp; nums[l] == nums[l + 1]) l++;
-                    while (l &lt; r &amp;&amp; nums[r] == nums[r - 1]) r--;
-                    l++; r--;
-                } else if (sum &lt; 0) {
-                    l++; // ③ 偏小，左指针右移
-                } else {
-                    r--; // ③ 偏大，右指针左移
+        Arrays.sort(nums); // ① 先排序
+        List&lt;List&lt;Integer&gt;&gt; ans = new ArrayList&lt;List&lt;Integer&gt;&gt;();
+        // 枚举 a（固定第一个数）
+        for (int first = 0; first &lt; n; ++first) {
+            // ② 需要和上一次枚举的数不相同（去重）
+            if (first &gt; 0 &amp;&amp; nums[first] == nums[first - 1]) {
+                continue;
+            }
+            // ③ c 对应的指针初始指向数组的最右端
+            int right = n - 1;
+            int target = -nums[first];
+            // 枚举 b
+            for (int left = first + 1; left &lt; n; ++left) {
+                // 需要和上一次枚举的数不相同（去重）
+                if (left &gt; first + 1 &amp;&amp; nums[left] == nums[left - 1]) {
+                    continue;
+                }
+                // ③ 需要保证 b 的指针在 c 的指针的左侧
+                while (left &lt; right &amp;&amp; nums[left] + nums[right] &gt; target) {
+                    --right;
+                }
+                // 指针重合，随着 b 后续递增也不会有满足 a+b+c=0 的组合，跳出
+                if (left == right) {
+                    break;
+                }
+                // ④ 命中，记录三元组
+                if (nums[left] + nums[right] == target) {
+                    List&lt;Integer&gt; list = new ArrayList&lt;Integer&gt;();
+                    list.add(nums[first]);
+                    list.add(nums[left]);
+                    list.add(nums[right]);
+                    ans.add(list);
                 }
             }
         }

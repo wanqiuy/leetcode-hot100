@@ -74,19 +74,20 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 输出：[0,6]
 解释：起始下标 0 的子串 "cba"、下标 6 的子串 "bac" 都是 "abc" 的异位词</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：定长滑动窗口 + 两个 26 长计数数组，每步用 Arrays.equals 比较频次。</p>
 <p><b>先回答两个问题，答案就是代码的骨架：</b></p>
-<p><b>Q1：怎么判断一个子串是 p 的异位词？</b>不要排序、不要逐字符比对。异位词 ⇔「26 个字母的频次完全相同」。所以给每个串开一个 <code>int[26]</code> 计数数组，Java 里直接 <code>Arrays.equals(win, need)</code> 比较两个数组即可，一次比较固定 26 步，是 O(1) 级别。</p>
+<p><b>Q1：怎么判断一个子串是 p 的异位词？</b>不要排序、不要逐字符比对。异位词 ⇔「26 个字母的频次完全相同」。所以给每个串开一个 <code>int[26]</code> 计数数组，Java 里直接 <code>Arrays.equals(cntS, cntP)</code> 比较两个数组即可，一次比较固定 26 步，是 O(1) 级别。</p>
 <p><b>Q2：窗口怎么滑？</b>p 的长度 m 是固定的，所以窗口<b>长度恒为 m，不需要伸缩</b>。右指针 i 每走一步只做三件事：<b>进 → 出 → 比</b>。</p>
 <p><b>照着写的五步：</b></p>
 <p>① 特判：s 比 p 短，直接返回空列表；<br>
-② 开两个数组：<code>need[26]</code> 存 p 的频次（先统计好，之后不变），<code>win[26]</code> 存当前窗口的频次；<br>
-③ <b>进</b>：右端字符 s[i] 进窗口，<code>win[s[i]-'a']++</code>；<br>
-④ <b>出</b>：只有当 i ≥ m（窗口超长）时，让左边掉出去的字符 s[i-m] 出窗口，<code>win[s[i-m]-'a']--</code>；<br>
-⑤ <b>比</b>：<code>Arrays.equals(win, need)</code> 相等 → 当前窗口就是异位词，记录起始下标 <b>i - m + 1</b>（右端位置减去窗口长度加 1）。</p>
+② 开两个数组：<code>cntP[26]</code> 存 p 的频次（先统计好，之后不变），<code>cntS[26]</code> 存当前窗口的频次；<br>
+③ <b>进</b>：右端字符 s[i] 进窗口，<code>cntS[s[i]-'a']++</code>；<br>
+④ <b>出</b>：只有当 i ≥ m（窗口超长）时，让左边掉出去的字符 s[i-m] 出窗口，<code>cntS[s[i-m]-'a']--</code>；<br>
+⑤ <b>比</b>：<code>Arrays.equals(cntS, cntP)</code> 相等 → 当前窗口就是异位词，记录起始下标 <b>i - m + 1</b>（右端位置减去窗口长度加 1）。</p>
 <p>容易写错的两个点：出窗口的字符是 <b>s[i-m]</b>（不是 s[i-1]）；记录的起始下标是 <b>i-m+1</b>（不是 i）。</p>
-<pre class="diagram">s = "cbaebabacd", p = "abc"，m = 3，need = {a:1,b:1,c:1}
+<pre class="diagram">s = "cbaebabacd", p = "abc"，m = 3，cntP = {a:1,b:1,c:1}
 
-i   进       出(i≥m 时)   win 当前状态          比较 need
+i   进       出(i≥m 时)   cntS 当前状态          比较 cntP
 0   c        -            {c:1}                 窗口不足 3
 1   b        -            {b:1,c:1}             窗口不足 3
 2   a        -            {a:1,b:1,c:1}    ✓ 相等 → 记录 2-3+1 = 0
@@ -104,23 +105,32 @@ i   进       出(i≥m 时)   win 当前状态          比较 need
 c b a e b a b a c d
 └─┴─┘
             └─┴─┘（起点下标 6）</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
     public List&lt;Integer&gt; findAnagrams(String s, String p) {
-        List&lt;Integer&gt; ans = new ArrayList&lt;&gt;();
-        int n = s.length(), m = p.length();
+        int sLen = s.length(), pLen = p.length();
+        List&lt;Integer&gt; ans = new ArrayList&lt;Integer&gt;();
         // ① 特判：s 比 p 短不可能有异位词
-        if (n &lt; m) return ans;
-        // ② need 存 p 的频次，win 存当前窗口的频次
-        int[] need = new int[26], win = new int[26];
-        for (char c : p.toCharArray()) need[c - 'a']++;
-        for (int i = 0; i &lt; n; i++) {
+        if (sLen &lt; pLen) {
+            return ans;
+        }
+        // ② cntP 存 p 的频次，cntS 存当前窗口的频次
+        int[] cntS = new int[26];
+        int[] cntP = new int[26];
+        for (int i = 0; i &lt; pLen; ++i) {
+            ++cntP[p.charAt(i) - 'a'];
+        }
+        for (int i = 0; i &lt; sLen; ++i) {
             // ③ 进：右端字符进窗口
-            win[s.charAt(i) - 'a']++;
-            // ④ 出：窗口超长（i≥m）才让最左字符 s[i-m] 出窗口
-            if (i &gt;= m) win[s.charAt(i - m) - 'a']--;
-            // ⑤ 比：频次完全相同 → 是异位词，记录起始下标 i-m+1
-            if (Arrays.equals(win, need)) ans.add(i - m + 1);
+            ++cntS[s.charAt(i) - 'a'];
+            // ④ 出：窗口超长（i≥pLen）才让最左字符 s[i-pLen] 出窗口
+            if (i &gt;= pLen) {
+                --cntS[s.charAt(i - pLen) - 'a'];
+            }
+            // ⑤ 比：频次完全相同 → 是异位词，记录起始下标 i-pLen+1
+            if (Arrays.equals(cntS, cntP)) {
+                ans.add(i - pLen + 1);
+            }
         }
         return ans;
     }

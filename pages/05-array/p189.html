@@ -73,6 +73,7 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 输入：nums = [1,2,3,4,5,6,7], k = 3
 输出：[5,6,7,1,2,3,4]</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：数组翻转，三次反转完成右轮转。</p>
 <p><b>先想清楚两个问题：</b></p>
 <p><b>Q1：为什么三次反转就能完成轮转？</b>右轮转 k 位 = 末尾 k 个元素整体搬到最前且内部顺序不变。整体反转后这 k 个到了最前但顺序反了，再分别反转前 k 个、后 n-k 个，两段各自恢复正序。</p>
 <p><b>Q2：k 大于数组长度怎么办？</b>轮转 n 位等于没动，先 k %= n 归一化，否则反转区间的下标会越界。</p>
@@ -81,26 +82,29 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 ② 反转整个数组 [0, n-1]；<br>
 ③ 反转前 k 个 [0, k-1]；<br>
 ④ 反转后 n-k 个 [k, n-1]。</p>
-<p>易错点：是「先整体、再分段」反转，顺序反了结果就错；反转区间是闭区间 [l, r]，第二段从下标 k 开始，不是 k-1；k %= n 必须在最开始做，不能省。</p>
+<p>易错点：是「先整体、再分段」反转，顺序反了结果就错；反转区间是闭区间 [start, end]，第二段从下标 k 开始，不是 k-1；k %= n 必须在最开始做，不能省。</p>
 <pre class="diagram">nums = [1,2,3,4,5,6,7], k = 3
 
 ① k %= n → k = 3
 ② 整体反转 [0,6]:    [7,6,5,4,3,2,1]   末尾 3 个 (5,6,7) 已到最前但反序
 ③ 反转前 3 个 [0,2]:  [5,6,7,4,3,2,1]   前段恢复正序
 ④ 反转后 4 个 [3,6]:  [5,6,7,1,2,3,4]   后段恢复正序 ✓</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
     public void rotate(int[] nums, int k) {
-        int n = nums.length;
-        k %= n;                  // ① k 可能大于 n，先归一化
-        reverse(nums, 0, n - 1); // ② 整体反转
-        reverse(nums, 0, k - 1); // ③ 前 k 个反转，恢复正序
-        reverse(nums, k, n - 1); // ④ 剩余 n-k 个反转，恢复正序
+        k %= nums.length; // ① k 可能大于数组长度，先归一化
+        reverse(nums, 0, nums.length - 1); // ② 整体反转
+        reverse(nums, 0, k - 1);           // ③ 前 k 个反转，恢复正序
+        reverse(nums, k, nums.length - 1); // ④ 剩余 n-k 个反转，恢复正序
     }
-    private void reverse(int[] a, int l, int r) {
-        while (l &lt; r) { // 双指针交换，闭区间 [l, r]
-            int t = a[l]; a[l] = a[r]; a[r] = t;
-            l++; r--;
+
+    public void reverse(int[] nums, int start, int end) {
+        while (start &lt; end) { // 双指针交换，闭区间 [start, end]
+            int temp = nums[start];
+            nums[start] = nums[end];
+            nums[end] = temp;
+            start += 1;
+            end -= 1;
         }
     }
 }</code></pre>

@@ -73,13 +73,14 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 输入：nums = [1,3,-1,-3,5,3,6,7], k = 3
 输出：[3,3,5,5,6,7]</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：单调递减双端队列（单调队列），队首永远是当前窗口最大值。</p>
 <p><b>先想清楚两个问题：</b></p>
 <p><b>Q1：每个窗口重新找最大值是 O(nk)，怎么降？</b>用单调递减双端队列：队首永远是当前窗口最大值；新元素入队前把队尾所有比它小的弹掉（它们再也不可能成为任何后续窗口的最大值），每元素只进出一次，均摊 O(1)。</p>
-<p><b>Q2：队列里存值还是存下标？</b>存下标。既能量出对应值做比较，又能用「队首下标 ≤ i-k」判断它是否已滑出窗口。</p>
+<p><b>Q2：队列里存值还是存下标？</b>存下标。既能取出对应值做比较，又能用「队首下标 ≤ i-k」判断它是否已滑出窗口。</p>
 <p><b>照着写的四步：</b></p>
 <p>① 建双端队列（存下标，对应值保持单调递减）和答案数组；<br>
 ② 遍历 i：弹出队首已滑出窗口的下标（≤ i-k）；<br>
-③ 队尾对应值比 nums[i] 小的全部弹出，然后 i 入队尾；<br>
+③ 队尾对应值 ≤ nums[i] 的全部弹出，然后 i 入队尾；<br>
 ④ i ≥ k-1 时窗口已满，队首对应值就是本窗口最大值，写入 ans[i-k+1]。</p>
 <p>易错点：判滑出用的是下标比较（peekFirst() &lt;= i-k），不是值比较；顺序是先判滑出、再弹队尾、最后入队，不能乱；答案下标是 i-k+1，不是 i-k。</p>
 <pre class="diagram">nums = [1,3,-1,-3,5,3,6,7], k = 3
@@ -96,20 +97,32 @@ i  操作                              队列（下标:值）  窗口          �
 7  7 弹 6，入队                      7:7             [3,6,7]       7
 
 ans = [3,3,5,5,6,7]</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
     public int[] maxSlidingWindow(int[] nums, int k) {
         int n = nums.length;
-        int[] ans = new int[n - k + 1]; // ① 答案数组
-        Deque&lt;Integer&gt; dq = new ArrayDeque&lt;&gt;(); // ① 存下标，对应值单调递减
-        for (int i = 0; i &lt; n; i++) {
-            // ② 队首下标已滑出窗口，弹出
-            while (!dq.isEmpty() &amp;&amp; dq.peekFirst() &lt;= i - k) dq.pollFirst();
-            // ③ 队尾比当前值小的永不可能再当最大值，弹出后入队
-            while (!dq.isEmpty() &amp;&amp; nums[dq.peekLast()] &lt; nums[i]) dq.pollLast();
-            dq.offerLast(i);
+        // ① 双端队列：存下标，对应值保持单调递减
+        Deque&lt;Integer&gt; deque = new LinkedList&lt;Integer&gt;();
+        for (int i = 0; i &lt; k; ++i) { // ① 初始化前 k 个元素
+            while (!deque.isEmpty() &amp;&amp; nums[i] &gt;= nums[deque.peekLast()]) {
+                deque.pollLast();
+            }
+            deque.offerLast(i);
+        }
+        int[] ans = new int[n - k + 1];
+        ans[0] = nums[deque.peekFirst()]; // ④ 第一个窗口的最大值
+        for (int i = k; i &lt; n; ++i) {
+            // ③ 队尾对应值比 nums[i] 小的永不可能再当最大值，弹出后入队
+            while (!deque.isEmpty() &amp;&amp; nums[i] &gt;= nums[deque.peekLast()]) {
+                deque.pollLast();
+            }
+            deque.offerLast(i);
+            // ② 队首下标已滑出窗口（≤ i-k），弹出
+            while (deque.peekFirst() &lt;= i - k) {
+                deque.pollFirst();
+            }
             // ④ 窗口已满：队首即本窗口最大值
-            if (i &gt;= k - 1) ans[i - k + 1] = nums[dq.peekFirst()];
+            ans[i - k + 1] = nums[deque.peekFirst()];
         }
         return ans;
     }

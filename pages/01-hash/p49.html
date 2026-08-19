@@ -73,6 +73,7 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 输入：strs = ["eat","tea","tan","ate","nat","bat"]
 输出：[["bat"],["nat","tan"],["ate","eat","tea"]]</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：排序后的字符串作为哈希表的 key。</p>
 <p><b>先想清楚两个问题：</b></p>
 <p><b>Q1：怎么判断两个字符串互为异位词？</b>不用两两比对——互为异位词的字符串，字符排序后必然完全相同，「排序结果」就是天然的分组标识。</p>
 <p><b>Q2：分组用什么数据结构存？</b>哈希表：key = 排序后的字符串，value = 该组原字符串列表。computeIfAbsent 一句搞定「没有就建组、有就追加」。</p>
@@ -81,7 +82,7 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 ② 遍历每个字符串，把字符数组排序得到 key；<br>
 ③ 把原串追加到 map[key] 的列表（key 不存在先新建空列表）；<br>
 ④ 遍历结束，map 的所有 value 就是分组结果。</p>
-<p>易错点：排序要对 char 数组排（String 不可变）；加入列表的必须是原串 s，不是排序后的 key；最后别忘用 map.values() 包一层 ArrayList 返回。</p>
+<p>易错点：排序要对 char 数组排（String 不可变）；加入列表的必须是原串 str，不是排序后的 key；最后别忘用 map.values() 包一层 ArrayList 返回。</p>
 <pre class="diagram">strs = ["eat","tea","tan","ate","nat","bat"]
 
 字符串  排序后 key  map 变化（key → 组内列表）
@@ -96,21 +97,23 @@ map 的 values 即答案：
   aet → ["eat","tea","ate"]
   ant → ["tan","nat"]
   abt → ["bat"]</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
     public List&lt;List&lt;String&gt;&gt; groupAnagrams(String[] strs) {
         // ① key = 排序后的字符串，value = 该异位词组的原串列表
-        Map&lt;String, List&lt;String&gt;&gt; map = new HashMap&lt;&gt;();
-        for (String s : strs) {
+        Map&lt;String, List&lt;String&gt;&gt; map = new HashMap&lt;String, List&lt;String&gt;&gt;();
+        for (String str : strs) {
             // ② 字符排序得到分组标识（异位词排序后必然相同）
-            char[] ch = s.toCharArray();
-            Arrays.sort(ch);
-            String key = new String(ch);
+            char[] array = str.toCharArray();
+            Arrays.sort(array);
+            String key = new String(array);
             // ③ key 不存在先建空组，再把原串追加进去
-            map.computeIfAbsent(key, k -&gt; new ArrayList&lt;&gt;()).add(s);
+            List&lt;String&gt; list = map.getOrDefault(key, new ArrayList&lt;String&gt;());
+            list.add(str);
+            map.put(key, list);
         }
         // ④ map 的所有 value 就是分组答案
-        return new ArrayList&lt;&gt;(map.values());
+        return new ArrayList&lt;List&lt;String&gt;&gt;(map.values());
     }
 }</code></pre>
 <p class="cx">时间复杂度 O(n·k log k)，n 为字符串个数、k 为最长字符串长度 · 空间复杂度 O(n·k)</p>

@@ -73,37 +73,40 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 输入：nums = [1,1,1], k = 2
 输出：2</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：前缀和 + 哈希表，一遍遍历统计。</p>
 <p><b>先想清楚两个问题：</b></p>
 <p><b>Q1：为什么不用滑动窗口？</b>数组含负数，窗口和不再单调，指针不知道该往哪边收。改用前缀和：子数组 (i..j] 的和 = pre[j] - pre[i]，问题变成「统计有多少对前缀和之差为 k」。</p>
 <p><b>Q2：怎么 O(n) 统计这种前缀和对？</b>哈希表记录每个前缀和出现的次数。遍历到 pre 时，先查 pre - k 出现过几次（每出现一次就对应一个合法子数组），再把 pre 入表。</p>
 <p><b>照着写的四步：</b></p>
 <p>① 哈希表预置 {0: 1}：空前缀和为 0，算出现 1 次；<br>
 ② 遍历数组，累加当前前缀和 pre；<br>
-③ 查表：ans += (pre - k) 的出现次数；<br>
+③ 查表：count += (pre - k) 的出现次数；<br>
 ④ 把 pre 入表（次数 +1），继续遍历。</p>
-<p>易错点：必须先查后存，反了会把「pre 减自己」算进去（k=0 时直接出错）；必须预置 {0:1}，否则漏掉从下标 0 开始的子数组；ans 累加的是「次数」，不是 1。</p>
+<p>易错点：必须先查后存，反了会把「pre 减自己」算进去（k=0 时直接出错）；必须预置 {0:1}，否则漏掉从下标 0 开始的子数组；count 累加的是「次数」，不是 1。</p>
 <pre class="diagram">nums = [1,1,1], k = 2
 
-i   pre  查 pre-k   命中次数  ans   操作后的 map（先查后存）
--   -    -          -         0     {0:1}（预置）
-0   1    -1         0         0     {0:1, 1:1}
-1   2    0          1 ✓       1     {0:1, 1:1, 2:1}      ← 子数组 [1,1] 下标 0~1
-2   3    1          1 ✓       2     {0:1, 1:1, 2:1, 3:1} ← 子数组 [1,1] 下标 1~2
+i   pre  查 pre-k   命中次数  count  操作后的 map（先查后存）
+-   -    -          -         0      {0:1}（预置）
+0   1    -1         0         0      {0:1, 1:1}
+1   2    0          1 ✓       1      {0:1, 1:1, 2:1}      ← 子数组 [1,1] 下标 0~1
+2   3    1          1 ✓       2      {0:1, 1:1, 2:1, 3:1} ← 子数组 [1,1] 下标 1~2
 
-ans = 2</pre>
-<h3>代码（Java）</h3>
+count = 2</pre>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
     public int subarraySum(int[] nums, int k) {
-        Map&lt;Integer, Integer&gt; cnt = new HashMap&lt;&gt;();
-        cnt.put(0, 1); // ① 预置空前缀：和为 0 出现 1 次
-        int pre = 0, ans = 0;
-        for (int x : nums) {
-            pre += x; // ② 当前前缀和
+        int count = 0, pre = 0;
+        HashMap&lt;Integer, Integer&gt; mp = new HashMap&lt;&gt;();
+        mp.put(0, 1); // ① 预置空前缀：和为 0 出现 1 次
+        for (int i = 0; i &lt; nums.length; i++) {
+            pre += nums[i]; // ② 当前前缀和
             // ③ 有多少个旧前缀和 = pre-k，就有多少个和为 k 的子数组
-            ans += cnt.getOrDefault(pre - k, 0);
-            cnt.merge(pre, 1, Integer::sum); // ④ 当前前缀和入表
+            if (mp.containsKey(pre - k)) {
+                count += mp.get(pre - k);
+            }
+            mp.put(pre, mp.getOrDefault(pre, 0) + 1); // ④ 当前前缀和入表
         }
-        return ans;
+        return count;
     }
 }</code></pre>
 <p class="cx">时间复杂度 O(n) · 空间复杂度 O(n)</p>

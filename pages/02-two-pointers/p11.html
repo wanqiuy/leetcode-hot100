@@ -74,6 +74,7 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 输出：49
 解释：选中下标 1（高 8）和下标 8（高 7），面积 = 7 × 7 = 49</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：对撞双指针，每步移动较矮一侧。</p>
 <p><b>先想清楚两个问题：</b></p>
 <p><b>Q1：怎么避免 O(n²) 枚举所有线对？</b>对撞双指针从两端开始，每步排除一个「不可能更优」的选择，只扫一遍就结束。</p>
 <p><b>Q2：每步移动哪一侧的指针？</b>移动较矮一侧。面积由短板决定：若移动较高一侧，宽度变小且短板不变，面积必然更小，等于白走；只有动短板才可能遇到更高的板。</p>
@@ -97,7 +98,7 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
  l==r 结束
 
 ans = 49</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
     public int maxArea(int[] height) {
         int l = 0, r = height.length - 1, ans = 0; // ① 对撞指针从两端出发

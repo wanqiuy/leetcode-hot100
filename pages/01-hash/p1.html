@@ -74,34 +74,35 @@ footer{text-align:center;color:#9ca3af;font-size:12px;padding:20px}
 输出：[0,1]
 解释：nums[0] + nums[1] = 2 + 7 = 9</div></div>
 <h3>解题思路</h3>
+<p>本页代码参照<b>力扣官方题解</b>的写法：哈希表一遍遍历。</p>
 <p><b>先想清楚两个问题：</b></p>
 <p><b>Q1：怎么避免 O(n²) 的两两枚举？</b>用哈希表把「数值 → 下标」存起来，遍历时只需查 target - nums[i] 是否出现过，一次查询 O(1)，整体降到 O(n)。</p>
 <p><b>Q2：先存后查，还是先查后存？</b>先查后存。这样配对到的一定是「之前见过的数」，既不会拿当前元素和自己配对，也不用来回处理下标。</p>
 <p><b>照着写的三步：</b></p>
 <p>① 建哈希表：key = 数值，value = 下标；<br>
-② 遍历到 nums[i]，先算 need = target - nums[i]，查表；<br>
+② 遍历到 nums[i]，先查 target - nums[i] 是否在表中；<br>
 ③ 命中就直接返回 [表中下标, i]；没命中把 (nums[i], i) 存入表，继续走。</p>
-<p>易错点：必须先查后存——先存再查时，nums=[3,2,4]、target=6 会把 3 和自己配成对；返回的两个下标顺序是 [旧, 新]；循环结束仍无解返回空数组。</p>
+<p>易错点：必须先查后存——先存再查时，nums=[3,2,4]、target=6 会把 3 和自己配成对；返回的两个下标顺序是 [旧, 新]；题目保证有解，循环里的 return 一定会命中。</p>
 <pre class="diagram">nums = [2, 7, 11, 15], target = 9
 
-i  num  需要 need=9-num  查 map        操作后的 map
-0  2    7               没有 7        存入 → {2:0}
-1  7    2               命中 2→下标0  返回 [0, 1]
+i  num  需要 9-num  查 map        操作后的 map
+0  2    7           没有 7        存入 → {2:0}
+1  7    2           命中 2→下标0  返回 [0, 1]
 
 答案 = [0, 1]，即 nums[0]+nums[1] = 2+7 = 9</pre>
-<h3>代码（Java）</h3>
+<h3>代码（Java · 力扣官方题解写法）</h3>
 <pre><code>class Solution {
     public int[] twoSum(int[] nums, int target) {
         // ① 哈希表：key = 数值，value = 下标
-        Map&lt;Integer, Integer&gt; map = new HashMap&lt;&gt;();
-        for (int i = 0; i &lt; nums.length; i++) {
+        Map&lt;Integer, Integer&gt; hashtable = new HashMap&lt;Integer, Integer&gt;();
+        for (int i = 0; i &lt; nums.length; ++i) {
             // ② 先查：配对数 target - nums[i] 是否在表中
-            int need = target - nums[i];
-            if (map.containsKey(need)) {
-                return new int[]{map.get(need), i}; // ③ 命中，直接返回
+            if (hashtable.containsKey(target - nums[i])) {
+                // ③ 命中，直接返回 [旧下标, 当前下标]
+                return new int[]{hashtable.get(target - nums[i]), i};
             }
             // ③ 没命中才把当前数入表（先查后存，避免自配对）
-            map.put(nums[i], i);
+            hashtable.put(nums[i], i);
         }
         return new int[0];
     }
